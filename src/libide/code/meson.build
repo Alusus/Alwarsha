@@ -149,7 +149,6 @@ libide_code_deps = [
   libgio_dep,
   libgtk_dep,
   libgtksource_dep,
-  libdazzle_dep,
   libtemplate_glib_dep,
 
   libide_core_dep,

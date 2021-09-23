@@ -104,7 +104,6 @@ libide_core_sources += libide_core_public_sources
 libide_core_deps = [
   libgio_dep,
   libgtk_dep,
-  libdazzle_dep,
   libpeas_dep,
 ]
 
