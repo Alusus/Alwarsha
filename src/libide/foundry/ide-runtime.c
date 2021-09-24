@@ -22,10 +22,10 @@
 
 #include "config.h"
 
-#include <dazzle.h>
 #include <glib/gi18n.h>
-#include <libide-threading.h>
 #include <string.h>
+
+#include <libide-threading.h>
 
 #include "ide-build-target.h"
 #include "ide-config.h"
