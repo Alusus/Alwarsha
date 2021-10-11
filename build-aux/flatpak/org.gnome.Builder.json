@@ -11,15 +11,15 @@
         "nightly"
     ],
     "desktop-file-name-prefix" : "(Nightly) ",
-    "add-extensions": {
-        "org.gnome.Builder.Plugin": {
-            "version": "master",
-            "directory": "extensions",
-            "add-ld-path": "lib",
-            "merge-dirs": "lib/gnome-builder/plugins",
-            "subdirectories": true,
-            "no-autodownload": true,
-            "autodelete": true
+    "add-extensions" : {
+        "org.gnome.Builder.Plugin" : {
+            "version" : "master",
+            "directory" : "extensions",
+            "add-ld-path" : "lib",
+            "merge-dirs" : "lib/gnome-builder/plugins",
+            "subdirectories" : true,
+            "no-autodownload" : true,
+            "autodelete" : true
         }
     },
     "finish-args" : [
@@ -59,12 +59,13 @@
     ],
     "build-options" : {
         "env" : {
+            "V" : "1",
             "BASH_COMPLETIONSDIR" : "/app/share/bash-completion/completions",
             "MOUNT_FUSE_PATH" : "../tmp/",
-            "V" : "1"
+            "JSONRPC_DEBUG" : "1"
         },
-        "prepend-path": "/usr/lib/sdk/llvm12/bin",
-        "prepend-ld-library-path": "/usr/lib/sdk/llvm12/lib"
+        "prepend-path" : "/usr/lib/sdk/llvm12/bin",
+        "prepend-ld-library-path" : "/usr/lib/sdk/llvm12/lib"
     },
     "cleanup" : [
         "/bin/rst*",
@@ -137,7 +138,7 @@
             "cleanup" : [
                 "/bin/ulockmgr_server"
             ],
-            "post-install": [
+            "post-install" : [
                 "install -m a+rx fusermount-wrapper.sh /app/bin/fusermount"
             ],
             "sources" : [
@@ -161,13 +162,15 @@
             ]
         },
         {
-            "name": "intltool",
-            "cleanup": [ "*" ],
-            "sources": [
+            "name" : "intltool",
+            "cleanup" : [
+                "*"
+            ],
+            "sources" : [
                 {
-                    "type": "archive",
-                    "url": "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz",
-                    "sha256": "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd"
+                    "type" : "archive",
+                    "url" : "https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz",
+                    "sha256" : "67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd"
                 }
             ]
         },
@@ -341,7 +344,7 @@
                 {
                     "type" : "archive",
                     "url" : "https://download.gnome.org/sources/gspell/1.8/gspell-1.8.1.tar.xz",
-		    "sha256" : "819a1d23c7603000e73f5e738bdd284342e0cd345fb0c7650999c31ec741bbe5"
+                    "sha256" : "819a1d23c7603000e73f5e738bdd284342e0cd345fb0c7650999c31ec741bbe5"
                 }
             ]
         },
@@ -610,9 +613,9 @@
             ]
         },
         {
-            "name": "html-tidy",
-            "buildsystem": "cmake-ninja",
-            "config-opts": [
+            "name" : "html-tidy",
+            "buildsystem" : "cmake-ninja",
+            "config-opts" : [
                 "-DCMAKE_BUILD_TYPE=Release",
                 "-DBUILD_SHARED_LIB=OFF"
             ],
@@ -628,8 +631,8 @@
             "buildsystem" : "cmake-ninja",
             "builddir" : true,
             "config-opts" : [
-              "-DCMARK_TESTS=OFF",
-              "-DCMARK_SHARED=OFF"
+                "-DCMARK_TESTS=OFF",
+                "-DCMARK_SHARED=OFF"
             ],
             "cleanup" : [
                 "/bin/cmark"
