@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/plugins/alusus_templates">
+    <file compressed="true">resources/src/main.alusus</file>
+    <file compressed="true">resources/src/main.أسس</file>
+    <file compressed="true">resources/src/alususbuilder</file>
+    <file compressed="true">resources/src/AlususBuilder</file>
+  </gresource>
+  <gresource prefix="/org/gnome/builder">
+    <file compressed="true">icons/scalable/actions/pattern-empty.svg</file>
+  </gresource>
+</gresources>
