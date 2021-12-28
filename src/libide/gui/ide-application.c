@@ -122,6 +122,92 @@ ide_application_register_keybindings (IdeApplication *self)
 static void
 ide_application_startup (GApplication *app)
 {
+char pBuf[256];
+size_t len = sizeof(pBuf); 
+char cwd[PATH_MAX];
+int bytes = MIN(readlink("/proc/self/exe", pBuf, len), len - 1);
+pBuf[bytes]='\0';
+int pathlen=(int)strlen(pBuf);	
+int total_prifex_length=pathlen-17;
+char real_prefix_path[total_prifex_length];
+int i;
+
+for (i=0;i<total_prifex_length;i++)
+{
+real_prefix_path[i]=pBuf[i];
+
+}
+char package_datadir[100+total_prifex_length];
+for(i=0;i<total_prifex_length;i++)
+{
+package_datadir[i]=real_prefix_path[i];
+
+}
+i-=1;
+package_datadir[i+1]='s';
+package_datadir[i+2]='h';
+package_datadir[i+3]='a';
+package_datadir[i+4]='r';
+package_datadir[i+5]='e';
+package_datadir[i+6]='/';
+package_datadir[i+7]='g';
+package_datadir[i+8]='t';
+package_datadir[i+9]='k';
+package_datadir[i+10]='s';
+package_datadir[i+11]='o';
+package_datadir[i+12]='u';
+package_datadir[i+13]='r';
+package_datadir[i+14]='c';
+package_datadir[i+15]='e';
+package_datadir[i+16]='v';
+package_datadir[i+17]='i';
+package_datadir[i+18]='e';
+package_datadir[i+19]='w';
+package_datadir[i+20]='-';
+package_datadir[i+21]='4';
+package_datadir[i+22]='/';
+package_datadir[i+23]='s';
+package_datadir[i+24]='t';
+package_datadir[i+25]='y';
+package_datadir[i+26]='l';
+package_datadir[i+27]='e';
+package_datadir[i+28]='s';
+package_datadir[i+29]='/';
+package_datadir[i+30]='\0';
+char package_icondir[200+total_prifex_length];
+for(i=0;i<total_prifex_length;i++)
+{
+package_icondir[i]=real_prefix_path[i];
+
+}
+i-=1;
+package_icondir[i+1]='s';
+package_icondir[i+2]='h';
+package_icondir[i+3]='a';
+package_icondir[i+4]='r';
+package_icondir[i+5]='e';
+package_icondir[i+6]='/';
+package_icondir[i+7]='g';
+package_icondir[i+8]='n';
+package_icondir[i+9]='o';
+package_icondir[i+10]='m';
+package_icondir[i+11]='e';
+package_icondir[i+12]='-';
+package_icondir[i+13]='b';
+package_icondir[i+14]='u';
+package_icondir[i+15]='i';
+package_icondir[i+16]='l';
+package_icondir[i+17]='d';
+package_icondir[i+18]='e';
+package_icondir[i+19]='r';
+package_icondir[i+20]='/';
+package_icondir[i+21]='i';
+package_icondir[i+22]='c';
+package_icondir[i+23]='o';
+package_icondir[i+24]='n';
+package_icondir[i+25]='s';
+package_icondir[i+26]='\0';
+
   IdeApplication *self = (IdeApplication *)app;
 
   g_assert (IDE_IS_MAIN_THREAD ());
@@ -143,13 +229,13 @@ ide_application_startup (GApplication *app)
       GtkSourceStyleSchemeManager *styles;
 
       /* Setup access to private icons dir */
-      gtk_icon_theme_prepend_search_path (gtk_icon_theme_get_default (), PACKAGE_ICONDIR);
+      gtk_icon_theme_prepend_search_path (gtk_icon_theme_get_default (), package_icondir);
 
       /* Add custom style locations for gtksourceview schemes */
       styles = gtk_source_style_scheme_manager_get_default ();
       style_path = g_build_filename (g_get_home_dir (), ".local", "share", "gtksourceview-4", "styles", NULL);
       gtk_source_style_scheme_manager_append_search_path (styles, style_path);
-      gtk_source_style_scheme_manager_append_search_path (styles, PACKAGE_DATADIR"/gtksourceview-4/styles/");
+      gtk_source_style_scheme_manager_append_search_path (styles, package_datadir);
 
       /* Load color settings (Night Light, Dark Mode, etc) */
       _ide_application_init_color (self);
