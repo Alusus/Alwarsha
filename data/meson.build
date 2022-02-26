@@ -2,6 +2,7 @@ subdir('appdata')
 subdir('fonts')
 subdir('gsettings')
 subdir('icons')
+subdir('language-specs')
 subdir('style-schemes')
 
 # Desktop launcher and description file.
