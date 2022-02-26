@@ -1,0 +1,2 @@
+import "Srl/Console";
+Srl.Console.print("Hello World!\n");

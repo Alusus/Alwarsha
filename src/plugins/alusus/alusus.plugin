@@ -1,0 +1,14 @@
+[Plugin]
+Authors=Sarmad Abdullah <sarmad@alusus.org>
+Copyright=Copyright © 2022 Sarmad Khalid Abdullah
+Depends=create-project;
+Description=Provides templates for creating alusus projects
+Hidden=true
+Loader=python3
+Module=alusus_plugin
+Name=Alusus
+X-Builder-ABI=@PACKAGE_ABI@
+X-Has-Resources=true
+X-Project-File-Filter-Name=Alusus Project
+X-Project-File-Filter-Pattern=.alwarsha,main.alusus,src/main.alusus,.الورشة,بداية.أسس,الشفرة/بداية.أسس
+X-Project-File-Filter-Content-Type=text/x-alusus

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # __init__.py
 #
-# Copyright 2016 Patrick Griffis <tingping@tingping.se>
+# Copyright 2022 Sarmad Abdullah <sarmad@alusus.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,20 +35,12 @@ _ = Ide.gettext
 class AlususBuildSystemDiscovery(Ide.SimpleBuildSystemDiscovery):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.props.glob = '+(maia.alusus|aluasusfile|Alusuasfile)'
-        self.props.hint = 'alusus-templates_plugin'
-        self.props.priority = 11000
+        self.props.glob = '+(.alwarsha|main.alusus|src/main.alusus|.الورشة|بداية.أسس|الشفرة/بداية.أسس)'
+        self.props.hint = 'alusus_plugin'
+        self.props.priority = 100
 
 class AlususBuildSystem(Ide.Object, Ide.BuildSystem):
     project_file = GObject.Property(type=Gio.File)
-    make_dir = GObject.Property(type=Gio.File)
-    run_args = None
-
-    def do_parent_set(self, parent):
-        if self.project_file.query_file_type(0, None) == Gio.FileType.DIRECTORY:
-            self.make_dir = self.project_file
-        else:
-            self.make_dir = self.project_file.get_parent()
 
     def do_get_id(self):
         return 'alusus'
@@ -59,12 +51,6 @@ class AlususBuildSystem(Ide.Object, Ide.BuildSystem):
     def do_get_priority(self):
         return 0
 
-    def do_get_builddir(self, pipeline):
-        return self.get_context().ref_workdir().get_path()
-
-    def get_make_dir(self):
-        return self.make_dir
-
 class AlususPipelineAddin(Ide.Object, Ide.PipelineAddin):
     """
     The MakePipelineAddin registers stages to be executed when various
@@ -74,111 +60,30 @@ class AlususPipelineAddin(Ide.Object, Ide.PipelineAddin):
     def do_load(self, pipeline):
         context = pipeline.get_context()
         build_system = Ide.BuildSystem.from_context(context)
-        srcdir = context.ref_workdir().get_path()
-        fsrcdir = srcdir
-        print("nehanehaneha")
-        AlususBuildTarget.set_context(AlususBuildTarget,srcdir)
-        #if type(build_system) != AlususBuildSystem:
-         #   print("I am not alusus")
-          #  return
-
-
-        config = pipeline.get_config()
-        runtime = config.get_runtime()
-
-        # If the configuration has set $MAKE, then use it.
-        make = config.getenv('Alusus') or "alusus"
-        
-        srcdir = context.ref_workdir().get_path()
-        fsrcdir = srcdir+"main.alusus"
-        print(fsrcdir)
-        print("fsrcdir")
-        builddir = pipeline.get_builddir()
-
-        # Register the build launcher which will perform the incremental
-        # build of the project when the Ide.PipelinePhase.BUILD phase is
-        # requested of the pipeline.
-        build_launcher = pipeline.create_launcher()
-        build_launcher.set_cwd(build_system.get_make_dir().get_path())
-        build_launcher.push_argv(make)
-        if config.props.parallelism > 0:
-            build_launcher.push_argv('-j{}'.format(config.props.parallelism))
-
-        clean_launcher = pipeline.create_launcher()
-        clean_launcher.set_cwd(build_system.get_make_dir().get_path())
-        clean_launcher.push_argv("alusus main.alusus")
-        clean_launcher.push_argv('clean')
-        print(make)
-        print("make")
-
-        build_stage = Ide.PipelineStageLauncher.new(context, build_launcher)
-        build_stage.set_name(_("Build project"))
-        build_stage.set_clean_launcher(clean_launcher)
-        build_stage.connect('query', self._query)
-        self.track(pipeline.attach(Ide.PipelinePhase.BUILD, 0, build_stage))
-
-        # Register the install launcher which will perform our
-        # "make install" when the Ide.PipelinePhase.INSTALL phase
-        # is requested of the pipeline.
-        install_launcher = pipeline.create_launcher()
-        install_launcher.set_cwd(build_system.get_make_dir().get_path())
-        install_launcher.push_argv("alusus main.alusus")
-        install_launcher.push_argv('install')
-
-        install_stage = Ide.PipelineStageLauncher.new(context, install_launcher)
-        install_stage.set_name(_("Install project"))
-        self.track(pipeline.attach(Ide.PipelinePhase.INSTALL, 0, install_stage))
-
-        # Determine what it will take to "make run" for this pipeline
-        # and stash it on the build_system for use by the build target.
-        # This allows us to run Make projects as long as the makefile
-        # has a "run" target.
-        print(build_system.get_make_dir().get_path())
-        build_system.run_args = ["alusus main.alusus"]
-
-    def _query(self, stage, pipeline, targets, cancellable):
-        stage.set_completed(False)
 
 class AlususBuildTarget(Ide.Object, Ide.BuildTarget):
- 
-    fssrcdir="alusus"
-    def set_context(self,srcdir):
-        self.srcdir = srcdir
-        if os.path.isfile(srcdir+"/alususbuilder"):
-            print(srcdir+"/alususbuilder")
-            print("srcdir hahah")
-            f=open(srcdir+"/alususbuilder")
-            excpath=f.read()
-            print("excpath hahah")
-            print(excpath)
-            excpath=srcdir+"/"+excpath
-            self.excstring = f"gnome-terminal -- sh -c 'alusus {excpath}; bash'"
-        if os.path.isfile(srcdir+"/AlususBuilder"):
-            f=open(srcdir+"/AlususBuilder")
-            excpath=f.read()
-            excpath=srcdir+"/"+excpath
-            self.excstring = f"gnome-terminal -- sh -c 'الأسس {excpath}; bash'"
+    def __init__(self, script, **kw):
+        super().__init__(**kw)
+        self._script = script
 
     def do_get_install_directory(self):
         return None
 
+    def do_get_display_name(self):
+        return self._script
+
     def do_get_name(self):
-        print('fssrcdir is :')
-        print(self.excstring)
-        os.system(self.excstring)
-        return self.excstring
+        return self._script
 
     def do_get_language(self):
-        # Not meaningful, since we have an indirect process.
-        print('fssrcdir is name :')
-        print(self.fssrcdir)
-        return self.fssrcdir
+        return 'alusus'
+
+    def do_get_cwd(self):
+        context = self.get_context()
+        return context.ref_workdir().get_path()
 
     def do_get_argv(self):
-        context = self.get_context()
-        build_system = Ide.BuildSystem.from_context(context)
-        print("puildsdsdw");
-        return build_system.run_args
+        return ["alusus", self._script]
 
     def do_get_priority(self):
         return 0
@@ -197,9 +102,19 @@ class AlususBuildTargetProvider(Ide.Object, Ide.BuildTargetProvider):
 
         context = self.get_context()
         build_system = Ide.BuildSystem.from_context(context)
-        print(build_system)
-        print("hahahaha")
-        task.targets = [AlususBuildTarget()]
+
+        srcdir = context.ref_workdir().get_path()
+        filePaths = [
+            "/main.alusus",
+            "/بداية.أسس",
+            "/src/main.alusus",
+            "/الشفرة/بداية.أسس"
+        ]
+        for path in filePaths:
+            if os.path.isfile(srcdir+path):
+                task.targets = [AlususBuildTarget(srcdir + path)]
+                break
+
         task.return_boolean(True)
 
     def do_get_targets_finish(self, result):
@@ -379,7 +294,7 @@ class AlususTemplate(Ide.TemplateBase, Ide.ProjectTemplate):
             if src.startswith('resource://'):
                 self.add_resource(src[11:], destination, scope, modes.get(src, 0))
             else:
-                path = os.path.join('/plugins/alusus_templates', src)
+                path = os.path.join('/plugins/alusus', src)
                 self.add_resource(path, destination, scope, modes.get(src, 0))
 
         self.expand_all_async(cancellable, self.expand_all_cb, task)
@@ -404,7 +319,7 @@ class AlususEmptyProjectTemplate(AlususTemplate):
     def __init__(self):
         super().__init__(
             'empty-alusus',
-            _('alusus Project'),
+            _('Alusus Project'),
             'pattern-empty',
             _('Create a new alusus project'),
             ['alusus','الأسس'],
@@ -414,9 +329,5 @@ class AlususEmptyProjectTemplate(AlususTemplate):
     def prepare_files(self, files):
     	if self.language=='alusus':
         	files['resources/src/main.alusus'] = 'src/main.alusus'
-        	files['resources/src/alususbuilder'] = 'alususbuilder'
     	if self.language=='الأسس':
-        	files['resources/src/main.أسس'] = 'src/main.أسس'
-        	files['resources/src/AlususBuilder'] = 'AlususBuilder'
-
-
+        	files['resources/الشفرة/بداية.أسس'] = 'الشفرة/بداية.أسس'

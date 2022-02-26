@@ -36,6 +36,7 @@ if libwebkit_dep.found()
   plugins_deps += [libide_webkit_dep]
 endif
 
+subdir('alusus')
 subdir('auto-save')
 subdir('autotools')
 subdir('beautifier')
