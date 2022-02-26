@@ -31,7 +31,7 @@
       <default>true</default>
     </key>
     <key name="show-right-margin" type="b">
-      <default>true</default>
+      <default>false</default>
     </key>
     <key name="right-margin-position" type="i">
       <range min="32" max="500"/>

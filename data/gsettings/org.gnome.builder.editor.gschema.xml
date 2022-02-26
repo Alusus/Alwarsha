@@ -36,7 +36,7 @@
       <description>If enabled, the editor will show diagnostics to the left to the line numbers.</description>
     </key>
     <key name="highlight-current-line" type="b">
-      <default>false</default>
+      <default>true</default>
       <summary>Highlight current line</summary>
       <description>If enabled, the editor will highlight the line containing the cursor.</description>
     </key>
@@ -66,7 +66,7 @@
       <description>Whether or not Home moves to first non-space character.</description>
     </key>
     <key name="show-grid-lines" type="b">
-      <default>true</default>
+      <default>false</default>
       <summary>Show grid lines</summary>
       <description>If enabled, the editor will show grid lines in the document.</description>
     </key>
