@@ -1,7 +1,7 @@
 # appimage-builder recipe see https://appimage-builder.readthedocs.io for details
 version: 1
 AppDir:
-  path: /home/sleman231/gnome-builder-3.40.2/buildmefinle/a/s/finals/f/AppDir
+  path: /root/AppDir
   app_info:
     id: org.gnome.Builder
     name: Builder
@@ -67,21 +67,6 @@ AppDir:
     - python3-gi-cairo
   files:
     include:
-    - /home/sleman231/.bash_history
-    - /home/sleman231/.bashrc
-    - /home/sleman231/.gitconfig
-    - /home/sleman231/.local/share/gnome-builder/recent-projects.xbel
-    - /home/sleman231/.local/share/gvfs-metadata/home
-    - /home/sleman231/.local/share/gvfs-metadata/home-f87f0bf3.log
-    - /home/sleman231/.profile
-    - /home/sleman231/Projects/sdsww/.git/HEAD
-    - /home/sleman231/Projects/sdsww/.git/config
-    - /home/sleman231/Projects/sdsww/.git/description
-    - /home/sleman231/Projects/sdsww/.git/hooks/README.sample
-    - /home/sleman231/Projects/sdsww/.git/info/exclude
-    - /home/sleman231/Projects/sdsww/COPYING
-    - /home/sleman231/Projects/sdsww/alususbuilder
-    - /home/sleman231/Projects/sdsww/src/main.alusus
     - /lib/x86_64-linux-gnu/libGLX.so.0
     - /lib/x86_64-linux-gnu/libGLdispatch.so.0
     - /lib/x86_64-linux-gnu/libX11.so.6
@@ -416,37 +401,30 @@ AppDir:
     - /usr/lib/python3/dist-packages/gi/repository/__pycache__/__init__.cpython-39.pyc
     - /usr/lib/x86_64-linux-gnu/gtk-3.0/3.0.0/immodules.cache
     - /usr/local/lib/python3.9/dist-packages/ruamel.yaml-0.17.17-py3.9-nspkg.pth
-    - /usr/local/share/icons/hicolor/icon-theme.cache
-    - /usr/share/icons/Adwaita/icon-theme.cache
     - /usr/share/icons/default/index.theme
-    - /usr/share/icons/elementary-xfce-dark/icon-theme.cache
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/document-open-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/document-save-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/edit-clear-all-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/edit-find-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/go-down-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/go-next-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/go-previous-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/go-up-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/media-playback-pause-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/media-playback-start-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/media-playback-stop-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/object-select-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/open-menu-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/pan-down-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/pan-up-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/process-stop-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/view-fullscreen-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/view-list-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/view-more-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/window-close-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/window-maximize-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/window-minimize-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/actions/symbolic/window-restore-symbolic.svg
-    - /usr/share/icons/elementary-xfce-darker/icon-theme.cache
-    - /usr/share/icons/elementary-xfce/icon-theme.cache
-    - /usr/share/icons/hicolor/icon-theme.cache
-    - /usr/share/mime//mime.cache
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/document-open-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/document-save-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/edit-clear-all-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/edit-find-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/go-down-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/go-next-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/go-previous-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/go-up-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/media-playback-pause-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/media-playback-start-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/media-playback-stop-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/object-select-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/open-menu-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/pan-down-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/pan-up-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/process-stop-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/view-fullscreen-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/view-list-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/view-more-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/window-close-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/window-maximize-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/window-minimize-symbolic.svg
+    - /usr/share/icons/Adwaita/scalable/actions/symbolic/window-restore-symbolic.svg
     exclude:
     - usr/share/man
     - usr/share/doc/*/README.*
