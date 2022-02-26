@@ -103,8 +103,8 @@ ide_preferences_builtin_register_appearance (DzlPreferences *preferences)
   dzl_preferences_add_switch (preferences, "appearance", "basic", "org.gnome.builder.editor", "show-grid-lines", NULL, NULL, _("Grid Pattern"), _("Display a grid pattern underneath source code"), NULL, 10);
 
   dzl_preferences_add_list_group (preferences, "appearance", "font", _("Font"), GTK_SELECTION_NONE, 10);
-  dzl_preferences_add_font_button (preferences, "appearance", "font", "org.gnome.builder.editor", "font-name", _("Editor"), C_("Keywords", "editor font monospace"), 0);
-  dzl_preferences_add_spin_button (preferences, "appearance", "font", "org.gnome.builder.editor", "line-spacing", NULL, _("Line Spacing"), _("Number of pixels above and below editor lines"), C_("Keywords", "editor line spacing font monospace"), 0);
+  dzl_preferences_add_font_button (preferences, "appearance", "font", "org.gnome.builder.editor", "font-name", _("Editor"), C_("Keywords", "editor font AlususMono"), 0);
+  dzl_preferences_add_spin_button (preferences, "appearance", "font", "org.gnome.builder.editor", "line-spacing", NULL, _("Line Spacing"), _("Number of pixels above and below editor lines"), C_("Keywords", "editor line spacing font AlususMono"), 0);
 
   manager = gtk_source_style_scheme_manager_get_default ();
   scheme_ids = gtk_source_style_scheme_manager_get_scheme_ids (manager);
