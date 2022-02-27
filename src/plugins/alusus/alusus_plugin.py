@@ -124,7 +124,10 @@ class AlususBuildTargetProvider(Ide.Object, Ide.BuildTargetProvider):
 
 class AlususTemplateProvider(GObject.Object, Ide.TemplateProvider):
     def do_get_project_templates(self):
-        return [AlususEmptyProjectTemplate()]
+        return [
+            AlususEmptyProjectTemplate(_('Alusus Project - Arabic'), _('Create an Arabic based Alusus project'), "ar"),
+            AlususEmptyProjectTemplate(_('Alusus Project - English'), _('Create an English based Alusus project'), "en")
+        ]
 
 class AlususTemplateLocator(Template.TemplateLocator):
     license = None
@@ -190,7 +193,7 @@ class AlususTemplate(Ide.TemplateBase, Ide.ProjectTemplate):
         else:
             self.language = 'alusus'
 
-        if self.language not in ('alusus','الأسس'):
+        if self.language != 'alusus':
             task.return_error(GLib.Error('Language %s not supported' % self.language))
             return
 
@@ -316,18 +319,19 @@ class AlususTemplate(Ide.TemplateBase, Ide.ProjectTemplate):
 
 
 class AlususEmptyProjectTemplate(AlususTemplate):
-    def __init__(self):
+    def __init__(self, title, description, lang):
         super().__init__(
             'empty-alusus',
-            _('Alusus Project'),
+            title,
             'pattern-empty',
-            _('Create a new alusus project'),
-            ['alusus','الأسس'],
+            description,
+            ['alusus'],
             200
-         )
+        )
+        self.lang = lang
 
     def prepare_files(self, files):
-    	if self.language=='alusus':
-        	files['resources/src/main.alusus'] = 'src/main.alusus'
-    	if self.language=='الأسس':
-        	files['resources/الشفرة/بداية.أسس'] = 'الشفرة/بداية.أسس'
+        if self.lang=='ar':
+            files['resources/الشفرة/بداية.أسس'] = 'الشفرة/بداية.أسس'
+        else:
+            files['resources/src/main.alusus'] = 'src/main.alusus'

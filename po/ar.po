@@ -7558,3 +7558,23 @@ msgstr "يجب ان يحفظ الملف بشكل محلي ليتم تمريره"
 
 #~ msgid "Current language does not support symbol resolvers"
 #~ msgstr "اللغة الحالية لا تدعم تدعم تحليل الرمز"
+
+#: src/plugins/create-project/gbp-create-project-surface.c:120
+msgid "Alusus"
+msgstr "الأسس"
+
+#: src/plugins/alusus/alusus_plugin.py:128
+msgid "Alusus Project - Arabic"
+msgstr "مشروع الأسس - عربية"
+
+#: src/plugins/alusus/alusus_plugin.py:128
+msgid "Create an Arabic based Alusus project"
+msgstr "أنشئ مشروع بالنسخة العربية من لغة الأسس"
+
+#: src/plugins/alusus/alusus_plugin.py:129
+msgid "Alusus Project - English"
+msgstr "مشروع الأسس - إنجليزية"
+
+#: src/plugins/alusus/alusus_plugin.py:129
+msgid "Create an English based Alusus project"
+msgstr "أنشئ مشروع بالنسخة الإنجليزية من لغة الأسس"

@@ -117,6 +117,7 @@ gbp_create_project_surface_add_languages (GbpCreateProjectSurface *self,
 
   keys = (const gchar **)g_hash_table_get_keys_as_array (languages, &len);
   qsort (keys, len, sizeof (gchar *), sort_by_name);
+  dzl_radio_box_add_item (self->project_language_chooser, "alusus", _("Alusus"));
   for (guint i = 0; keys[i]; i++)
     dzl_radio_box_add_item (self->project_language_chooser, keys[i], keys[i]);
 }
@@ -446,10 +447,10 @@ gbp_create_project_surface_provider_added_cb (PeasExtensionSet *set,
    * additions for templates during startup.
    */
 
-  /* Default to C, always. We might investigate setting this to the
+  /* Default to alusus, always. We might investigate setting this to the
    * previously selected item in the future.
    */
-  dzl_radio_box_set_active_id (self->project_language_chooser, "C");
+  dzl_radio_box_set_active_id (self->project_language_chooser, "alusus");
 
   /* Select the first template that is visible so we have a selection
    * initially without the user having to select. We might also try to
