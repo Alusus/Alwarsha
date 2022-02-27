@@ -7984,7 +7984,7 @@ ide_source_view_set_gutter (IdeSourceView *self,
     return;
 
   left_gutter = gtk_source_view_get_gutter (GTK_SOURCE_VIEW (self),
-                                            GTK_TEXT_WINDOW_LEFT);
+                                            GTK_TEXT_WINDOW_RIGHT);
 
   if (priv->gutter)
     {

@@ -173,10 +173,10 @@ add_buttons (GbpEditorWorkspaceAddin *self,
   ide_header_bar_add_primary (header, GTK_WIDGET (self->panels_box));
 
   button = g_object_new (GTK_TYPE_TOGGLE_BUTTON,
-                         "action-name", "dockbin.left-visible",
+                         "action-name", "dockbin.right-visible",
                          "focus-on-click", FALSE,
                          "child", g_object_new (GTK_TYPE_IMAGE,
-                                                "icon-name", "builder-view-left-pane-symbolic",
+                                                "icon-name", "builder-view-right-pane-symbolic",
                                                 "margin-start", 12,
                                                 "margin-end", 12,
                                                 "visible", TRUE,

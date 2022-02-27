@@ -98,15 +98,15 @@ ide_editor_surface_restore_panel_state (IdeEditorSurface *self)
   settings = g_settings_new ("org.gnome.builder.workbench");
 
   pane = dzl_dock_bin_get_left_edge (DZL_DOCK_BIN (self));
-  reveal = self->restore_panel ? g_settings_get_boolean (settings, "left-visible") : FALSE;
   position = g_settings_get_int (settings, "left-position");
   dzl_dock_revealer_set_position (DZL_DOCK_REVEALER (pane), position);
-  set_reveal_child_without_transition (DZL_DOCK_REVEALER (pane), reveal);
+  set_reveal_child_without_transition (DZL_DOCK_REVEALER (pane), FALSE);
 
   pane = dzl_dock_bin_get_right_edge (DZL_DOCK_BIN (self));
+  reveal = self->restore_panel ? g_settings_get_boolean (settings, "right-visible") : FALSE;
   position = g_settings_get_int (settings, "right-position");
   dzl_dock_revealer_set_position (DZL_DOCK_REVEALER (pane), position);
-  set_reveal_child_without_transition (DZL_DOCK_REVEALER (pane), FALSE);
+  set_reveal_child_without_transition (DZL_DOCK_REVEALER (pane), reveal);
 
   pane = dzl_dock_bin_get_bottom_edge (DZL_DOCK_BIN (self));
   reveal = self->restore_panel ? g_settings_get_boolean (settings, "bottom-visible") : FALSE;
@@ -176,7 +176,7 @@ ide_editor_surface_set_fullscreen (IdeSurface *surface,
       gboolean bottom_visible;
 
       g_object_get (self,
-                    "left-visible", &left_visible,
+                    "right-visible", &left_visible,
                     "bottom-visible", &bottom_visible,
                     NULL);
 
@@ -184,14 +184,14 @@ ide_editor_surface_set_fullscreen (IdeSurface *surface,
       self->prefocus_had_bottom = bottom_visible;
 
       g_object_set (self,
-                    "left-visible", FALSE,
+                    "right-visible", FALSE,
                     "bottom-visible", FALSE,
                     NULL);
     }
   else
     {
       g_object_set (self,
-                    "left-visible", self->prefocus_had_left,
+                    "right-visible", self->prefocus_had_left,
                     "bottom-visible", self->prefocus_had_bottom,
                     NULL);
     }
@@ -341,7 +341,7 @@ ide_editor_surface_create_edge (DzlDockBin      *dock_bin,
   g_assert (edge >= GTK_POS_LEFT);
   g_assert (edge <= GTK_POS_BOTTOM);
 
-  if (edge == GTK_POS_LEFT)
+  if (edge == GTK_POS_RIGHT)
     return g_object_new (IDE_TYPE_EDITOR_SIDEBAR,
                          "edge", edge,
                          "transition-duration", 333,
@@ -349,7 +349,7 @@ ide_editor_surface_create_edge (DzlDockBin      *dock_bin,
                          "visible", TRUE,
                          NULL);
 
-  if (edge == GTK_POS_RIGHT)
+  if (edge == GTK_POS_LEFT)
     return g_object_new (IDE_TYPE_TRANSIENT_SIDEBAR,
                          "edge", edge,
                          "reveal-child", FALSE,
@@ -903,7 +903,7 @@ ide_editor_surface_get_sidebar (IdeEditorSurface *self)
 {
   g_return_val_if_fail (IDE_IS_EDITOR_SURFACE (self), NULL);
 
-  return IDE_EDITOR_SIDEBAR (dzl_dock_bin_get_left_edge (DZL_DOCK_BIN (self)));
+  return IDE_EDITOR_SIDEBAR (dzl_dock_bin_get_right_edge (DZL_DOCK_BIN (self)));
 }
 
 /**
@@ -925,7 +925,7 @@ ide_editor_surface_get_transient_sidebar (IdeEditorSurface *self)
 {
   g_return_val_if_fail (IDE_IS_EDITOR_SURFACE (self), NULL);
 
-  return IDE_TRANSIENT_SIDEBAR (dzl_dock_bin_get_right_edge (DZL_DOCK_BIN (self)));
+  return IDE_TRANSIENT_SIDEBAR (dzl_dock_bin_get_left_edge (DZL_DOCK_BIN (self)));
 }
 
 /**
