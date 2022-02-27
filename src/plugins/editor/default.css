@@ -2,6 +2,16 @@
 
 @binding-set default-ide-source-view
 {
+  bind "<ctrl>n" { "action" ("editor", "new-file", "") };
+  bind "<ctrl>o" { "action" ("workbench", "open", "") };
+  bind "<ctrl>s" { "action" ("editor-page", "save", "") };
+  bind "<ctrl><shift>s" { "action" ("editor-page", "save-as", "") };
+  bind "<ctrl>w" { "action" ("frame", "close-page", "") };
+  bind "<ctrl><shift>w" { "action" ("editor", "close-all", "") };
+  bind "<ctrl>f" { "action" ("editor-page", "find", "") };
+  bind "<ctrl>h" { "action" ("editor-page", "find-replace", "") };
+  bind "<ctrl>g" { "action" ("editor-page", "next-match", "") };
+  bind "<ctrl><shift>g" { "action" ("editor-page", "prev-match", "") };
   bind "Escape" { "clear-search" ()
                   "clear-modifier" ()
                   "clear-selection" ()

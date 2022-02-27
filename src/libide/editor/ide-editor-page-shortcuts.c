@@ -92,29 +92,29 @@ _ide_editor_page_init_shortcuts (IdeEditorPage *self)
 
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
 
-  dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.editor-page.find"),
-                                              "<Primary>f",
-                                              DZL_SHORTCUT_PHASE_BUBBLE,
-                                              I_("editor-page.find"));
+  // dzl_shortcut_controller_add_command_action (controller,
+  //                                             I_("org.gnome.builder.editor-page.find"),
+  //                                             "<Primary>f",
+  //                                             DZL_SHORTCUT_PHASE_BUBBLE,
+  //                                             I_("editor-page.find"));
 
-  dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.editor-page.find-replace"),
-                                              "<Primary>h",
-                                              DZL_SHORTCUT_PHASE_BUBBLE,
-                                              I_("editor-page.find-replace"));
+  // dzl_shortcut_controller_add_command_action (controller,
+  //                                             I_("org.gnome.builder.editor-page.find-replace"),
+  //                                             "<Primary>h",
+  //                                             DZL_SHORTCUT_PHASE_BUBBLE,
+  //                                             I_("editor-page.find-replace"));
 
-  dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.editor-page.next-match"),
-                                              "<Primary>g",
-                                              DZL_SHORTCUT_PHASE_BUBBLE,
-                                              I_("editor-page.move-next-search-result"));
+  // dzl_shortcut_controller_add_command_action (controller,
+  //                                             I_("org.gnome.builder.editor-page.next-match"),
+  //                                             "<Primary>g",
+  //                                             DZL_SHORTCUT_PHASE_BUBBLE,
+  //                                             I_("editor-page.move-next-search-result"));
 
-  dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.editor-page.prev-match"),
-                                              "<Primary><Shift>g",
-                                              DZL_SHORTCUT_PHASE_BUBBLE,
-                                              I_("editor-page.move-previous-search-result"));
+  // dzl_shortcut_controller_add_command_action (controller,
+  //                                             I_("org.gnome.builder.editor-page.prev-match"),
+  //                                             "<Primary><Shift>g",
+  //                                             DZL_SHORTCUT_PHASE_BUBBLE,
+  //                                             I_("editor-page.move-previous-search-result"));
 
   dzl_shortcut_controller_add_command_action (controller,
                                               I_("org.gnome.builder.editor-page.next-error"),
@@ -128,17 +128,17 @@ _ide_editor_page_init_shortcuts (IdeEditorPage *self)
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("editor-page.move-previous-error"));
 
-  dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.editor-page.save"),
-                                              "<Primary>s",
-                                              DZL_SHORTCUT_PHASE_BUBBLE,
-                                              I_("editor-page.save"));
+  // dzl_shortcut_controller_add_command_action (controller,
+  //                                             I_("org.gnome.builder.editor-page.save"),
+  //                                             "<Primary>s",
+  //                                             DZL_SHORTCUT_PHASE_BUBBLE,
+  //                                             I_("editor-page.save"));
 
-  dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.editor-page.save-as"),
-                                              "<Primary><Shift>s",
-                                              DZL_SHORTCUT_PHASE_BUBBLE,
-                                              I_("editor-page.save-as"));
+  // dzl_shortcut_controller_add_command_action (controller,
+  //                                             I_("org.gnome.builder.editor-page.save-as"),
+  //                                             "<Primary><Shift>s",
+  //                                             DZL_SHORTCUT_PHASE_BUBBLE,
+  //                                             I_("editor-page.save-as"));
 
   dzl_shortcut_controller_add_command_action (controller,
                                               I_("org.gnome.builder.editor-page.print"),

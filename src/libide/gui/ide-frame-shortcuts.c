@@ -105,9 +105,9 @@ _ide_frame_init_shortcuts (IdeFrame *self)
                                               I_("change-current-page"),
                                               1, G_TYPE_INT, -1);
 
-  dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.frame.close-page"),
-                                              I_("<Primary>w"),
-                                              DZL_SHORTCUT_PHASE_BUBBLE,
-                                              I_("frame.close-page"));
+  // dzl_shortcut_controller_add_command_action (controller,
+  //                                             I_("org.gnome.builder.frame.close-page"),
+  //                                             I_("<Primary>w"),
+  //                                             DZL_SHORTCUT_PHASE_BUBBLE,
+  //                                             I_("frame.close-page"));
 }
