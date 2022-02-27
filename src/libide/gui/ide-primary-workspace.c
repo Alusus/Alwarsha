@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <glib/gi18n.h>
 #include "ide-gui-global.h"
 #include "ide-gui-private.h"
 #include "ide-header-bar.h"
@@ -67,8 +68,8 @@ ide_primary_workspace_context_set (IdeWorkspace *workspace,
                                    IdeContext   *context)
 {
   IdePrimaryWorkspace *self = (IdePrimaryWorkspace *)workspace;
-  IdeProjectInfo *project_info;
-  IdeWorkbench *workbench;
+  // IdeProjectInfo *project_info;
+  // IdeWorkbench *workbench;
 
   g_assert (IDE_IS_MAIN_THREAD ());
   g_assert (IDE_IS_PRIMARY_WORKSPACE (self));
@@ -76,12 +77,18 @@ ide_primary_workspace_context_set (IdeWorkspace *workspace,
 
   IDE_WORKSPACE_CLASS (ide_primary_workspace_parent_class)->context_set (workspace, context);
 
-  workbench = ide_widget_get_workbench (GTK_WIDGET (self));
-  project_info = ide_workbench_get_project_info (workbench);
+  // workbench = ide_widget_get_workbench (GTK_WIDGET (self));
+  // project_info = ide_workbench_get_project_info (workbench);
 
-  if (project_info)
-    g_object_bind_property (project_info, "name", self->project_title, "label",
-                            G_BINDING_SYNC_CREATE);
+  g_autofree gchar *title = NULL;
+  g_autofree gchar *formatted = NULL;
+  title = ide_context_dup_title (context);
+  formatted = g_strdup_printf (_("Builder — %s"), title);
+  gtk_label_set_text(self->project_title, formatted);
+
+  // if (project_info)
+  //   g_object_bind_property (project_info, "name", self->project_title, "label",
+  //                           G_BINDING_SYNC_CREATE);
 }
 
 static void
