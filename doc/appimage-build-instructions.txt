@@ -1,0 +1,55 @@
+Requirements: Ubuntu 21.10
+
+1- Install dependencies:
+
+    $ apt install gcc
+    $ apt install libdazzle-1.0-dev
+    $ apt install libgtksourceview-4-dev
+    $ apt install libjson-glib-dev
+    $ apt install libjsonrpc-glib-1.0-dev
+    $ apt install libpeas-dev
+    $ apt install libportal-dev
+    $ apt install libtemplate-glib-1.0-dev
+    $ apt install libvte-2.91-dev
+    $ apt install libunwind-dev
+    $ apt install libpolkit-gobject-1-dev
+    $ apt install itstool
+    $ apt install gettext
+    $ apt install libxml2-utils
+    $ apt install uncrustify
+    $ apt install tidy
+    $ apt install universal-ctags
+    $ apt install llvm
+    $ apt install libclang-13-dev
+    $ apt install libdevhelp-dev
+    $ apt install libflatpak-dev
+    $ apt install libgit2-glib-1.0-dev
+    $ apt install libgladeui-dev
+    $ apt install libgspell-1-dev
+    $ apt install git
+    $ apt install patchelf
+    $ apt install meson
+
+    $ git clone https://gitlab.gnome.org/GNOME/sysprof.git
+    $ cd sysprof
+    $ meson --prefix=/usr build
+    $ cd build
+    $ ninja
+    $ sudo ninja install
+
+2- Build albany:
+
+    $ cd /albany
+    $ meson --prefix=/usr ~/build
+    $ cd ~/build
+    $ ninja
+
+3- Install albany into AppDir:
+
+    $ DESTDIR=~/AppDir ninja install
+
+4- Build AppImage:
+
+    $ cd ~/
+    $ appimage-builder --skip-test --recipe /path/to/AppImageBuilder.yml
+
