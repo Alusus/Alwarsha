@@ -38,57 +38,57 @@ struct _GbpRecentWorkbenchAddin
 static gboolean
 directory_is_ignored (GFile *file)
 {
-  g_autofree gchar *relative_path = NULL;
-  g_autoptr(GFile) downloads_dir = NULL;
-  g_autoptr(GFile) home_dir = NULL;
-  g_autoptr(GFile) projects_dir = NULL;
-  GFileType file_type;
+  // g_autofree gchar *relative_path = NULL;
+  // g_autoptr(GFile) downloads_dir = NULL;
+  // g_autoptr(GFile) home_dir = NULL;
+  // g_autoptr(GFile) projects_dir = NULL;
+  // GFileType file_type;
 
-  g_assert (G_IS_FILE (file));
+  // g_assert (G_IS_FILE (file));
 
-  projects_dir = g_file_new_for_path (ide_get_projects_dir ());
-  home_dir = g_file_new_for_path (g_get_home_dir ());
-  relative_path = g_file_get_relative_path (home_dir, file);
-  file_type = g_file_query_file_type (file, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL);
+  // projects_dir = g_file_new_for_path (ide_get_projects_dir ());
+  // home_dir = g_file_new_for_path (g_get_home_dir ());
+  // relative_path = g_file_get_relative_path (home_dir, file);
+  // file_type = g_file_query_file_type (file, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL);
 
-  if (!g_file_has_prefix (file, home_dir) &&
-      !g_file_has_prefix (file, projects_dir))
-    return TRUE;
+  // if (!g_file_has_prefix (file, home_dir) &&
+  //     !g_file_has_prefix (file, projects_dir))
+  //   return TRUE;
 
-  /* First check downloads directory as we never want that */
-  downloads_dir = g_file_new_for_path (g_get_user_special_dir (G_USER_DIRECTORY_DOWNLOAD));
-  if (downloads_dir != NULL &&
-      (g_file_equal (file, downloads_dir) ||
-       g_file_has_prefix (file, downloads_dir)))
-    return TRUE;
+  // /* First check downloads directory as we never want that */
+  // downloads_dir = g_file_new_for_path (g_get_user_special_dir (G_USER_DIRECTORY_DOWNLOAD));
+  // if (downloads_dir != NULL &&
+  //     (g_file_equal (file, downloads_dir) ||
+  //      g_file_has_prefix (file, downloads_dir)))
+  //   return TRUE;
 
-  /* If the directory is in the projects dir (and the projects dir is
-   * not $HOME, then short-circuit as not ignored.
-   */
-  if (!g_file_equal (home_dir, projects_dir) &&
-      g_file_has_prefix (file, projects_dir))
-    return FALSE;
+  // /* If the directory is in the projects dir (and the projects dir is
+  //  * not $HOME, then short-circuit as not ignored.
+  //  */
+  // if (!g_file_equal (home_dir, projects_dir) &&
+  //     g_file_has_prefix (file, projects_dir))
+  //   return FALSE;
 
-  /* Not in home or projects directory, ignore */
-  if (relative_path == NULL)
-    return TRUE;
+  // /* Not in home or projects directory, ignore */
+  // if (relative_path == NULL)
+  //   return TRUE;
 
-  /*
-   * Ignore dot directories, except .local.
-   * We've had too many bug reports with people creating things
-   * like gnome-shell extensions in their .local directory.
-   */
-  if (relative_path[0] == '.' &&
-      !g_str_has_prefix (relative_path, ".local"G_DIR_SEPARATOR_S))
-    return TRUE;
+  // /*
+  //  * Ignore dot directories, except .local.
+  //  * We've had too many bug reports with people creating things
+  //  * like gnome-shell extensions in their .local directory.
+  //  */
+  // if (relative_path[0] == '.' &&
+  //     !g_str_has_prefix (relative_path, ".local"G_DIR_SEPARATOR_S))
+  //   return TRUE;
 
-  if (file_type != G_FILE_TYPE_DIRECTORY)
-    {
-      g_autoptr(GFile) parent = g_file_get_parent (file);
+  // if (file_type != G_FILE_TYPE_DIRECTORY)
+  //   {
+  //     g_autoptr(GFile) parent = g_file_get_parent (file);
 
-      if (g_file_equal (home_dir, parent))
-        return TRUE;
-    }
+  //     if (g_file_equal (home_dir, parent))
+  //       return TRUE;
+  //   }
 
   return FALSE;
 }

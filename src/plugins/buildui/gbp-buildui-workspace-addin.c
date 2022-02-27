@@ -119,15 +119,15 @@ gbp_buildui_workspace_addin_notify_pipeline (GbpBuilduiWorkspaceAddin *self,
                                              GParamSpec               *pspec,
                                              IdeBuildManager          *build_manager)
 {
-  IdePipeline *pipeline;
+  // IdePipeline *pipeline;
 
-  g_assert (IDE_IS_MAIN_THREAD ());
-  g_assert (GBP_IS_BUILDUI_WORKSPACE_ADDIN (self));
-  g_assert (IDE_IS_BUILD_MANAGER (build_manager));
+  // g_assert (IDE_IS_MAIN_THREAD ());
+  // g_assert (GBP_IS_BUILDUI_WORKSPACE_ADDIN (self));
+  // g_assert (IDE_IS_BUILD_MANAGER (build_manager));
 
-  pipeline = ide_build_manager_get_pipeline (build_manager);
-  gbp_buildui_log_pane_set_pipeline (self->log_pane, pipeline);
-  gbp_buildui_pane_set_pipeline (self->pane, pipeline);
+  // pipeline = ide_build_manager_get_pipeline (build_manager);
+  // gbp_buildui_log_pane_set_pipeline (self->log_pane, pipeline);
+  // gbp_buildui_pane_set_pipeline (self->pane, pipeline);
 }
 
 static void
@@ -174,7 +174,7 @@ on_view_output_cb (GSimpleAction *action,
   g_assert (G_IS_SIMPLE_ACTION (action));
   g_assert (GBP_IS_BUILDUI_WORKSPACE_ADDIN (self));
 
-  ide_widget_reveal_and_grab (GTK_WIDGET (self->log_pane));
+  // ide_widget_reveal_and_grab (GTK_WIDGET (self->log_pane));
 }
 
 static void
@@ -213,21 +213,21 @@ gbp_buildui_workspace_addin_build_started (GbpBuilduiWorkspaceAddin *self,
                                            IdePipeline              *pipeline,
                                            IdeBuildManager          *build_manager)
 {
-  IdePipelinePhase phase;
+  // IdePipelinePhase phase;
 
   IDE_ENTRY;
 
-  g_assert (IDE_IS_MAIN_THREAD ());
-  g_assert (GBP_IS_BUILDUI_WORKSPACE_ADDIN (self));
-  g_assert (IDE_IS_PIPELINE (pipeline));
-  g_assert (IDE_IS_BUILD_MANAGER (build_manager));
+  // g_assert (IDE_IS_MAIN_THREAD ());
+  // g_assert (GBP_IS_BUILDUI_WORKSPACE_ADDIN (self));
+  // g_assert (IDE_IS_PIPELINE (pipeline));
+  // g_assert (IDE_IS_BUILD_MANAGER (build_manager));
 
-  phase = ide_pipeline_get_requested_phase (pipeline);
+  // phase = ide_pipeline_get_requested_phase (pipeline);
 
-  IDE_TRACE_MSG ("Pipeline phase 0x%x requested", phase);
+  // IDE_TRACE_MSG ("Pipeline phase 0x%x requested", phase);
 
-  if (phase > IDE_PIPELINE_PHASE_CONFIGURE)
-    dzl_dock_item_present (DZL_DOCK_ITEM (self->log_pane));
+  // if (phase > IDE_PIPELINE_PHASE_CONFIGURE)
+  //   dzl_dock_item_present (DZL_DOCK_ITEM (self->log_pane));
 
   IDE_EXIT;
 }
@@ -240,14 +240,14 @@ gbp_buildui_workspace_addin_load (IdeWorkspaceAddin *addin,
   IdeConfigManager *config_manager;
   PangoAttrList *small_attrs = NULL;
   DzlShortcutController *shortcuts;
-  IdeEditorSidebar *sidebar;
+  // IdeEditorSidebar *sidebar;
   IdeBuildManager *build_manager;
   IdeWorkbench *workbench;
-  IdeHeaderBar *headerbar;
-  IdeSurface *surface;
-  IdeOmniBar *omnibar;
+  // IdeHeaderBar *headerbar;
+  // IdeSurface *surface;
+  // IdeOmniBar *omnibar;
   IdeContext *context;
-  GtkWidget *utilities;
+  // GtkWidget *utilities;
 
   g_assert (GBP_IS_BUILDUI_WORKSPACE_ADDIN (self));
   g_assert (IDE_IS_PRIMARY_WORKSPACE (workspace));
@@ -271,8 +271,8 @@ gbp_buildui_workspace_addin_load (IdeWorkspaceAddin *addin,
                                               DZL_SHORTCUT_PHASE_GLOBAL | DZL_SHORTCUT_PHASE_CAPTURE,
                                               "build-manager.rebuild");
 
-  headerbar = ide_workspace_get_header_bar (workspace);
-  omnibar = IDE_OMNI_BAR (gtk_header_bar_get_custom_title (GTK_HEADER_BAR (headerbar)));
+  // headerbar = ide_workspace_get_header_bar (workspace);
+  // omnibar = IDE_OMNI_BAR (gtk_header_bar_get_custom_title (GTK_HEADER_BAR (headerbar)));
   workbench = ide_widget_get_workbench (GTK_WIDGET (workspace));
   context = ide_workbench_get_context (workbench);
   build_manager = ide_build_manager_from_context (context);
@@ -289,7 +289,7 @@ gbp_buildui_workspace_addin_load (IdeWorkspaceAddin *addin,
                     "destroy",
                     G_CALLBACK (gtk_widget_destroyed),
                     &self->diag_box);
-  ide_omni_bar_add_status_icon (omnibar, GTK_WIDGET (self->diag_box), 0);
+  // ide_omni_bar_add_status_icon (omnibar, GTK_WIDGET (self->diag_box), 0);
 
   self->error_image = g_object_new (GTK_TYPE_IMAGE,
                                     "icon-name", "dialog-error-symbolic",
@@ -334,7 +334,7 @@ gbp_buildui_workspace_addin_load (IdeWorkspaceAddin *addin,
                     "destroy",
                     G_CALLBACK (gtk_widget_destroyed),
                     &self->omni_bar_section);
-  ide_omni_bar_add_popover_section (omnibar, GTK_WIDGET (self->omni_bar_section), 0);
+  // ide_omni_bar_add_popover_section (omnibar, GTK_WIDGET (self->omni_bar_section), 0);
   gbp_buildui_omni_bar_section_set_context (self->omni_bar_section, context);
 
   self->build_button = g_object_new (GTK_TYPE_BUTTON,
@@ -347,7 +347,7 @@ gbp_buildui_workspace_addin_load (IdeWorkspaceAddin *addin,
                                      "has-tooltip", TRUE,
                                      "visible", TRUE,
                                      NULL);
-  ide_omni_bar_add_button (omnibar, GTK_WIDGET (self->build_button), GTK_PACK_END, 0);
+  // ide_omni_bar_add_button (omnibar, GTK_WIDGET (self->build_button), GTK_PACK_END, 0);
 
   self->cancel_button = g_object_new (GTK_TYPE_BUTTON,
                                       "action-name", "build-manager.cancel",
@@ -359,27 +359,27 @@ gbp_buildui_workspace_addin_load (IdeWorkspaceAddin *addin,
                                       "has-tooltip", TRUE,
                                       "visible", TRUE,
                                       NULL);
-  ide_omni_bar_add_button (omnibar, GTK_WIDGET (self->cancel_button), GTK_PACK_END, 0);
+  // ide_omni_bar_add_button (omnibar, GTK_WIDGET (self->cancel_button), GTK_PACK_END, 0);
 
-  surface = ide_workspace_get_surface_by_name (workspace, "editor");
-  utilities = ide_editor_surface_get_utilities (IDE_EDITOR_SURFACE (surface));
-  sidebar = ide_editor_surface_get_sidebar (IDE_EDITOR_SURFACE (surface));
+  // surface = ide_workspace_get_surface_by_name (workspace, "editor");
+  // utilities = ide_editor_surface_get_utilities (IDE_EDITOR_SURFACE (surface));
+  // sidebar = ide_editor_surface_get_sidebar (IDE_EDITOR_SURFACE (surface));
 
-  self->log_pane = g_object_new (GBP_TYPE_BUILDUI_LOG_PANE,
-                                 "visible", TRUE,
-                                 NULL);
-  gtk_container_add (GTK_CONTAINER (utilities), GTK_WIDGET (self->log_pane));
+  // self->log_pane = g_object_new (GBP_TYPE_BUILDUI_LOG_PANE,
+  //                                "visible", TRUE,
+  //                                NULL);
+  // gtk_container_add (GTK_CONTAINER (utilities), GTK_WIDGET (self->log_pane));
 
-  self->pane = g_object_new (GBP_TYPE_BUILDUI_PANE,
-                             "visible", TRUE,
-                             NULL);
-  ide_editor_sidebar_add_section (sidebar,
-                                  "build-issues",
-                                  _("Build Issues"),
-                                  "builder-build-symbolic",
-                                  NULL, NULL,
-                                  GTK_WIDGET (self->pane),
-                                  100);
+  // self->pane = g_object_new (GBP_TYPE_BUILDUI_PANE,
+  //                            "visible", TRUE,
+  //                            NULL);
+  // ide_editor_sidebar_add_section (sidebar,
+  //                                 "build-issues",
+  //                                 _("Build Issues"),
+  //                                 "builder-build-symbolic",
+  //                                 NULL, NULL,
+  //                                 GTK_WIDGET (self->pane),
+  //                                 100);
 
   self->surface = g_object_new (GBP_TYPE_BUILDUI_CONFIG_SURFACE,
                                 "config-manager", config_manager,

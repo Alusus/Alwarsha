@@ -44,7 +44,7 @@
         </child>
       </object>
     </child>
-    <child>
+    <!-- <child>
       <object class="DzlMenuButton" id="menu_button">
         <property name="focus-on-click">false</property>
         <property name="icon-name">pan-down-symbolic</property>
@@ -59,7 +59,7 @@
           <class name="run-arrow-button"/>
         </style>
       </object>
-    </child>
+    </child> -->
   </template>
   <object class="DzlShortcutTooltip" id="tooltip">
     <property name="widget">button</property>

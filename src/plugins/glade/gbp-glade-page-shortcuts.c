@@ -65,11 +65,11 @@ _gbp_glade_page_init_shortcuts (GtkWidget *widget)
 
   controller = dzl_shortcut_controller_find (widget);
 
-  dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.glade-view.save"),
-                                              "<Primary>s",
-                                              DZL_SHORTCUT_PHASE_BUBBLE,
-                                              I_("glade-view.save"));
+  // dzl_shortcut_controller_add_command_action (controller,
+  //                                             I_("org.gnome.builder.glade-view.save"),
+  //                                             "<Primary>s",
+  //                                             DZL_SHORTCUT_PHASE_BUBBLE,
+  //                                             I_("glade-view.save"));
 
   dzl_shortcut_controller_add_command_action (controller,
                                               I_("org.gnome.builder.glade-view.preview"),

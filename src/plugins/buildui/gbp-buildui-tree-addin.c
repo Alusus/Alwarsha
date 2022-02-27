@@ -46,15 +46,15 @@ typedef struct
   guint                   n_active;
 } BuildTargets;
 
-static void
+/* static void
 build_targets_free (BuildTargets *state)
 {
   g_clear_object (&state->node);
   ide_clear_and_destroy_object (&state->set);
   g_slice_free (BuildTargets, state);
-}
+}*/
 
-static void
+/* static void
 get_targets_cb (GObject      *object,
                 GAsyncResult *result,
                 gpointer      user_data)
@@ -99,9 +99,9 @@ get_targets_cb (GObject      *object,
 
   if (state->n_active == 0)
     ide_task_return_boolean (task, TRUE);
-}
+} */
 
-static void
+/* static void
 build_targets_cb (IdeExtensionSetAdapter *set,
                   PeasPluginInfo         *plugin_info,
                   PeasExtension          *exten,
@@ -123,7 +123,7 @@ build_targets_cb (IdeExtensionSetAdapter *set,
                                                ide_task_get_cancellable (task),
                                                get_targets_cb,
                                                g_object_ref (task));
-}
+}*/
 
 static void
 gbp_buildui_tree_addin_build_children_async (IdeTreeAddin        *addin,
@@ -152,38 +152,38 @@ gbp_buildui_tree_addin_build_children_async (IdeTreeAddin        *addin,
       return;
     }
 
-  if (ide_tree_node_holds (node, IDE_TYPE_CONTEXT))
-    {
-      g_autoptr(IdeTreeNode) targets = NULL;
+  // if (ide_tree_node_holds (node, IDE_TYPE_CONTEXT))
+  //   {
+  //     g_autoptr(IdeTreeNode) targets = NULL;
 
-      targets = g_object_new (IDE_TYPE_TREE_NODE,
-                              "icon-name", "builder-build-symbolic",
-                              "is-header", TRUE,
-                              "item", NULL,
-                              "display-name", _("Build Targets"),
-                              "children-possible", TRUE,
-                              "tag", "BUILD_TARGETS",
-                              NULL);
-      ide_tree_node_prepend (node, targets);
-    }
-  else if (ide_tree_node_is_tag (node, "BUILD_TARGETS"))
-    {
-      BuildTargets *state;
+  //     targets = g_object_new (IDE_TYPE_TREE_NODE,
+  //                             "icon-name", "builder-build-symbolic",
+  //                             "is-header", TRUE,
+  //                             "item", NULL,
+  //                             "display-name", _("Build Targets"),
+  //                             "children-possible", TRUE,
+  //                             "tag", "BUILD_TARGETS",
+  //                             NULL);
+  //     ide_tree_node_prepend (node, targets);
+  //   }
+  // else if (ide_tree_node_is_tag (node, "BUILD_TARGETS"))
+  //   {
+  //     BuildTargets *state;
 
-      state = g_slice_new0 (BuildTargets);
-      state->node = g_object_ref (node);
-      state->n_active = 0;
-      state->set = ide_extension_set_adapter_new (IDE_OBJECT (self->model),
-                                                  peas_engine_get_default (),
-                                                  IDE_TYPE_BUILD_TARGET_PROVIDER,
-                                                  NULL, NULL);
-      ide_task_set_task_data (task, state, build_targets_free);
+  //     state = g_slice_new0 (BuildTargets);
+  //     state->node = g_object_ref (node);
+  //     state->n_active = 0;
+  //     state->set = ide_extension_set_adapter_new (IDE_OBJECT (self->model),
+  //                                                 peas_engine_get_default (),
+  //                                                 IDE_TYPE_BUILD_TARGET_PROVIDER,
+  //                                                 NULL, NULL);
+  //     ide_task_set_task_data (task, state, build_targets_free);
 
-      ide_extension_set_adapter_foreach (state->set, build_targets_cb, task);
+  //     ide_extension_set_adapter_foreach (state->set, build_targets_cb, task);
 
-      if (state->n_active > 0)
-        return;
-    }
+  //     if (state->n_active > 0)
+  //       return;
+  //   }
 
   ide_task_return_boolean (task, TRUE);
 }

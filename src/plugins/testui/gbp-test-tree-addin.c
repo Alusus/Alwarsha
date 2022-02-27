@@ -93,7 +93,7 @@ show_test_panel (GbpTestTreeAddin *self)
     }
 }
 
-static void
+/* static void
 gbp_test_tree_addin_build_paths_cb (GObject      *object,
                                     GAsyncResult *result,
                                     gpointer      user_data)
@@ -153,7 +153,7 @@ gbp_test_tree_addin_build_paths_cb (GObject      *object,
     }
 
   ide_task_return_boolean (task, TRUE);
-}
+} */
 
 static void
 gbp_test_tree_addin_build_children_async (IdeTreeAddin        *addin,
@@ -183,33 +183,33 @@ gbp_test_tree_addin_build_children_async (IdeTreeAddin        *addin,
       return;
     }
 
-  if (ide_tree_node_holds (node, IDE_TYPE_CONTEXT))
-    {
-      g_autoptr(IdeTreeNode) child = NULL;
-      g_autoptr(GbpTestPath) path = NULL;
-      IdeTestManager *test_manager;
+  // if (ide_tree_node_holds (node, IDE_TYPE_CONTEXT))
+  //   {
+  //     g_autoptr(IdeTreeNode) child = NULL;
+  //     g_autoptr(GbpTestPath) path = NULL;
+  //     IdeTestManager *test_manager;
 
-      test_manager = ide_test_manager_from_context (context);
-      path = gbp_test_path_new (test_manager, NULL);
+  //     test_manager = ide_test_manager_from_context (context);
+  //     path = gbp_test_path_new (test_manager, NULL);
 
-      child = ide_tree_node_new ();
-      ide_tree_node_set_children_possible (child, TRUE);
-      ide_tree_node_set_display_name (child, _("Unit Tests"));
-      ide_tree_node_set_icon_name (child, "builder-unit-tests-symbolic");
-      ide_tree_node_set_is_header (child, TRUE);
-      ide_tree_node_set_item (child, path);
-      ide_tree_node_prepend (node, child);
-    }
-  else if (ide_tree_node_holds (node, GBP_TYPE_TEST_PATH))
-    {
-      IdeTestManager *test_manager = ide_test_manager_from_context (context);
+  //     child = ide_tree_node_new ();
+  //     ide_tree_node_set_children_possible (child, TRUE);
+  //     ide_tree_node_set_display_name (child, _("Unit Tests"));
+  //     ide_tree_node_set_icon_name (child, "builder-unit-tests-symbolic");
+  //     ide_tree_node_set_is_header (child, TRUE);
+  //     ide_tree_node_set_item (child, path);
+  //     ide_tree_node_prepend (node, child);
+  //   }
+  // else if (ide_tree_node_holds (node, GBP_TYPE_TEST_PATH))
+  //   {
+  //     IdeTestManager *test_manager = ide_test_manager_from_context (context);
 
-      ide_test_manager_ensure_loaded_async (test_manager,
-                                            NULL,
-                                            gbp_test_tree_addin_build_paths_cb,
-                                            g_steal_pointer (&task));
-      return;
-    }
+  //     ide_test_manager_ensure_loaded_async (test_manager,
+  //                                           NULL,
+  //                                           gbp_test_tree_addin_build_paths_cb,
+  //                                           g_steal_pointer (&task));
+  //     return;
+  //   }
 
   ide_task_return_boolean (task, TRUE);
 }

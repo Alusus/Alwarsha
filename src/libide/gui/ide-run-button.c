@@ -178,7 +178,7 @@ ide_run_button_class_init (IdeRunButtonClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/libide-gui/ui/ide-run-button.ui");
   gtk_widget_class_bind_template_child (widget_class, IdeRunButton, button);
   gtk_widget_class_bind_template_child (widget_class, IdeRunButton, button_image);
-  gtk_widget_class_bind_template_child (widget_class, IdeRunButton, menu_button);
+  // gtk_widget_class_bind_template_child (widget_class, IdeRunButton, menu_button);
   gtk_widget_class_bind_template_child (widget_class, IdeRunButton, run_shortcut);
   gtk_widget_class_bind_template_child (widget_class, IdeRunButton, stop_button);
   gtk_widget_class_bind_template_child (widget_class, IdeRunButton, run_tooltip_message);

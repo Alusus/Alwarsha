@@ -60,7 +60,7 @@ gbp_deviceui_workspace_addin_load (IdeWorkspaceAddin *addin,
 {
   GbpDeviceuiWorkspaceAddin *self = (GbpDeviceuiWorkspaceAddin *)addin;
   IdeDeviceManager *device_manager;
-  IdeHeaderBar *header;
+  // IdeHeaderBar *header;
   IdeContext *context;
   GMenu *menu;
 
@@ -68,7 +68,7 @@ gbp_deviceui_workspace_addin_load (IdeWorkspaceAddin *addin,
   g_assert (IDE_IS_WORKSPACE_ADDIN (self));
   g_assert (IDE_IS_PRIMARY_WORKSPACE (workspace));
 
-  header = ide_workspace_get_header_bar (workspace);
+  // header = ide_workspace_get_header_bar (workspace);
   context = ide_widget_get_context (GTK_WIDGET (workspace));
   device_manager = ide_device_manager_from_context (context);
   menu = _ide_device_manager_get_menu (device_manager);
@@ -84,7 +84,7 @@ gbp_deviceui_workspace_addin_load (IdeWorkspaceAddin *addin,
                     "destroy",
                     G_CALLBACK (gtk_widget_destroyed),
                     &self->button);
-  ide_header_bar_add_center_left (header, self->button);
+  // ide_header_bar_add_center_left (header, self->button);
 
   g_object_bind_property_full (device_manager, "device",
                                self->button, "icon-name",
