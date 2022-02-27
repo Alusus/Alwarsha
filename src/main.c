@@ -21,7 +21,8 @@
 #define G_LOG_DOMAIN "main"
 
 #include "config.h"
-
+#include <unistd.h>
+#include <string.h>
 #include <girepository.h>
 #include <glib/gi18n.h>
 #include <gtksourceview/gtksource.h>
@@ -37,7 +38,7 @@
 #endif
 #include <sched.h>
 #include <unistd.h>
-
+#include <limits.h>
 #include "ide-application-private.h"
 #include "ide-thread-private.h"
 #include "ide-terminal-private.h"
@@ -225,7 +226,28 @@ main (gint   argc,
 
   /* Set up gettext translations */
   setlocale (LC_ALL, "");
-  bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
+  char pBuf[256];
+  size_t len = sizeof(pBuf); 
+  char cwd[PATH_MAX];
+  int bytes = MIN(readlink("/proc/self/exe", pBuf, len), len - 1);
+  pBuf[bytes]='\0';
+  int pathlen=(int)strlen(pBuf);	
+  int total_prifex_length=pathlen-17;
+  char real_prefix_path[total_prifex_length];
+  int i;
+
+  for (i=0;i<total_prifex_length;i++)
+  {
+  real_prefix_path[i]=pBuf[i];
+  }
+  real_prefix_path[i-1]='\0';
+  char localedir[total_prifex_length];
+  strcpy(localedir, real_prefix_path);
+  printf("localedir %s\n",localedir);
+  char locale[]="/share/locale";
+  strcat(localedir,locale);
+  printf("localedir %s\n",localedir);
+  bindtextdomain (GETTEXT_PACKAGE, localedir);
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
   textdomain (GETTEXT_PACKAGE);
 
