@@ -35,6 +35,10 @@
                           "clear-selection" ()
                           "remove-cursors" ()
                           "redo" () };
+  bind "<ctrl>y" { "clear-count" ()
+                   "clear-selection" ()
+                   "remove-cursors" ()
+                   "redo" () };
   bind "<ctrl>z" { "clear-count" ()
                    "clear-selection" ()
                    "remove-cursors" ()
