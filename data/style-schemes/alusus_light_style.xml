@@ -31,10 +31,12 @@
     <color name="yellow" value="#f99b11" />
     <color name="darkyellow" value="#c96b11" />
     <!-- Greens -->
-    <color name="green" value="#0e8420" />
+    <color name="green" value="#009900" />
+    <color name="khaki" value="#608449" />
     <!-- Blues -->
-    <color name="blue" value="#19B6EE" />
+    <color name="blue" value="#10199c" />
     <color name="strongblue" value="#1926EE" />
+    <color name="cyan" value="#159ac9" />
     <!-- Brown -->
     <color name="brown" value="#A52A2A" />
 
@@ -54,22 +56,22 @@
     <style name="search-match" foreground="white" background="green" />
 
     <!-- Comments -->
-    <style name="def:comment" foreground="slate" italic="True" />
+    <style name="def:comment" foreground="green" italic="True" />
     <style name="def:shebang" foreground="aubergine" bold="True" />
     <style name="def:doc-comment" foreground="aubergine" italic="True" />
     <style name="def:doc-comment-element" italic="True" />
     <style name="def:net-address-in-comment" foreground="black" italic="False" underline="True" />
 
     <!-- Constants and Variables-->
-    <style name="def:constant" foreground="red" />
-    <style name="def:string" foreground="darkyellow" />
+    <style name="def:constant" foreground="cyan" />
+    <style name="def:string" foreground="khaki" />
     <style name="def:special-char" foreground="green" />
     <style name="def:special-constant" foreground="green" bold="True" />
     <style name="def:number" foreground="blue" />
     <style name="def:complex" foreground="blue" />
     <style name="def:floating-point" foreground="blue" />
     <style name="def:decimal" foreground="blue" />
-    <style name="def:keyword" foreground="strongblue" />
+    <style name="def:keyword" foreground="darkyellow" />
     <style name="def:builtin" foreground="green" bold="True" />
     <style name="def:variable" foreground="purple"/>
     <style name="def:preprocessor" foreground="black" bold="True" />
@@ -84,7 +86,7 @@
     <style name="def:statement" foreground="satsuma" bold="True" />
 
     <!-- Types -->
-    <style name="def:type" foreground="green" />
+    <style name="def:type" foreground="strongblue" />
 
     <!-- Annotations -->
     <style name="def:error" foreground="red" background="porcelain" bold="True" underline="True" strikethrough="False" />
@@ -97,5 +99,7 @@
     <style name="alusus:modifier" foreground="purple" />
     <style name="alusus:punctuation" foreground="black" />
     <style name="alusus:boldpunctuation" foreground="jet" bold="True" />
+    <style name="alusus:pre-identifier" foreground="slate" />
+    <style name="alusus:pre-type" foreground="blue" />
 
 </style-scheme>

@@ -14,16 +14,18 @@
   </metadata>
 
   <styles>
-    <style id="escaped-character" _name="Escaped Character"         map-to="def:special-char"/>
-    <style id="literal"           _name="Literal"                   map-to="def:string"/>
-    <style id="keyword"           _name="Keyword"                   map-to="def:keyword"/>
-    <style id="block-keyword"     _name="Block Keyword"             map-to="alusus:block-keyword"/>
-    <style id="type"              _name="Data Type"                 map-to="def:type"/>
-    <style id="modifier"          _name="Modifier"                  map-to="alusus:modifier"/>
-    <style id="constant"          _name="Constant"                  map-to="def:constant"/>
-    <style id="punctuation"       _name="Punctuation"               map-to="alusus:punctuation"/>
-    <style id="boldpunctuation"   _name="Bold Punctuation"          map-to="alusus:boldpunctuation"/>
-    <style id="comment"           _name="Comment"                   map-to="def:comment"/>
+    <style id="escaped-character" _name="Escaped Character"          map-to="def:special-char"/>
+    <style id="literal"           _name="Literal"                    map-to="def:string"/>
+    <style id="keyword"           _name="Keyword"                    map-to="def:keyword"/>
+    <style id="block-keyword"     _name="Block Keyword"              map-to="alusus:block-keyword"/>
+    <style id="type"              _name="Data Type"                  map-to="def:type"/>
+    <style id="modifier"          _name="Modifier"                   map-to="alusus:modifier"/>
+    <style id="constant"          _name="Constant"                   map-to="def:constant"/>
+    <style id="punctuation"       _name="Punctuation"                map-to="alusus:punctuation"/>
+    <style id="boldpunctuation"   _name="Bold Punctuation"           map-to="alusus:boldpunctuation"/>
+    <style id="comment"           _name="Comment"                    map-to="def:comment"/>
+    <style id="pre-type"          _name="Data Type Preceeding Dot"   map-to="alusus:pre-type"/>
+    <style id="pre-identifier"    _name="identifier preceeeding dot" map-to="alusus:pre-identifier"/>
   </styles>
 
   <definitions>
@@ -179,6 +181,14 @@
         (\b[A-Z][a-zA-Z0-9_]*\b)
       </match>
     </context>
+    <context id="pre_type" style-ref="pre-type">
+      <match extended="true">
+        \b[A-Z][a-zA-Z0-9_]*\b(\.)
+      </match>
+      <include>
+        <context id="pre_type_dot" sub-pattern="1" style-ref="boldpunctuation" />
+      </include>
+    </context>
     <context id="predef_type" style-ref="type">
       <keyword>int</keyword>
       <keyword>word</keyword>
@@ -193,6 +203,14 @@
         (\b[اأإورزدذ]*[\x{0620}-\x{065F}]ـ[\x{0620}-\x{065F}0-9_]*\b)
       </match>
     </context>
+    <context id="pre_ar_type" style-ref="pre-type">
+      <match extended="true">
+        \b[اأإورزدذ]*[\x{0620}-\x{065F}]ـ[\x{0620}-\x{065F}0-9_]*\b(\.)
+      </match>
+      <include>
+        <context id="pre_ar_type_dot" sub-pattern="1" style-ref="boldpunctuation" />
+      </include>
+    </context>
     <context id="predef_ar_type" style-ref="type">
       <keyword>صحيح</keyword>
       <keyword>طبيعي</keyword>
@@ -200,6 +218,15 @@
       <keyword>ثنائي</keyword>
       <keyword>محرف</keyword>
       <keyword>فراغ</keyword>
+    </context>
+
+    <context id="pre_identifier" style-ref="pre-identifier">
+      <match extended="true">
+        \b[a-zA-Z_\x{0620}-\x{065F}][a-zA-Z0-9_\x{0620}-\x{065F}]*\b(\.)
+      </match>
+      <include>
+        <context id="pre_identifier_dot" sub-pattern="1" style-ref="boldpunctuation" />
+      </include>
     </context>
 
     <context id="tilde" style-ref="keyword">
@@ -234,10 +261,13 @@
         <context ref="block-keyword"/>
         <context ref="ar-keyword"/>
         <context ref="ar-block-keyword"/>
+        <context ref="pre_type"/>
         <context ref="type"/>
         <context ref="predef_type"/>
+        <context ref="pre_ar_type"/>
         <context ref="ar_type"/>
         <context ref="predef_ar_type"/>
+        <context ref="pre_identifier"/>
         <context ref="tilde"/>
         <context ref="modifier"/>
       </include>
