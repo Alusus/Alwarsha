@@ -359,57 +359,21 @@ ide_clang_client_parent_set (IdeObject *object,
   ide_subprocess_launcher_push_argv (launcher, "gdbserver");
   ide_subprocess_launcher_push_argv (launcher, "localhost:8888");
 #endif
-char pBuf[256];
-size_t len = sizeof(pBuf); 
-int bytes = MIN(readlink("/proc/self/exe", pBuf, len), len - 1);
-if (bytes>=0)
-pBuf[bytes]='\0';
-int pathlen=(int)strlen(pBuf);	
-int total_prifex_length=pathlen-17;
-char real_prefix_path[total_prifex_length];
-int i;
 
-for (i=0;i<total_prifex_length;i++)
-{
-real_prefix_path[i]=pBuf[i];
+  /*
+    Set the path to a path relative to the current exe.
+    This will allow the locales to be found when the app is running inside an app image.
+  */
+  char pathBuf[PATH_MAX];
+  int bytes = MIN(readlink("/proc/self/exe", pathBuf, PATH_MAX), PATH_MAX - 1);
+  pathBuf[bytes]='\0';
+  // Remove /bin/<exe-name> from the path.
+  *(strrchr(pathBuf, '/')) = '\0';
+  *(strrchr(pathBuf, '/')) = '\0';
+  // Complete and set the path.
+  strcat(pathBuf, "/libexec/gnome-builder-clang");
 
-}
-char package_datadir[100+total_prifex_length];
-for(i=0;i<total_prifex_length;i++)
-{
-package_datadir[i]=real_prefix_path[i];
-
-}
-i-=1;
-package_datadir[i+1]='l';
-package_datadir[i+2]='i';
-package_datadir[i+3]='b';
-package_datadir[i+4]='e';
-package_datadir[i+5]='x';
-package_datadir[i+6]='e';
-package_datadir[i+7]='c';
-package_datadir[i+8]='/';
-package_datadir[i+9]='g';
-package_datadir[i+10]='n';
-package_datadir[i+11]='o';
-package_datadir[i+12]='m';
-package_datadir[i+13]='e';
-package_datadir[i+14]='-';
-package_datadir[i+15]='b';
-package_datadir[i+16]='u';
-package_datadir[i+17]='i';
-package_datadir[i+18]='l';
-package_datadir[i+19]='d';
-package_datadir[i+20]='e';
-package_datadir[i+21]='r';
-package_datadir[i+22]='-';
-package_datadir[i+23]='c';
-package_datadir[i+24]='l';
-package_datadir[i+25]='a';
-package_datadir[i+26]='n';
-package_datadir[i+27]='g';
-package_datadir[i+28]='\0';
-  ide_subprocess_launcher_push_argv (launcher,package_datadir);
+  ide_subprocess_launcher_push_argv (launcher, pathBuf);
 
   self->supervisor = ide_subprocess_supervisor_new ();
   ide_subprocess_supervisor_set_launcher (self->supervisor, launcher);

@@ -354,164 +354,29 @@ _ide_application_load_plugins_for_startup (IdeApplication *self)
 void
 _ide_application_load_plugins (IdeApplication *self)
 {
-char pBuf[256];
-size_t len = sizeof(pBuf); 
-char cwd[PATH_MAX];
-int bytes = MIN(readlink("/proc/self/exe", pBuf, len), len - 1);
+  /*
+    Set the plugins paths to a path relative the current executable.
+    This will allow the locales to be found when the app is running inside an app image.
+  */
+  char pathBuf[PATH_MAX];
+  int bytes = MIN(readlink("/proc/self/exe", pathBuf, PATH_MAX), PATH_MAX - 1);
+  pathBuf[bytes]='\0';
+  // Remove /bin/<exe-name> from the path.
+  *(strrchr(pathBuf, '/')) = '\0';
+  *(strrchr(pathBuf, '/')) = '\0';
 
-if (bytes>=0)
-pBuf[bytes]='\0';
-int pathlen=(int)strlen(pBuf);	
-int total_prifex_length=pathlen-17;
-char real_prefix_path[total_prifex_length];
-int i;
-for (i=0;i<total_prifex_length;i++)
-{
-real_prefix_path[i]=pBuf[i];
+  char girepositorydir[PATH_MAX]; // "<exe>/../lib/x86_64-linux-gnu/gnome-builder/girepository-1.0"
+  strcpy(girepositorydir, pathBuf);
+  strcat(girepositorydir, "/lib/x86_64-linux-gnu/gnome-builder/girepository-1.0");
 
-}
-char package_datadir[10+total_prifex_length];
-char pachage_libdir[total_prifex_length+27];
-char lib_gnome_dir[15];
-lib_gnome_dir[0]='/';
+  char plugin_lib_dir[PATH_MAX]; // "<exe>/../lib/x86_64-linux-gnu/gnome-builder/plugins"
+  strcpy(plugin_lib_dir, pathBuf);
+  strcat(plugin_lib_dir, "/lib/x86_64-linux-gnu/gnome-builder/plugins");
 
-lib_gnome_dir[1]='g';
-lib_gnome_dir[2]='n';
-lib_gnome_dir[3]='o';
-lib_gnome_dir[4]='m';
-lib_gnome_dir[5]='e';
-lib_gnome_dir[6]='-';
-lib_gnome_dir[7]='b';
-lib_gnome_dir[8]='u';
-lib_gnome_dir[9]='i';
+  char plugin_data_dir[PATH_MAX]; // "<exe>/../share/gnome-builder/plugins"
+  strcpy(plugin_data_dir, pathBuf);
+  strcat(plugin_data_dir, "/share/gnome-builder/plugins");
 
-lib_gnome_dir[10]='l';
-lib_gnome_dir[11]='d';
-
-lib_gnome_dir[12]='e';
-lib_gnome_dir[13]='r';
-lib_gnome_dir[14]='\0';
-
-for(i=0;i<total_prifex_length;i++)
-{
-package_datadir[i]=real_prefix_path[i];
-pachage_libdir[i]=real_prefix_path[i];
-
-}
-
-i-=1;
-package_datadir[i+1]='s';
-package_datadir[i+2]='h';
-package_datadir[i+3]='a';
-package_datadir[i+4]='r';
-package_datadir[i+5]='e';
-package_datadir[i+6]='\0';
-
-pachage_libdir[i+1]='l';
-pachage_libdir[i+2]='i';
-pachage_libdir[i+3]='b';
-pachage_libdir[i+4]='/';
-pachage_libdir[i+5]='x';
-pachage_libdir[i+6]='8';
-pachage_libdir[i+7]='6';
-pachage_libdir[i+8]='_';
-pachage_libdir[i+9]='6';
-pachage_libdir[i+10]='4';
-pachage_libdir[i+11]='-';
-pachage_libdir[i+12]='l';
-pachage_libdir[i+13]='i';
-pachage_libdir[i+14]='n';
-pachage_libdir[i+15]='u';
-pachage_libdir[i+16]='x';
-pachage_libdir[i+17]='-';
-pachage_libdir[i+18]='g';
-pachage_libdir[i+19]='n';
-pachage_libdir[i+20]='u';
-pachage_libdir[i+21]='\0';
-int pathlibdirlen=(int)strlen(pachage_libdir);
-
-int libdir_lin=(int)strlen(pachage_libdir);;
-int datadir_lin=(int)strlen(package_datadir);;
-
-char girepositorydir[libdir_lin+35];
-for(i=0;i<libdir_lin;i++)
-{
-girepositorydir[i]=pachage_libdir[i];
-
-}
-
-i-=1;
-int z=0;
-for(int j=i+1;j<i+15;j++)
-{
-girepositorydir[j]=lib_gnome_dir[z];
-z++;
-}
-
-
-girepositorydir[i+15]='/';
-
-girepositorydir[i+16]='g';
-girepositorydir[i+17]='i';
-girepositorydir[i+18]='r';
-girepositorydir[i+19]='e';
-girepositorydir[i+20]='p';
-girepositorydir[i+21]='o';
-girepositorydir[i+22]='s';
-girepositorydir[i+23]='i';
-girepositorydir[i+24]='t';
-girepositorydir[i+25]='o';
-girepositorydir[i+26]='r';
-girepositorydir[i+27]='y';
-girepositorydir[i+28]='-';
-girepositorydir[i+29]='1';
-girepositorydir[i+30]='.';
-girepositorydir[i+31]='0';
-girepositorydir[i+32]='\0';
-
-char plugin_lib_dir[libdir_lin+14+9];
-for(i=0;i<libdir_lin;i++)
-{
-plugin_lib_dir[i]=pachage_libdir[i];
-}
-i-=1;
-z=0;
-for(int j=i+1;j<i+15;j++)
-{
-plugin_lib_dir[j]=lib_gnome_dir[z];
-z++;
-}
-plugin_lib_dir[i+15]='/';
-plugin_lib_dir[i+16]='p';
-plugin_lib_dir[i+17]='l';
-plugin_lib_dir[i+18]='u';
-plugin_lib_dir[i+19]='g';
-plugin_lib_dir[i+20]='i';
-plugin_lib_dir[i+21]='n';
-plugin_lib_dir[i+22]='s';
-plugin_lib_dir[i+23]='\0';
-
-char plugin_data_dir[datadir_lin+14+9];
-for(i=0;i<datadir_lin;i++)
-{
-plugin_data_dir[i]=package_datadir[i];
-}
-i-=1;
- z=0;
-for(int j=i+1;j<i+15;j++)
-{
-plugin_data_dir[j]=lib_gnome_dir[z];
-z++;
-}
-plugin_data_dir[i+15]='/';
-plugin_data_dir[i+16]='p';
-plugin_data_dir[i+17]='l';
-plugin_data_dir[i+18]='u';
-plugin_data_dir[i+19]='g';
-plugin_data_dir[i+20]='i';
-plugin_data_dir[i+21]='n';
-plugin_data_dir[i+22]='s';
-plugin_data_dir[i+23]='\0';
   g_autofree gchar *user_plugins_dir = NULL;
   g_autoptr(GError) error = NULL;
   const GList *plugins;

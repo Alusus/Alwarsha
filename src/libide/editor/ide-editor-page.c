@@ -59,80 +59,24 @@ ide_editor_page_load_fonts (IdeEditorPage *self)
 
   PangoFontMap *font_map;
   PangoFontDescription *font_desc;
-char pBuf[256];
-size_t len = sizeof(pBuf); 
-char cwd[PATH_MAX];
-int bytes = MIN(readlink("/proc/self/exe", pBuf, len), len - 1);
 
-if (bytes>=0)
-pBuf[bytes]='\0';
-int pathlen=(int)strlen(pBuf);	
-int total_prifex_length=pathlen-17;
-char real_prefix_path[total_prifex_length];
-int i;
-for (i=0;i<total_prifex_length;i++)
-{
-real_prefix_path[i]=pBuf[i];
-
-}
-char package_datadir[250+total_prifex_length];
-for(i=0;i<total_prifex_length;i++)
-{
-package_datadir[i]=real_prefix_path[i];
-
-}
-
-i-=1;
-package_datadir[i+1]='s';
-package_datadir[i+2]='h';
-package_datadir[i+3]='a';
-package_datadir[i+4]='r';
-package_datadir[i+5]='e';
-package_datadir[i+6]='/';
-package_datadir[i+7]='g';
-package_datadir[i+8]='n';
-package_datadir[i+9]='o';
-package_datadir[i+10]='m';
-package_datadir[i+11]='e';
-package_datadir[i+12]='-';
-package_datadir[i+13]='b';
-package_datadir[i+14]='u';
-package_datadir[i+15]='i';
-package_datadir[i+16]='l';
-package_datadir[i+17]='d';
-package_datadir[i+18]='e';
-package_datadir[i+19]='r';
-package_datadir[i+20]='/';
-package_datadir[i+21]='f';
-package_datadir[i+22]='o';
-package_datadir[i+23]='n';
-package_datadir[i+24]='t';
-package_datadir[i+25]='s';
-package_datadir[i+26]='/';
-package_datadir[i+27]='A';
-package_datadir[i+28]='l';
-package_datadir[i+29]='u';
-package_datadir[i+30]='s';
-package_datadir[i+31]='u';
-package_datadir[i+32]='s';
-package_datadir[i+33]='M';
-package_datadir[i+34]='o';
-package_datadir[i+35]='n';
-package_datadir[i+36]='o';
-package_datadir[i+37]='.';
-package_datadir[i+38]='t';
-package_datadir[i+39]='t';
-package_datadir[i+40]='f';
-package_datadir[i+41]='\0';
+  /*
+    Set the font path to <exe-path>/../share/gnome-builder/fonts/AlususMono.ttf
+    This will allow the locales to be found when the app is running inside an app image.
+  */
+  char pathBuf[PATH_MAX];
+  int bytes = MIN(readlink("/proc/self/exe", pathBuf, PATH_MAX), PATH_MAX - 1);
+  pathBuf[bytes]='\0';
+  // Remove /bin/<exe-name> from the path.
+  *(strrchr(pathBuf, '/')) = '\0';
+  *(strrchr(pathBuf, '/')) = '\0';
+  // Complete the path.
+  strcat(pathBuf, "/share/gnome-builder/fonts/AlususMono.ttf");
 
   if (g_once_init_enter (&localFontConfig))
     {
-
-      const gchar *font_path = package_datadir;
+      const gchar *font_path = pathBuf;
       FcConfig *config = FcInitLoadConfigAndFonts ();
-
-    font_path = package_datadir;
-printf("inside inside if the package data dir fonts is %s \n",package_datadir);
 
       if (!g_file_test (font_path, G_FILE_TEST_IS_REGULAR))
         g_warning ("Failed to locate \"%s\"", font_path);

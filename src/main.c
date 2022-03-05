@@ -226,28 +226,21 @@ main (gint   argc,
 
   /* Set up gettext translations */
   setlocale (LC_ALL, "");
-  char pBuf[256];
-  size_t len = sizeof(pBuf); 
-  char cwd[PATH_MAX];
-  int bytes = MIN(readlink("/proc/self/exe", pBuf, len), len - 1);
-  pBuf[bytes]='\0';
-  int pathlen=(int)strlen(pBuf);	
-  int total_prifex_length=pathlen-17;
-  char real_prefix_path[total_prifex_length];
-  int i;
 
-  for (i=0;i<total_prifex_length;i++)
-  {
-  real_prefix_path[i]=pBuf[i];
-  }
-  real_prefix_path[i-1]='\0';
-  char localedir[total_prifex_length];
-  strcpy(localedir, real_prefix_path);
-  printf("localedir %s\n",localedir);
-  char locale[]="/share/locale";
-  strcat(localedir,locale);
-  printf("localedir %s\n",localedir);
-  bindtextdomain (GETTEXT_PACKAGE, localedir);
+  /*
+    Set the locale path to <exe-path>/../share/locale
+    This will allow the locales to be found when the app is running inside an app image.
+  */
+  char pathBuf[PATH_MAX];
+  int bytes = MIN(readlink("/proc/self/exe", pathBuf, PATH_MAX), PATH_MAX - 1);
+  pathBuf[bytes]='\0';
+  // Remove /bin/<exe-name> from the path.
+  *(strrchr(pathBuf, '/')) = '\0';
+  *(strrchr(pathBuf, '/')) = '\0';
+  // Complete and set the path.
+  strcat(pathBuf, "/share/locale");
+  bindtextdomain (GETTEXT_PACKAGE, pathBuf);
+
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
   textdomain (GETTEXT_PACKAGE);
 
