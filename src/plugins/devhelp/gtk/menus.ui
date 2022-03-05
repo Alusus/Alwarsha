@@ -13,7 +13,7 @@
       </item>
     </section>
   </menu>
-  <menu id="new-document-menu">
+  <!-- <menu id="new-document-menu">
     <section id="new-document-section">
       <item>
         <attribute name="id">new-documentation-page</attribute>
@@ -22,5 +22,5 @@
         <attribute name="action">win.new-devhelp-page</attribute>
       </item>
     </section>
-  </menu>
+  </menu> -->
 </interface>
