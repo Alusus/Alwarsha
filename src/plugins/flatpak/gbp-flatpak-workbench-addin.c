@@ -85,7 +85,7 @@ gbp_flatpak_workbench_addin_workspace_added (IdeWorkbenchAddin *addin,
 
   self->message = g_object_new (IDE_TYPE_NOTIFICATION,
                                 "title", _("Missing system dependencies"),
-                                "body", _("The “flatpak-builder” program is necessary for building Flatpak-based applications. Builder can install it for you."),
+                                "body", _("The “flatpak-builder” program is necessary for building Flatpak-based applications. Alwarsha can install it for you."),
                                 "icon-name", "dialog-warning-symbolic",
                                 "urgent", TRUE,
                                 NULL);

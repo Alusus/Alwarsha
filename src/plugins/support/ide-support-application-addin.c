@@ -65,7 +65,7 @@ generate_support_activate (GSimpleAction              *action,
   g_assert (G_IS_SIMPLE_ACTION (action));
   g_assert (IDE_IS_SUPPORT_APPLICATION_ADDIN (self));
 
-  name = g_strdup_printf ("gnome-builder-%u.log", (int)getpid ());
+  name = g_strdup_printf ("alwarsha-%u.log", (int)getpid ());
   log_path = g_build_filename (g_get_home_dir (), name, NULL);
   g_free (name);
 

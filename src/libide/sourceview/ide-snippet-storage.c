@@ -28,7 +28,7 @@
 
 #include "ide-snippet-storage.h"
 
-#define SNIPPETS_DIRECTORY "/org/gnome/builder/snippets/"
+#define SNIPPETS_DIRECTORY "/org/alusus/alwarsha/snippets/"
 
 /**
  * SECTION:ide-snippet-storage
@@ -424,7 +424,7 @@ ide_snippet_storage_init_async (GAsyncInitable      *initable,
   /* TODO: Do this async */
 
   local = g_build_filename (g_get_user_config_dir (),
-                            "gnome-builder",
+                            "alwarsha",
                             "snippets",
                             NULL);
 

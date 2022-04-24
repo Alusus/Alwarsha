@@ -149,11 +149,11 @@ _ide_application_command_line (IdeApplication          *self,
   if (g_variant_dict_contains (dict, "version"))
     {
 #ifdef DEVELOPMENT_BUILD
-      g_application_command_line_print (cmdline, "GNOME Builder %s (%s)\n",
+      g_application_command_line_print (cmdline, "Alwarsha %s (%s)\n",
                                         PACKAGE_VERSION,
                                         IDE_BUILD_IDENTIFIER);
 #else
-      g_application_command_line_print (cmdline, "GNOME Builder "PACKAGE_VERSION"\n");
+      g_application_command_line_print (cmdline, "Alwarsha "PACKAGE_VERSION"\n");
 #endif
       g_application_command_line_set_exit_status (cmdline, 0);
       return;

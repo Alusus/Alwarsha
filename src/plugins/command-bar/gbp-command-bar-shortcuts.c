@@ -30,7 +30,7 @@
 #define I_(s) g_intern_static_string(s)
 
 static const DzlShortcutEntry command_bar_shortcuts[] = {
-  { "org.gnome.builder.command-bar.reveal",
+  { "org.alusus.alwarsha.command-bar.reveal",
     DZL_SHORTCUT_PHASE_GLOBAL | DZL_SHORTCUT_PHASE_CAPTURE,
     NULL,
     N_("Workspace Shortcuts"),
@@ -51,13 +51,13 @@ _gbp_command_bar_init_shortcuts (GbpCommandBar *self)
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.command-bar.reveal"),
+                                              I_("org.alusus.alwarsha.command-bar.reveal"),
                                               I_("<Primary>Return"),
                                               DZL_SHORTCUT_PHASE_GLOBAL | DZL_SHORTCUT_PHASE_CAPTURE,
                                               I_("win.reveal-command-bar"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.command-bar.dismiss"),
+                                              I_("org.alusus.alwarsha.command-bar.dismiss"),
                                               I_("Escape"),
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               I_("win.dismiss-command-bar"));

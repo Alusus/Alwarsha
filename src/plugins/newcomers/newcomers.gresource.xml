@@ -7,7 +7,7 @@
   </gresource>
 
   <!-- Icons used by the greeter for newcomer projects -->
-  <gresource prefix="/org/gnome/builder/icons">
+  <gresource prefix="/org/alusus/alwarsha/icons">
     <file compressed="true" alias="scalable/apps/org.gnome.Boxes.svg">icons/scalable/org.gnome.Boxes.svg</file>
     <file compressed="true" alias="scalable/apps/org.gnome.Maps.svg">icons/scalable/org.gnome.Maps.svg</file>
     <file compressed="true" alias="scalable/apps/org.gnome.Music.svg">icons/scalable/org.gnome.Music.svg</file>

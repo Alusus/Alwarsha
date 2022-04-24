@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="org.gnome.builder.plugins.stylelint" path="/org/gnome/builder/plugins/stylelint/" gettext-domain="gnome-builder">
+  <schema id="org.alusus.alwarsha.plugins.stylelint" path="/org/alusus/alwarsha/plugins/stylelint/" gettext-domain="alwarsha">
     <key name="enable-stylelint" type="b">
       <default>false</default>
       <summary>Enable Stylelint</summary>

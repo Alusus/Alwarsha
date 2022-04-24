@@ -452,8 +452,8 @@ gbp_recent_section_purge_selected_full (IdeGreeterSection *section,
        * Unset any project settings so if the project is openned again there
        * is a better chance it get's fresh state.
        */
-      path = g_strdup_printf ("/org/gnome/builder/projects/%s/", id);
-      clear_settings_with_path ("org.gnome.builder.project", path);
+      path = g_strdup_printf ("/org/alusus/alwarsha/projects/%s/", id);
+      clear_settings_with_path ("org.alusus.alwarsha.project", path);
     }
 
   if (purge_sources)

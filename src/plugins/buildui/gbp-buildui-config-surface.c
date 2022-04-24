@@ -305,7 +305,7 @@ gbp_buildui_config_surface_init (GbpBuilduiConfigSurface *self)
 
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.buildui.focus",
+                                              "org.alusus.alwarsha.buildui.focus",
                                               "<alt>comma",
                                               DZL_SHORTCUT_PHASE_GLOBAL,
                                               "win.surface('buildui')");

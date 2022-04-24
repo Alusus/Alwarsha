@@ -1,19 +1,19 @@
 {
-    "app-id" : "org.gnome.Builder",
+    "app-id" : "org.alusus.Alwarsha",
     "runtime" : "org.gnome.Sdk",
     "runtime-version" : "master",
     "sdk" : "org.gnome.Sdk",
-    "command" : "gnome-builder",
+    "command" : "alwarsha",
     "tags" : [
         "nightly"
     ],
     "desktop-file-name-prefix" : "(Nightly) ",
     "add-extensions": {
-        "org.gnome.Builder.Plugin": {
+        "org.alusus.Alwarsha.Plugin": {
             "version": "master",
             "directory": "extensions",
             "add-ld-path": "lib",
-            "merge-dirs": "lib/gnome-builder/plugins",
+            "merge-dirs": "lib/alwarsha/plugins",
             "subdirectories": true,
             "no-autodownload": true,
             "autodelete": true
@@ -46,7 +46,7 @@
         "--filesystem=~/.local/share/flatpak",
         "--filesystem=xdg-data/meson",
         "--filesystem=/var/lib/flatpak",
-        "--metadata=X-DConf=migrate-path=/org/gnome/builder/",
+        "--metadata=X-DConf=migrate-path=/org/alusus/alwarsha/",
         "--env=G_SLICE=always-malloc"
     ],
     "x-run-args" : [
@@ -644,7 +644,7 @@
             ]
         },
         {
-            "name" : "gnome-builder",
+            "name" : "alwarsha",
             "buildsystem" : "meson",
             "builddir" : true,
             "config-opts" : [
@@ -659,8 +659,8 @@
                 "-Dplugin_deviced=true"
             ],
             "cleanup" : [
-                "/share/gnome-builder/gir-1.0",
-                "/share/gnome-builder/vapi",
+                "/share/alwarsha/gir-1.0",
+                "/share/alwarsha/vapi",
                 "/share/gtksourceview-3.0"
             ],
             "sources" : [

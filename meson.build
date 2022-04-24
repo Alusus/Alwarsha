@@ -1,4 +1,4 @@
-project('gnome-builder', 'c',
+project('alwarsha', 'c',
           license: 'GPL3+',
           version: '3.40.2',
     meson_version: '>= 0.54.0',
@@ -18,12 +18,12 @@ MICRO_VERSION = version_split[2]
 
 libide_api_version = '@0@.@1@'.format(MAJOR_VERSION, MINOR_VERSION)
 
-pkgdocdir_abs = join_paths(get_option('prefix'), get_option('datadir'), 'doc', 'gnome-builder')
-pkglibdir_abs = join_paths(get_option('prefix'), get_option('libdir'), 'gnome-builder')
-pkglibdir = join_paths(get_option('libdir'), 'gnome-builder')
-pkgincludedir = join_paths(get_option('includedir'), 'gnome-builder')
-pkggirdir = join_paths(get_option('datadir'),'gnome-builder', 'gir-1.0')
-pkgtypelibdir = join_paths(get_option('libdir'), 'gnome-builder', 'girepository-1.0')
+pkgdocdir_abs = join_paths(get_option('prefix'), get_option('datadir'), 'doc', 'alwarsha')
+pkglibdir_abs = join_paths(get_option('prefix'), get_option('libdir'), 'alwarsha')
+pkglibdir = join_paths(get_option('libdir'), 'alwarsha')
+pkgincludedir = join_paths(get_option('includedir'), 'alwarsha')
+pkggirdir = join_paths(get_option('datadir'),'alwarsha', 'gir-1.0')
+pkgtypelibdir = join_paths(get_option('libdir'), 'alwarsha', 'girepository-1.0')
 
 safe_path = get_option('with_safe_path')
 
@@ -44,7 +44,7 @@ endif
 
 status = [
   '', '',
-  'gnome-builder @0@ (@1@)'.format(meson.project_version(), get_option('channel')),
+  'alwarsha @0@ (@1@)'.format(meson.project_version(), get_option('channel')),
   '', '',
 ]
 
@@ -78,14 +78,14 @@ status += [
 
 config_h = configuration_data()
 config_h.set_quoted('SYMBOLIC_RELEASE', symbolic_release)
-config_h.set_quoted('PACKAGE_NAME', 'gnome-builder')
+config_h.set_quoted('PACKAGE_NAME', 'alwarsha')
 config_h.set_quoted('PACKAGE_ABI_S', libide_api_version)
 config_h.set('PACKAGE_ABI', libide_api_version)
 config_h.set_quoted('PACKAGE_VERSION', meson.project_version())
-config_h.set_quoted('PACKAGE_STRING', 'gnome-builder-' + meson.project_version())
+config_h.set_quoted('PACKAGE_STRING', 'alwarsha-' + meson.project_version())
 config_h.set_quoted('PACKAGE_DATADIR', join_paths(get_option('prefix'), get_option('datadir')))
-config_h.set_quoted('PACKAGE_ICONDIR', join_paths(get_option('prefix'), get_option('datadir'), 'gnome-builder/icons'))
-config_h.set_quoted('PACKAGE_DOCDIR', join_paths(get_option('prefix'), get_option('datadir'), 'doc/gnome-builder'))
+config_h.set_quoted('PACKAGE_ICONDIR', join_paths(get_option('prefix'), get_option('datadir'), 'alwarsha/icons'))
+config_h.set_quoted('PACKAGE_DOCDIR', join_paths(get_option('prefix'), get_option('datadir'), 'doc/alwarsha'))
 config_h.set_quoted('PACKAGE_LIBDIR', join_paths(get_option('prefix'), get_option('libdir')))
 config_h.set_quoted('PACKAGE_LOCALE_DIR', join_paths(get_option('prefix'), get_option('datadir'), 'locale'))
 config_h.set_quoted('PACKAGE_LIBEXECDIR', join_paths(get_option('prefix'), get_option('libexecdir')))

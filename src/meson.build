@@ -8,7 +8,7 @@ gnome_builder_private_sources = []
 gnome_builder_private_headers = []
 gnome_builder_generated_sources = []
 gnome_builder_generated_headers = []
-gnome_builder_gir_extra_args = ['--pkg-export=gnome-builder-1.0']
+gnome_builder_gir_extra_args = ['--pkg-export=alwarsha-1.0']
 # To allow all resources to be initialized with static constructors
 # inside the final executable, we delay compiling them until the
 # final binary (otherwise they are silenty dropped when linking).
@@ -79,7 +79,7 @@ if libsysprof_capture.found()
   gnome_builder_deps += libsysprof_capture
 endif
 
-gnome_builder = executable('gnome-builder', 'main.c', 'bug-buddy.c',
+gnome_builder = executable('alwarsha', 'main.c', 'bug-buddy.c',
            gui_app: true,
            install: true,
             c_args: libide_args + exe_c_args + release_args,
@@ -96,9 +96,9 @@ gnome_builder = executable('gnome-builder', 'main.c', 'bug-buddy.c',
 pkgconfig.generate(
       subdirs: gnome_builder_include_subdirs,
       version: meson.project_version(),
-         name: 'gnome-builder-@0@.@1@'.format(MAJOR_VERSION, MINOR_VERSION),
-     filebase: 'gnome-builder-@0@.@1@'.format(MAJOR_VERSION, MINOR_VERSION),
-  description: 'Contains the plugin container for Builder.',
+         name: 'alwarsha-@0@.@1@'.format(MAJOR_VERSION, MINOR_VERSION),
+     filebase: 'alwarsha-@0@.@1@'.format(MAJOR_VERSION, MINOR_VERSION),
+  description: 'Contains the plugin container for Alwarsha.',
   install_dir: join_paths(pkglibdir, 'pkgconfig'),
      requires: [ 'gio-2.0', 'gio-unix-2.0', 'gtk+-3.0', 'gtksourceview-4', 'libdazzle-1.0', 'vte-2.91', 'template-glib-1.0', 'libpeas-1.0' ],
 )

@@ -30,31 +30,31 @@
 #define I_(s) g_intern_static_string(s)
 
 static const DzlShortcutEntry editor_surface_entries[] = {
-  { "org.gnome.builder.editor.new-file",
+  { "org.alusus.alwarsha.editor.new-file",
     0, NULL,
     N_("Editor shortcuts"),
     N_("Files"),
     N_("Create a new document") },
 
-  { "org.gnome.builder.editor.open-file",
+  { "org.alusus.alwarsha.editor.open-file",
     0, NULL,
     N_("Editor shortcuts"),
     N_("Files"),
     N_("Open a document") },
 
-  { "org.gnome.builder.editor.navigation-panel",
+  { "org.alusus.alwarsha.editor.navigation-panel",
     0, NULL,
     N_("Editor shortcuts"),
     N_("Panels"),
     N_("Toggle navigation panel") },
 
-  { "org.gnome.builder.editor.utilities-panel",
+  { "org.alusus.alwarsha.editor.utilities-panel",
     0, NULL,
     N_("Editor shortcuts"),
     N_("Panels"),
     N_("Toggle utilities panel") },
 
-  { "org.gnome.builder.editor.close-all",
+  { "org.alusus.alwarsha.editor.close-all",
     0, NULL,
     N_("Editor shortcuts"),
     N_("Files"),
@@ -71,37 +71,37 @@ _ide_editor_surface_init_shortcuts (IdeEditorSurface *self)
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
 
   // dzl_shortcut_controller_add_command_action (controller,
-  //                                             I_("org.gnome.builder.editor.new-file"),
+  //                                             I_("org.alusus.alwarsha.editor.new-file"),
   //                                             I_("<Primary>n"),
   //                                             DZL_SHORTCUT_PHASE_GLOBAL,
   //                                             I_("editor.new-file"));
 
   // dzl_shortcut_controller_add_command_action (controller,
-  //                                             I_("org.gnome.builder.editor.open-file"),
+  //                                             I_("org.alusus.alwarsha.editor.open-file"),
   //                                             I_("<Primary>o"),
   //                                             DZL_SHORTCUT_PHASE_GLOBAL,
   //                                             I_("editor.open-file"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.editor.navigation-panel"),
+                                              I_("org.alusus.alwarsha.editor.navigation-panel"),
                                               I_("F9"),
                                               DZL_SHORTCUT_PHASE_CAPTURE | DZL_SHORTCUT_PHASE_GLOBAL,
                                               I_("dockbin.right-visible"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.editor.utilities-panel"),
+                                              I_("org.alusus.alwarsha.editor.utilities-panel"),
                                               I_("<Control>F9"),
                                               DZL_SHORTCUT_PHASE_CAPTURE | DZL_SHORTCUT_PHASE_GLOBAL,
                                               I_("dockbin.bottom-visible"));
 
   // dzl_shortcut_controller_add_command_action (controller,
-  //                                             I_("org.gnome.builder.editor.close-all"),
+  //                                             I_("org.alusus.alwarsha.editor.close-all"),
   //                                             I_("<Primary><Shift>w"),
   //                                             DZL_SHORTCUT_PHASE_GLOBAL,
   //                                             I_("editor.close-all"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.editor.focus"),
+                                              I_("org.alusus.alwarsha.editor.focus"),
                                               "<alt>1",
                                               DZL_SHORTCUT_PHASE_GLOBAL,
                                               "win.surface('editor')");

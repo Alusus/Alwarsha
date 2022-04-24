@@ -29,35 +29,35 @@
 #define I_(s) g_intern_static_string(s)
 
 static const DzlShortcutEntry frame_shortcuts[] = {
-  { "org.gnome.builder.frame.move-right",
+  { "org.alusus.alwarsha.frame.move-right",
     DZL_SHORTCUT_PHASE_CAPTURE,
     NULL,
     N_("Editor shortcuts"),
     N_("Files"),
     N_("Move document to the right") },
 
-  { "org.gnome.builder.frame.move-left",
+  { "org.alusus.alwarsha.frame.move-left",
     DZL_SHORTCUT_PHASE_CAPTURE,
     NULL,
     N_("Editor shortcuts"),
     N_("Files"),
     N_("Move document to the left") },
 
-  { "org.gnome.builder.frame.previous-document",
+  { "org.alusus.alwarsha.frame.previous-document",
     DZL_SHORTCUT_PHASE_CAPTURE,
     NULL,
     N_("Editor shortcuts"),
     N_("Files"),
     N_("Switch to the previous document") },
 
-  { "org.gnome.builder.frame.next-document",
+  { "org.alusus.alwarsha.frame.next-document",
     DZL_SHORTCUT_PHASE_CAPTURE,
     NULL,
     N_("Editor shortcuts"),
     N_("Files"),
     N_("Switch to the next document") },
 
-  { "org.gnome.builder.frame.close-page",
+  { "org.alusus.alwarsha.frame.close-page",
     DZL_SHORTCUT_PHASE_BUBBLE,
     NULL,
     N_("Editor shortcuts"),
@@ -80,33 +80,33 @@ _ide_frame_init_shortcuts (IdeFrame *self)
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.frame.move-right"),
+                                              I_("org.alusus.alwarsha.frame.move-right"),
                                               I_("<Primary><Alt>Page_Down"),
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("frame.move-right"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.frame.move-left"),
+                                              I_("org.alusus.alwarsha.frame.move-left"),
                                               I_("<Primary><Alt>Page_Up"),
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("frame.move-left"));
 
   dzl_shortcut_controller_add_command_signal (controller,
-                                              I_("org.gnome.builder.frame.next-document"),
+                                              I_("org.alusus.alwarsha.frame.next-document"),
                                               I_("<Primary><Shift>Page_Down"),
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("change-current-page"),
                                               1, G_TYPE_INT, 1);
 
   dzl_shortcut_controller_add_command_signal (controller,
-                                              I_("org.gnome.builder.frame.previous-document"),
+                                              I_("org.alusus.alwarsha.frame.previous-document"),
                                               I_("<Primary><Shift>Page_Up"),
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("change-current-page"),
                                               1, G_TYPE_INT, -1);
 
   // dzl_shortcut_controller_add_command_action (controller,
-  //                                             I_("org.gnome.builder.frame.close-page"),
+  //                                             I_("org.alusus.alwarsha.frame.close-page"),
   //                                             I_("<Primary>w"),
   //                                             DZL_SHORTCUT_PHASE_BUBBLE,
   //                                             I_("frame.close-page"));

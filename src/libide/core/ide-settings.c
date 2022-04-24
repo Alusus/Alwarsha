@@ -158,9 +158,9 @@ ide_settings_constructed (GObject *object)
 
       schema_path = g_settings_schema_get_path (schema);
 
-      if ((schema_path != NULL) && !g_str_has_prefix (schema_path, "/org/gnome/builder/"))
+      if ((schema_path != NULL) && !g_str_has_prefix (schema_path, "/org/alusus/alwarsha/"))
         {
-          g_error ("Schema path MUST be under /org/gnome/builder/");
+          g_error ("Schema path MUST be under /org/alusus/alwarsha/");
           abort ();
         }
       else if (schema_path == NULL)
@@ -169,7 +169,7 @@ ide_settings_constructed (GObject *object)
         }
       else
         {
-          self->relative_path = g_strdup (schema_path + strlen ("/org/gnome/builder/"));
+          self->relative_path = g_strdup (schema_path + strlen ("/org/alusus/alwarsha/"));
         }
     }
 
@@ -177,13 +177,13 @@ ide_settings_constructed (GObject *object)
   g_assert (self->relative_path [0] != '/');
   g_assert ((self->relative_path [0] == 0) || g_str_has_suffix (self->relative_path, "/"));
 
-  full_path = g_strdup_printf ("/org/gnome/builder/%s", self->relative_path);
+  full_path = g_strdup_printf ("/org/alusus/alwarsha/%s", self->relative_path);
   self->settings_sandwich = dzl_settings_sandwich_new (self->schema_id, full_path);
 
   /* Add our project relative settings */
   if (self->ignore_project_settings == FALSE)
     {
-      path = g_strdup_printf ("/org/gnome/builder/projects/%s/%s",
+      path = g_strdup_printf ("/org/alusus/alwarsha/projects/%s/%s",
                               self->project_id, self->relative_path);
       settings = g_settings_new_with_path (self->schema_id, path);
       dzl_settings_sandwich_append (self->settings_sandwich, settings);

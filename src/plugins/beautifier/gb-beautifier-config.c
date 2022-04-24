@@ -640,7 +640,7 @@ get_entries_worker (IdeTask      *task,
   /* Project wide config */
   if (project_id != NULL)
     {
-      if (ide_str_equal0 (project_id, "Builder"))
+      if (ide_str_equal0 (project_id, "Alwarsha"))
         {
           configdir = g_strdup ("resource:///plugins/beautifier/self/");
           map = gb_beautifier_config_get_map (self, configdir);

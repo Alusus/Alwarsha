@@ -1,6 +1,6 @@
 if get_option('plugin_gnome_code_assistance')
 
-install_data('org.gnome.builder.gnome-code-assistance.gschema.xml', install_dir: schema_dir)
+install_data('org.alusus.alwarsha.gnome-code-assistance.gschema.xml', install_dir: schema_dir)
 
 plugins_sources += files([
   'gca-diagnostics.c',

@@ -37,14 +37,14 @@ Requirements: Ubuntu 21.10
     $ ninja
     $ sudo ninja install
 
-2- Build albany:
+2- Build Alwarsha:
 
-    $ cd /albany
+    $ cd /alwarsha
     $ meson --prefix=/usr ~/build
     $ cd ~/build
     $ ninja
 
-3- Install albany into AppDir:
+3- Install Alwarsha into AppDir:
 
     $ DESTDIR=~/AppDir ninja install
 

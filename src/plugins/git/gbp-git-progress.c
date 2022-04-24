@@ -55,7 +55,7 @@ gbp_git_progress_new (GDBusConnection  *connection,
     }
 
   guid = g_dbus_generate_guid ();
-  path = g_strdup_printf ("/org/gnome/Builder/Git/Progress/%s", guid);
+  path = g_strdup_printf ("/org/alusus/Alwarsha/Git/Progress/%s", guid);
 
   if (g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (ret),
                                         connection,

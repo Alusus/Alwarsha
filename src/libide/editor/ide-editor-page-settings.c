@@ -141,7 +141,7 @@ _ide_editor_page_init_settings (IdeEditorPage *self)
   source_view = ide_editor_page_get_view (self);
   buffer = ide_editor_page_get_buffer (self);
 
-  self->editor_settings = g_settings_new ("org.gnome.builder.editor");
+  self->editor_settings = g_settings_new ("org.alusus.alwarsha.editor");
 
   g_settings_bind (self->editor_settings, "highlight-current-line",
                    source_view, "highlight-current-line",
@@ -233,5 +233,5 @@ _ide_editor_page_init_settings (IdeEditorPage *self)
 
   on_draw_spaces_changed (self, "draw-spaces", self->editor_settings);
 
-  self->insight_settings = g_settings_new ("org.gnome.builder.code-insight");
+  self->insight_settings = g_settings_new ("org.alusus.alwarsha.code-insight");
 }

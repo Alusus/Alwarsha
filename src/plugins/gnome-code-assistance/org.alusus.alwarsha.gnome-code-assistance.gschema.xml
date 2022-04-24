@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="org.gnome.builder.gnome-code-assistance" path="/org/gnome/builder/plugins/gnome-code-assistance/" gettext-domain="gnome-builder">
+  <schema id="org.alusus.alwarsha.gnome-code-assistance" path="/org/alusus/alwarsha/plugins/gnome-code-assistance/" gettext-domain="alwarsha">
     <key name="enable-pylint" type="b">
       <default>false</default>
       <summary>Enable Pylint</summary>

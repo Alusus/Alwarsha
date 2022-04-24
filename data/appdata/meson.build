@@ -1,7 +1,7 @@
 # Appdata file.
 appdata_file = i18n.merge_file(
-  input: 'org.gnome.Builder.appdata.xml.in',
-  output: 'org.gnome.Builder.appdata.xml',
+  input: 'org.alusus.Alwarsha.appdata.xml.in',
+  output: 'org.alusus.Alwarsha.appdata.xml',
   po_dir: '../../po',
   install: true,
   install_dir: join_paths(get_option('datadir'), 'metainfo'),

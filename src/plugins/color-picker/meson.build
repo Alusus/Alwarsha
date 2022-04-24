@@ -4,7 +4,7 @@ if not libportal_dep.found()
   error('plugin_color_picker requires libportal')
 endif
 
-install_data('gsettings/org.gnome.builder.plugins.color_picker_plugin.gschema.xml', install_dir: schema_dir)
+install_data('gsettings/org.alusus.alwarsha.plugins.color_picker_plugin.gschema.xml', install_dir: schema_dir)
 
 plugins_deps += libgstyle_dep
 

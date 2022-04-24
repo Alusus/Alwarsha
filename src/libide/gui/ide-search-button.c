@@ -38,7 +38,7 @@ struct _IdeSearchButton
 };
 
 static const DzlShortcutEntry shortcuts[] = {
-  { "org.gnome.builder.workspace.global-search",
+  { "org.alusus.alwarsha.workspace.global-search",
     0, NULL,
     N_("Workspace shortcuts"),
     N_("Search"),
@@ -229,12 +229,12 @@ ide_search_button_init (IdeSearchButton *self)
   controller = dzl_shortcut_controller_find (GTK_WIDGET (entry));
 
   dzl_shortcut_controller_add_command_callback (controller,
-                                                I_("org.gnome.builder.workspace.global-search"),
+                                                I_("org.alusus.alwarsha.workspace.global-search"),
                                                 "<Primary>period",
                                                 DZL_SHORTCUT_PHASE_CAPTURE | DZL_SHORTCUT_PHASE_GLOBAL,
                                                 shortcut_grab_focus, self, NULL);
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.workspace.unfocus"),
+                                              I_("org.alusus.alwarsha.workspace.unfocus"),
                                               "Escape",
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               "search.unfocus");

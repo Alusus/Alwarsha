@@ -81,7 +81,7 @@
                         <property name="visible">True</property>
                         <property name="key">hsv-visible</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin.components</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin.components</property>
                         <property name="target">""</property>
                         <property name="title" translatable="yes">HSV</property>
                         <property name="subtitle" translatable="yes">Hue Saturation Value</property>
@@ -99,7 +99,7 @@
                         <property name="visible">True</property>
                         <property name="key">lab-visible</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin.components</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin.components</property>
                         <property name="target">""</property>
                         <property name="title" translatable="yes">L*a*b*</property>
                         <property name="subtitle" translatable="yes">CIE L*a*b* 1976</property>
@@ -117,7 +117,7 @@
                         <property name="visible">True</property>
                         <property name="key">rgb-visible</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin.components</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin.components</property>
                         <property name="target">""</property>
                         <property name="title" translatable="yes">RGB</property>
                         <property name="subtitle" translatable="yes">Red Green Blue</property>
@@ -174,7 +174,7 @@
                         <property name="visible">True</property>
                         <property name="key">rgb-unit</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin.components</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin.components</property>
                         <property name="target">"value"</property>
                         <property name="title" translatable="yes">Value</property>
                         <style>
@@ -191,7 +191,7 @@
                         <property name="visible">True</property>
                         <property name="key">rgb-unit</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin.components</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin.components</property>
                         <property name="target">"percent"</property>
                         <property name="title" translatable="yes">Percent</property>
                         <style>
@@ -247,7 +247,7 @@
                         <property name="visible">True</property>
                         <property name="key">filter</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
                         <property name="target">"none"</property>
                         <property name="title" translatable="yes">None</property>
                         <style>
@@ -264,7 +264,7 @@
                         <property name="visible">True</property>
                         <property name="key">filter</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
                         <property name="target">"achromatopsia"</property>
                         <property name="title" translatable="yes">Achromatopsia (monochromacy)</property>
                         <style>
@@ -281,7 +281,7 @@
                         <property name="visible">True</property>
                         <property name="key">filter</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
                         <property name="target">"achromatomaly"</property>
                         <property name="title" translatable="yes">Achromatomaly (blue cone monochromacy)</property>
                         <style>
@@ -298,7 +298,7 @@
                         <property name="visible">True</property>
                         <property name="key">filter</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
                         <property name="target">"deuteranopia"</property>
                         <property name="title" translatable="yes">Deuteranopia (green-blind)</property>
                         <style>
@@ -315,7 +315,7 @@
                         <property name="visible">True</property>
                         <property name="key">filter</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
                         <property name="target">"deuteranomaly"</property>
                         <property name="title" translatable="yes">Deuteranomaly (green-weak)</property>
                         <style>
@@ -332,7 +332,7 @@
                         <property name="visible">True</property>
                         <property name="key">filter</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
                         <property name="target">"protanopia"</property>
                         <property name="title" translatable="yes">Protanopia (red-blind)</property>
                         <style>
@@ -349,7 +349,7 @@
                         <property name="visible">True</property>
                         <property name="key">filter</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
                         <property name="target">"protanomaly"</property>
                         <property name="title" translatable="yes">Protanomaly (red-weak)</property>
                         <style>
@@ -366,7 +366,7 @@
                         <property name="visible">True</property>
                         <property name="key">filter</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
                         <property name="target">"tritanopia"</property>
                         <property name="title" translatable="yes">Tritanopia (blue-blind)</property>
                         <style>
@@ -383,7 +383,7 @@
                         <property name="visible">True</property>
                         <property name="key">filter</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
                         <property name="target">"tritanomaly"</property>
                         <property name="title" translatable="yes">Tritanomaly (blue-weak)</property>
                         <style>
@@ -400,7 +400,7 @@
                         <property name="visible">True</property>
                         <property name="key">filter</property>
                         <property name="is-radio">True</property>
-                        <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+                        <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
                         <property name="target">"websafe"</property>
                         <property name="title" translatable="yes">Websafe</property>
                         <style>
@@ -485,7 +485,7 @@
             <property name="visible">True</property>
             <property name="key">strings-visible</property>
             <property name="is-radio">True</property>
-            <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+            <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
             <property name="target">"hex3"</property>
             <property name="title" translatable="yes">HEX3</property>
             <style>
@@ -502,7 +502,7 @@
             <property name="visible">True</property>
             <property name="key">strings-visible</property>
             <property name="is-radio">True</property>
-            <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+            <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
             <property name="target">"hex6"</property>
             <property name="title" translatable="yes">HEX6</property>
             <style>
@@ -519,7 +519,7 @@
             <property name="visible">True</property>
             <property name="key">strings-visible</property>
             <property name="is-radio">True</property>
-            <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+            <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
             <property name="target">"rgb"</property>
             <property name="title" translatable="yes">RGB</property>
             <style>
@@ -536,7 +536,7 @@
             <property name="visible">True</property>
             <property name="key">strings-visible</property>
             <property name="is-radio">True</property>
-            <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+            <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
             <property name="target">"rgba"</property>
             <property name="title" translatable="yes">RGBA</property>
             <style>
@@ -553,7 +553,7 @@
             <property name="visible">True</property>
             <property name="key">strings-visible</property>
             <property name="is-radio">True</property>
-            <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+            <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
             <property name="target">"hsl"</property>
             <property name="title" translatable="yes">HSL</property>
             <style>
@@ -570,7 +570,7 @@
             <property name="visible">True</property>
             <property name="key">strings-visible</property>
             <property name="is-radio">True</property>
-            <property name="schema-id">org.gnome.builder.plugins.color_picker_plugin</property>
+            <property name="schema-id">org.alusus.alwarsha.plugins.color_picker_plugin</property>
             <property name="target">"hsla"</property>
             <property name="title" translatable="yes">HSLA</property>
             <style>

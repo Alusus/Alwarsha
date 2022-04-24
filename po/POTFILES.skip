@@ -1,6 +1,6 @@
 # List of source files that should *not* be translated.
 # Please keep this file sorted alphabetically.
-data/org.gnome.Builder.desktop.in
+data/org.alusus.Alwarsha.desktop.in
 src/gstyle/tests/data/gstyle-color-editor.ui
 src/gstyle/tests/data/palette.xml
 src/plugins/gdb/gdbwire.c

@@ -113,7 +113,7 @@ main (gint argc,
 
   if (!g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (service),
                                          connection,
-                                         "/org/gnome/Builder/Git",
+                                         "/org/alusus/Alwarsha/Git",
                                          &error))
     goto error;
 

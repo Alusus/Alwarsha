@@ -1,18 +1,18 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
-data/appdata/org.gnome.Builder.appdata.xml.in
-data/gsettings/org.gnome.builder.build.gschema.xml
-data/gsettings/org.gnome.builder.code-insight.gschema.xml.in
-data/gsettings/org.gnome.builder.editor.gschema.xml
-data/gsettings/org.gnome.builder.editor.language.gschema.xml
-data/gsettings/org.gnome.builder.extension-type.gschema.xml
-data/gsettings/org.gnome.builder.gschema.xml
-data/gsettings/org.gnome.builder.plugin.gschema.xml
-data/gsettings/org.gnome.builder.project-tree.gschema.xml
-data/gsettings/org.gnome.builder.project.gschema.xml
-data/gsettings/org.gnome.builder.terminal.gschema.xml
-data/gsettings/org.gnome.builder.workbench.gschema.xml
-data/org.gnome.Builder.desktop.in.in
+data/appdata/org.alusus.Alwarsha.appdata.xml.in
+data/gsettings/org.alusus.alwarsha.build.gschema.xml
+data/gsettings/org.alusus.alwarsha.code-insight.gschema.xml.in
+data/gsettings/org.alusus.alwarsha.editor.gschema.xml
+data/gsettings/org.alusus.alwarsha.editor.language.gschema.xml
+data/gsettings/org.alusus.alwarsha.extension-type.gschema.xml
+data/gsettings/org.alusus.alwarsha.gschema.xml
+data/gsettings/org.alusus.alwarsha.plugin.gschema.xml
+data/gsettings/org.alusus.alwarsha.project-tree.gschema.xml
+data/gsettings/org.alusus.alwarsha.project.gschema.xml
+data/gsettings/org.alusus.alwarsha.terminal.gschema.xml
+data/gsettings/org.alusus.alwarsha.workbench.gschema.xml
+data/org.alusus.Alwarsha.desktop.in.in
 data/style-schemes/Adwaita-dark.style-scheme.xml
 data/style-schemes/Adwaita.style-scheme.xml
 data/style-schemes/builder-dark.style-scheme.xml
@@ -171,7 +171,7 @@ src/plugins/clang/ide-clang-highlighter.c
 src/plugins/clang/ide-clang-preferences-addin.c
 src/plugins/clang/ide-clang-symbol-node.c
 src/plugins/clang/ide-clang-symbol-tree.c
-src/plugins/clang/org.gnome.builder.clang.gschema.xml
+src/plugins/clang/org.alusus.alwarsha.clang.gschema.xml
 src/plugins/cmake/gbp-cmake-build-system.c
 src/plugins/cmake/gbp-cmake-pipeline-addin.c
 src/plugins/cmake/gbp-cmake-toolchain.c
@@ -182,7 +182,7 @@ src/plugins/color-picker/data/basic.gstyle.xml
 src/plugins/color-picker/gb-color-picker-editor-addin.c
 src/plugins/color-picker/gb-color-picker-prefs-palette-row.c
 src/plugins/color-picker/gb-color-picker-prefs.c
-src/plugins/color-picker/gsettings/org.gnome.builder.plugins.color_picker_plugin.gschema.xml
+src/plugins/color-picker/gsettings/org.alusus.alwarsha.plugins.color_picker_plugin.gschema.xml
 src/plugins/color-picker/gtk/color-picker-palette-menu.ui
 src/plugins/color-picker/gtk/color-picker-prefs.ui
 src/plugins/color-picker/gtk/color-picker-preview.ui
@@ -192,7 +192,7 @@ src/plugins/command-bar/gbp-command-bar-shortcuts.c
 src/plugins/comment-code/gbp-comment-code-editor-page-addin.c
 src/plugins/comment-code/gtk/menus.ui
 src/plugins/copyright/copyright_plugin.py
-src/plugins/copyright/org.gnome.builder.plugins.copyright.gschema.xml
+src/plugins/copyright/org.alusus.alwarsha.plugins.copyright.gschema.xml
 src/plugins/create-project/gbp-create-project-application-addin.c
 src/plugins/create-project/gbp-create-project-surface.c
 src/plugins/create-project/gbp-create-project-surface.ui
@@ -251,7 +251,7 @@ src/plugins/editor/gtk/menus.ui
 src/plugins/editorconfig/gbp-editorconfig-file-settings.c
 src/plugins/emacs/gbp-emacs-preferences-addin.c
 src/plugins/eslint/eslint_plugin.py
-src/plugins/eslint/org.gnome.builder.plugins.eslint.gschema.xml
+src/plugins/eslint/org.alusus.alwarsha.plugins.eslint.gschema.xml
 src/plugins/file-search/gbp-file-search-index.c
 src/plugins/file-search/gbp-file-search-provider.c
 src/plugins/flatpak/gbp-flatpak-application-addin.c
@@ -291,7 +291,7 @@ src/plugins/glade/gtk/menus.ui
 src/plugins/gnome-code-assistance/ide-gca-diagnostic-provider.c
 src/plugins/gnome-code-assistance/ide-gca-preferences-addin.c
 src/plugins/gnome-code-assistance/ide-gca-service.c
-src/plugins/gnome-code-assistance/org.gnome.builder.gnome-code-assistance.gschema.xml
+src/plugins/gnome-code-assistance/org.alusus.alwarsha.gnome-code-assistance.gschema.xml
 src/plugins/gradle/gradle_plugin.py
 src/plugins/greeter/gbp-greeter-application-addin.c
 src/plugins/greeter/gtk/menus.ui
@@ -340,7 +340,7 @@ src/plugins/recent/gbp-recent-section.c
 src/plugins/recent/gbp-recent-section.ui
 src/plugins/retab/gbp-retab-editor-page-addin.c
 src/plugins/retab/gtk/menus.ui
-src/plugins/rust-analyzer/org.gnome.builder.rust-analyzer.gschema.xml
+src/plugins/rust-analyzer/org.alusus.alwarsha.rust-analyzer.gschema.xml
 src/plugins/rust-analyzer/rust-analyzer-preferences-addin.c
 src/plugins/rust-analyzer/rust-analyzer-service.c
 src/plugins/shellcmd/gbp-shellcmd-command.c
@@ -358,7 +358,7 @@ src/plugins/spellcheck/gbp-spell-navigator.c
 src/plugins/spellcheck/gbp-spell-widget.c
 src/plugins/spellcheck/gbp-spell-widget.ui
 src/plugins/spellcheck/gtk/menus.ui
-src/plugins/stylelint/org.gnome.builder.plugins.stylelint.gschema.xml
+src/plugins/stylelint/org.alusus.alwarsha.plugins.stylelint.gschema.xml
 src/plugins/stylelint/stylelint_plugin.py
 src/plugins/sublime/gbp-sublime-preferences-addin.c
 src/plugins/support/gtk/menus.ui

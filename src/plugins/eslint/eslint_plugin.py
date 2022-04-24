@@ -146,7 +146,7 @@ class ESLintPreferencesAddin(GObject.Object, Ide.PreferencesAddin):
     def do_load(self, preferences):
         self.eslint = preferences.add_switch("code-insight",
                                              "diagnostics",
-                                             "org.gnome.builder.plugins.eslint",
+                                             "org.alusus.alwarsha.plugins.eslint",
                                              "enable-eslint",
                                              None,
                                              "false",

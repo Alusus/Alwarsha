@@ -216,7 +216,7 @@ stack_notify_visible_child_cb (IdeGreeterWorkspace *self,
   if (DZL_IS_DOCK_ITEM (visible_child))
     {
       if ((title = dzl_dock_item_get_title (DZL_DOCK_ITEM (visible_child))))
-        full_title = g_strdup_printf (_("Builder — %s"), title);
+        full_title = g_strdup_printf (_("Alwarsha — %s"), title);
     }
 
   gtk_label_set_label (self->title, title);
@@ -634,7 +634,7 @@ ide_greeter_workspace_class_init (IdeGreeterWorkspaceClass *klass)
 
   ide_workspace_class_set_kind (workspace_class, "greeter");
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/builder/ui/ide-greeter-workspace.ui");
+  gtk_widget_class_set_template_from_resource (widget_class, "/org/alusus/alwarsha/ui/ide-greeter-workspace.ui");
   gtk_widget_class_bind_template_child (widget_class, IdeGreeterWorkspace, action_bar);
   gtk_widget_class_bind_template_child (widget_class, IdeGreeterWorkspace, back_button);
   gtk_widget_class_bind_template_child (widget_class, IdeGreeterWorkspace, buttons_section);

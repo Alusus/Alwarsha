@@ -283,7 +283,7 @@ rust_analyzer_service_class_init (RustAnalyzerServiceClass *klass)
 static void
 rust_analyzer_service_init (RustAnalyzerService *self)
 {
-  self->settings = g_settings_new ("org.gnome.builder.rust-analyzer");
+  self->settings = g_settings_new ("org.alusus.alwarsha.rust-analyzer");
   g_signal_connect_object (self->settings,
                            "changed",
                            G_CALLBACK (rust_analyzer_service_settings_changed_cb),

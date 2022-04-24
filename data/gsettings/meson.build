@@ -19,24 +19,24 @@ schema_conf = configuration_data()
 schema_conf.set('ECTAGS', ctags_path)
 
 schema_files += [configure_file(
-          input: 'org.gnome.builder.code-insight.gschema.xml.in',
-         output: 'org.gnome.builder.code-insight.gschema.xml',
+          input: 'org.alusus.alwarsha.code-insight.gschema.xml.in',
+         output: 'org.alusus.alwarsha.code-insight.gschema.xml',
   configuration: schema_conf,
         install: true,
     install_dir: schema_dir,
 )]
 
 schemas = [
-  'org.gnome.builder.build.gschema.xml',
-  'org.gnome.builder.editor.gschema.xml',
-  'org.gnome.builder.editor.language.gschema.xml',
-  'org.gnome.builder.extension-type.gschema.xml',
-  'org.gnome.builder.gschema.xml',
-  'org.gnome.builder.plugin.gschema.xml',
-  'org.gnome.builder.project.gschema.xml',
-  'org.gnome.builder.project-tree.gschema.xml',
-  'org.gnome.builder.terminal.gschema.xml',
-  'org.gnome.builder.workbench.gschema.xml',
+  'org.alusus.alwarsha.build.gschema.xml',
+  'org.alusus.alwarsha.editor.gschema.xml',
+  'org.alusus.alwarsha.editor.language.gschema.xml',
+  'org.alusus.alwarsha.extension-type.gschema.xml',
+  'org.alusus.alwarsha.gschema.xml',
+  'org.alusus.alwarsha.plugin.gschema.xml',
+  'org.alusus.alwarsha.project.gschema.xml',
+  'org.alusus.alwarsha.project-tree.gschema.xml',
+  'org.alusus.alwarsha.terminal.gschema.xml',
+  'org.alusus.alwarsha.workbench.gschema.xml',
 ]
 
 # HACK: We need access to all schemas when running tests, so we

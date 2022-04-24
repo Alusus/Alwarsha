@@ -1,4 +1,4 @@
-i18n.gettext('gnome-builder',
+i18n.gettext('alwarsha',
   preset: 'glib',
   args: [
     '--msgid-bugs-address=https://gitlab.gnome.org/GNOME/gnome-builder/issues',

@@ -366,7 +366,7 @@ ipc_git_repository_impl_handle_create_change_monitor (IpcGitRepository      *rep
 
   conn = g_dbus_method_invocation_get_connection (invocation);
   guid = g_dbus_generate_guid ();
-  obj_path = g_strdup_printf ("/org/gnome/Builder/Git/ChangeMonitor/%s", guid);
+  obj_path = g_strdup_printf ("/org/alusus/Alwarsha/Git/ChangeMonitor/%s", guid);
   monitor = ipc_git_change_monitor_impl_new (self->repository, path);
 
   if (!g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (monitor), conn, obj_path, &error))
@@ -902,7 +902,7 @@ ipc_git_repository_impl_handle_load_config (IpcGitRepository      *repository,
 
   conn = g_dbus_method_invocation_get_connection (invocation);
   uuid = g_dbus_generate_guid ();
-  obj_path = g_strdup_printf ("/org/gnome/Builder/Config/%s", uuid);
+  obj_path = g_strdup_printf ("/org/alusus/Alwarsha/Config/%s", uuid);
   g_hash_table_insert (self->configs, g_object_ref (config), g_strdup (uuid));
 
   g_signal_connect_object (config,

@@ -31,25 +31,25 @@
 #define I_(s) (g_intern_static_string(s))
 
 static DzlShortcutEntry glade_view_shortcuts[] = {
-  { "org.gnome.builder.glade-view.save",
+  { "org.alusus.alwarsha.glade-view.save",
     0, NULL,
     N_("Glade shortcuts"),
     N_("Designer"),
     N_("Save the interface design") },
 
-  { "org.gnome.builder.glade-view.preview",
+  { "org.alusus.alwarsha.glade-view.preview",
     0, NULL,
     N_("Glade shortcuts"),
     N_("Designer"),
     N_("Preview the interface design") },
 
-  { "org.gnome.builder.glade-view.undo",
+  { "org.alusus.alwarsha.glade-view.undo",
     0, NULL,
     N_("Glade shortcuts"),
     N_("Designer"),
     N_("Undo the last command") },
 
-  { "org.gnome.builder.glade-view.redo",
+  { "org.alusus.alwarsha.glade-view.redo",
     0, NULL,
     N_("Glade shortcuts"),
     N_("Designer"),
@@ -66,49 +66,49 @@ _gbp_glade_page_init_shortcuts (GtkWidget *widget)
   controller = dzl_shortcut_controller_find (widget);
 
   // dzl_shortcut_controller_add_command_action (controller,
-  //                                             I_("org.gnome.builder.glade-view.save"),
+  //                                             I_("org.alusus.alwarsha.glade-view.save"),
   //                                             "<Primary>s",
   //                                             DZL_SHORTCUT_PHASE_BUBBLE,
   //                                             I_("glade-view.save"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.glade-view.preview"),
+                                              I_("org.alusus.alwarsha.glade-view.preview"),
                                               "<Control><Alt>p",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("glade-view.preview"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.glade-view.undo"),
+                                              I_("org.alusus.alwarsha.glade-view.undo"),
                                               "<Control>z",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("glade-view.undo"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.glade-view.redo"),
+                                              I_("org.alusus.alwarsha.glade-view.redo"),
                                               "<Control><Shift>z",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("glade-view.redo"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.glade-view.copy"),
+                                              I_("org.alusus.alwarsha.glade-view.copy"),
                                               "<Primary>c",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("glade-view.copy"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.glade-view.cut"),
+                                              I_("org.alusus.alwarsha.glade-view.cut"),
                                               "<Primary>x",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("glade-view.cut"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.glade-view.paste"),
+                                              I_("org.alusus.alwarsha.glade-view.paste"),
                                               "<Primary>v",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("glade-view.paste"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.glade-view.delete"),
+                                              I_("org.alusus.alwarsha.glade-view.delete"),
                                               "Delete",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("glade-view.delete"));

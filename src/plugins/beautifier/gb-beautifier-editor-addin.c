@@ -143,7 +143,7 @@ set_default_keybinding (GbBeautifierEditorAddin *self,
 
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self->current_view));
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.editor-view.beautifier-default",
+                                              "org.alusus.alwarsha.editor-view.beautifier-default",
                                               I_(accel),
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               action_name);
@@ -342,7 +342,7 @@ cleanup_view_cb (GtkWidget               *widget,
 }
 
 static const DzlShortcutEntry beautifier_shortcut_entry[] = {
-  { "org.gnome.builder.editor-view.beautifier-default",
+  { "org.alusus.alwarsha.editor-view.beautifier-default",
     0,
     "<primary><Alt>b",
     N_("Editor shortcuts"),

@@ -138,7 +138,7 @@ ide_keybindings_reload (IdeKeybindings *self)
       self->mode = g_strdup ("default");
 
     IDE_TRACE_MSG ("Loading %s keybindings", self->mode);
-    path = g_strdup_printf ("/org/gnome/builder/keybindings/%s.css", self->mode);
+    path = g_strdup_printf ("/org/alusus/alwarsha/keybindings/%s.css", self->mode);
     bytes = g_resources_lookup_data (path, G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
 
     if (bytes == NULL)

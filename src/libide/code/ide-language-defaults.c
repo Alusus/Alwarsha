@@ -28,8 +28,8 @@
 
 #include "ide-language-defaults.h"
 
-#define SCHEMA_ID "org.gnome.builder.editor.language"
-#define PATH_BASE "/org/gnome/builder/editor/language/"
+#define SCHEMA_ID "org.alusus.alwarsha.editor.language"
+#define PATH_BASE "/org/alusus/alwarsha/editor/language/"
 
 static gboolean  initialized;
 static gboolean  initializing;
@@ -242,7 +242,7 @@ ide_language_defaults_get_current_version (const gchar  *path,
 static GBytes *
 ide_language_defaults_get_defaults (GError **error)
 {
-  return g_resources_lookup_data ("/org/gnome/builder/file-settings/defaults.ini",
+  return g_resources_lookup_data ("/org/alusus/alwarsha/file-settings/defaults.ini",
                                   G_RESOURCE_LOOKUP_FLAGS_NONE, error);
 }
 

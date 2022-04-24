@@ -1585,7 +1585,7 @@ gbp_omni_gutter_renderer_constructed (GObject *object)
   view = gtk_source_gutter_renderer_get_view (GTK_SOURCE_GUTTER_RENDERER (self));
   dzl_signal_group_set_target (self->view_signals, view);
 
-  self->settings = g_settings_new ("org.gnome.builder.editor");
+  self->settings = g_settings_new ("org.alusus.alwarsha.editor");
 }
 
 static void

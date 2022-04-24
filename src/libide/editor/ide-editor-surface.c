@@ -95,7 +95,7 @@ ide_editor_surface_restore_panel_state (IdeEditorSurface *self)
 
   /* TODO: This belongs in editor settings probably */
 
-  settings = g_settings_new ("org.gnome.builder.workbench");
+  settings = g_settings_new ("org.alusus.alwarsha.workbench");
 
   pane = dzl_dock_bin_get_left_edge (DZL_DOCK_BIN (self));
   position = g_settings_get_int (settings, "left-position");
@@ -129,7 +129,7 @@ ide_editor_surface_save_panel_state (IdeEditorSurface *self)
     return;
 
   /* TODO: possibly belongs in editor settings */
-  settings = g_settings_new ("org.gnome.builder.workbench");
+  settings = g_settings_new ("org.alusus.alwarsha.workbench");
 
   pane = dzl_dock_bin_get_left_edge (DZL_DOCK_BIN (self));
   position = dzl_dock_revealer_get_position (DZL_DOCK_REVEALER (pane));

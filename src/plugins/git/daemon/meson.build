@@ -38,32 +38,32 @@ gnome_builder_git_deps = [
 ]
 
 ipc_git_change_monitor_src = gnome.gdbus_codegen('ipc-git-change-monitor',
-           sources: 'org.gnome.Builder.Git.ChangeMonitor.xml',
-  interface_prefix: 'org.gnome.Builder.',
+           sources: 'org.alusus.Alwarsha.Git.ChangeMonitor.xml',
+  interface_prefix: 'org.alusus.Alwarsha.',
          namespace: 'Ipc',
 )
 
 ipc_git_config_src = gnome.gdbus_codegen('ipc-git-config',
-           sources: 'org.gnome.Builder.Git.Config.xml',
-  interface_prefix: 'org.gnome.Builder.',
+           sources: 'org.alusus.Alwarsha.Git.Config.xml',
+  interface_prefix: 'org.alusus.Alwarsha.',
          namespace: 'Ipc',
 )
 
 ipc_git_progress_src = gnome.gdbus_codegen('ipc-git-progress',
-           sources: 'org.gnome.Builder.Git.Progress.xml',
-  interface_prefix: 'org.gnome.Builder.',
+           sources: 'org.alusus.Alwarsha.Git.Progress.xml',
+  interface_prefix: 'org.alusus.Alwarsha.',
          namespace: 'Ipc',
 )
 
 ipc_git_repository_src = gnome.gdbus_codegen('ipc-git-repository',
-           sources: 'org.gnome.Builder.Git.Repository.xml',
-  interface_prefix: 'org.gnome.Builder.',
+           sources: 'org.alusus.Alwarsha.Git.Repository.xml',
+  interface_prefix: 'org.alusus.Alwarsha.',
          namespace: 'Ipc',
 )
 
 ipc_git_service_src = gnome.gdbus_codegen('ipc-git-service',
-           sources: 'org.gnome.Builder.Git.Service.xml',
-  interface_prefix: 'org.gnome.Builder.',
+           sources: 'org.alusus.Alwarsha.Git.Service.xml',
+  interface_prefix: 'org.alusus.Alwarsha.',
          namespace: 'Ipc',
 )
 

@@ -601,7 +601,7 @@ _gbp_project_tree_pane_init_actions (GbpProjectTreePane *self)
 
   g_assert (GBP_IS_PROJECT_TREE_PANE (self));
 
-  settings = g_settings_new ("org.gnome.builder.project-tree");
+  settings = g_settings_new ("org.alusus.alwarsha.project-tree");
   sort_action = g_settings_create_action (settings, "sort-directories-first");
   ignored_action = g_settings_create_action (settings, "show-ignored-files");
 

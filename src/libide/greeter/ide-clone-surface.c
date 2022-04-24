@@ -417,7 +417,7 @@ ide_clone_surface_class_init (IdeCloneSurfaceClass *klass)
 
   g_object_class_install_properties (object_class, N_PROPS, properties);
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/org/gnome/builder/ui/ide-clone-surface.ui");
+  gtk_widget_class_set_template_from_resource (widget_class, "/org/alusus/alwarsha/ui/ide-clone-surface.ui");
   gtk_widget_class_bind_template_child (widget_class, IdeCloneSurface, author_entry);
   gtk_widget_class_bind_template_child (widget_class, IdeCloneSurface, branch_entry);
   gtk_widget_class_bind_template_child (widget_class, IdeCloneSurface, button_stack);

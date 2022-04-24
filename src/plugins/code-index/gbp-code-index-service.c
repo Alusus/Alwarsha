@@ -205,7 +205,7 @@ gbp_code_index_service_init (GbpCodeIndexService *self)
   icon = g_themed_icon_new ("media-playback-pause-symbolic");
 
   self->notif = ide_notification_new ();
-  ide_notification_set_id (self->notif, "org.gnome.builder.code-index");
+  ide_notification_set_id (self->notif, "org.alusus.alwarsha.code-index");
   ide_notification_set_title (self->notif, _("Indexing Source Code"));
   ide_notification_set_body (self->notif, _("Search, diagnostics, and autocompletion may be limited until complete."));
   ide_notification_set_has_progress (self->notif, TRUE);

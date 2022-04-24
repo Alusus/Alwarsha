@@ -71,7 +71,7 @@ ide_editor_page_load_fonts (IdeEditorPage *self)
   *(strrchr(pathBuf, '/')) = '\0';
   *(strrchr(pathBuf, '/')) = '\0';
   // Complete the path.
-  strcat(pathBuf, "/share/gnome-builder/fonts/AlususMono.ttf");
+  strcat(pathBuf, "/share/alwarsha/fonts/AlususMono.ttf");
 
   if (g_once_init_enter (&localFontConfig))
     {

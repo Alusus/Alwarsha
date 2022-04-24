@@ -75,7 +75,7 @@ ide_application_actions_preferences (GSimpleAction *action,
                          "transient-for", toplevel,
                          "default-width", 1300,
                          "default-height", 800,
-                         "title", _("Builder — Preferences"),
+                         "title", _("Alwarsha — Preferences"),
                          "window-position", GTK_WIN_POS_CENTER_ON_PARENT,
                          NULL);
   gtk_application_add_window (GTK_APPLICATION (self), window);
@@ -140,19 +140,19 @@ ide_application_actions_about (GSimpleAction *action,
   dialog = g_object_new (GTK_TYPE_ABOUT_DIALOG,
                          "artists", ide_application_credits_artists,
                          "authors", ide_application_credits_authors,
-                         "comments", _("An IDE for GNOME"),
+                         "comments", _("An IDE with support for Alusus Language"),
                          "copyright", "© 2014–2021 Christian Hergert, et al.",
                          "documenters", ide_application_credits_documenters,
                          "license-type", GTK_LICENSE_GPL_3_0,
-                         "logo-icon-name", "org.gnome.Builder",
+                         "logo-icon-name", "org.alusus.Alwarsha",
                          "modal", TRUE,
-                         "program-name", _("GNOME Builder"),
+                         "program-name", _("Alwarsha"),
                          "transient-for", parent,
                          "translator-credits", _("translator-credits"),
                          "use-header-bar", TRUE,
                          "version", version->str,
                          "website", "https://wiki.gnome.org/Apps/Builder",
-                         "website-label", _("Learn more about GNOME Builder"),
+                         "website-label", _("Learn more about Alwarsha"),
                          NULL);
   gtk_about_dialog_add_credit_section (GTK_ABOUT_DIALOG (dialog),
                                        _("Funded By"),
@@ -206,7 +206,7 @@ ide_application_actions_help_cb (GObject      *object,
       g_autoptr(GError) error = NULL;
 
       if (ide_is_flatpak ())
-        file_base = ide_get_relocatable_path ("/share/doc/gnome-builder");
+        file_base = ide_get_relocatable_path ("/share/doc/alwarsha");
       else
         file_base = g_strdup (PACKAGE_DOCDIR);
 
@@ -306,7 +306,7 @@ ide_application_actions_nighthack (GSimpleAction *action,
                 "gtk-application-prefer-dark-theme", TRUE,
                 NULL);
 
-  settings = g_settings_new ("org.gnome.builder.editor");
+  settings = g_settings_new ("org.alusus.alwarsha.editor");
   name = g_settings_get_string (settings, "style-scheme-name");
 
   if (g_str_has_prefix (name, "Adwaita"))
@@ -327,7 +327,7 @@ ide_application_actions_dayhack (GSimpleAction *action,
                 "gtk-application-prefer-dark-theme", FALSE,
                 NULL);
 
-  settings = g_settings_new ("org.gnome.builder.editor");
+  settings = g_settings_new ("org.alusus.alwarsha.editor");
   name = g_settings_get_string (settings, "style-scheme-name");
 
   if (g_str_has_prefix (name, "Adwaita"))

@@ -128,7 +128,7 @@ class StylelintPreferencesAddin(GObject.Object, Ide.PreferencesAddin):
     def do_load(self, preferences):
         self.stylelint = preferences.add_switch("code-insight",
                                              "diagnostics",
-                                             "org.gnome.builder.plugins.stylelint",
+                                             "org.alusus.alwarsha.plugins.stylelint",
                                              "enable-stylelint",
                                              None,
                                              "false",

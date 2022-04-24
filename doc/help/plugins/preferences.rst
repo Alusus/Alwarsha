@@ -35,7 +35,7 @@ They are even searchable!
                    'completion',
 
                    # mapping to the gsettings schema
-                   'org.gnome.builder.extension-type',
+                   'org.alusus.alwarsha.extension-type',
 
                    # with the gsettings schema key
                    'enabled',

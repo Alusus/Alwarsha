@@ -27,6 +27,6 @@ plugin_rust_analyzer_resources = gnome.compile_resources(
 
 plugins_sources += plugin_rust_analyzer_resources
 
-install_data(['org.gnome.builder.rust-analyzer.gschema.xml'], install_dir: schema_dir)
+install_data(['org.alusus.alwarsha.rust-analyzer.gschema.xml'], install_dir: schema_dir)
 
 endif

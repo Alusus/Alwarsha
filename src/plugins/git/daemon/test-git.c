@@ -32,7 +32,7 @@
 #include "ipc-git-service.h"
 #include "ipc-git-types.h"
 
-#define PROGRESS_PATH "/org/gnome/Builder/Git/Progress/1"
+#define PROGRESS_PATH "/org/alusus/Alwarsha/Git/Progress/1"
 
 static GMainLoop *main_loop;
 static gchar tmpdir[] = { "test-git-XXXXXX" };
@@ -492,7 +492,7 @@ main (gint argc,
   g_dbus_connection_set_exit_on_close (connection, FALSE);
   g_dbus_connection_start_message_processing (connection);
 
-  service = ipc_git_service_proxy_new_sync (connection, 0, NULL, "/org/gnome/Builder/Git", NULL, &error);
+  service = ipc_git_service_proxy_new_sync (connection, 0, NULL, "/org/alusus/Alwarsha/Git", NULL, &error);
   g_assert_no_error (error);
   g_assert_true (IPC_IS_GIT_SERVICE (service));
 

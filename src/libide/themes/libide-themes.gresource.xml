@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
-  <gresource prefix="/org/gnome/builder">
+  <gresource prefix="/org/alusus/alwarsha">
     <file compressed="true">themes/Adwaita.css</file>
     <file compressed="true">themes/Adwaita-dark.css</file>
     <file compressed="true">themes/Adwaita-shared.css</file>

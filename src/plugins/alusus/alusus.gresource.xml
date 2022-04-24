@@ -4,7 +4,7 @@
     <file compressed="true">resources/src/main.alusus</file>
     <file compressed="true">resources/الشفرة/بداية.أسس</file>
   </gresource>
-  <gresource prefix="/org/gnome/builder">
+  <gresource prefix="/org/alusus/alwarsha">
     <file compressed="true">icons/scalable/actions/pattern-empty.svg</file>
   </gresource>
 </gresources>

@@ -51,7 +51,7 @@ typedef struct
 } SymbolResolverTaskData;
 
 static DzlShortcutEntry symbol_tree_shortcuts[] = {
-  { "org.gnome.builder.symbol-tree.search",
+  { "org.alusus.alwarsha.symbol-tree.search",
     0, NULL,
     N_("Editor shortcuts"),
     N_("Symbols"),
@@ -446,7 +446,7 @@ gbp_symbol_frame_addin_load (IdeFrameAddin *addin,
   controller = dzl_shortcut_controller_find (GTK_WIDGET (stack));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.symbol-tree.search"),
+                                              I_("org.alusus.alwarsha.symbol-tree.search"),
                                               "<Primary><Shift>k",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("symbol-tree.search"));

@@ -261,12 +261,12 @@ gbp_buildui_workspace_addin_load (IdeWorkspaceAddin *addin,
 
   shortcuts = dzl_shortcut_controller_find (GTK_WIDGET (workspace));
   dzl_shortcut_controller_add_command_action (shortcuts,
-                                              "org.gnome.builder.buildui.build",
+                                              "org.alusus.alwarsha.buildui.build",
                                               "<Control>F7",
                                               DZL_SHORTCUT_PHASE_GLOBAL | DZL_SHORTCUT_PHASE_CAPTURE,
                                               "build-manager.build");
   dzl_shortcut_controller_add_command_action (shortcuts,
-                                              "org.gnome.builder.buildui.rebuild",
+                                              "org.alusus.alwarsha.buildui.rebuild",
                                               "<Control><Shift>F7",
                                               DZL_SHORTCUT_PHASE_GLOBAL | DZL_SHORTCUT_PHASE_CAPTURE,
                                               "build-manager.rebuild");

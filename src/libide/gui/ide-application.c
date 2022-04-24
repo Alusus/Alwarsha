@@ -113,7 +113,7 @@ ide_application_register_keybindings (IdeApplication *self)
 
   g_assert (IDE_IS_APPLICATION (self));
 
-  settings = g_settings_new ("org.gnome.builder.editor");
+  settings = g_settings_new ("org.alusus.alwarsha.editor");
   name = g_settings_get_string (settings, "keybindings");
   self->keybindings = ide_keybindings_new (name);
   g_settings_bind (settings, "keybindings", self->keybindings, "mode", G_SETTINGS_BIND_GET);
@@ -139,7 +139,7 @@ ide_application_startup (GApplication *app)
 
   char package_icons_dir[PATH_MAX]; // "<exe>/../lib/x86_64-linux-gnu/gnome-builder/plugins"
   strcpy(package_icons_dir, pathBuf);
-  strcat(package_icons_dir, "/share/gnome-builder/icons");
+  strcat(package_icons_dir, "/share/alwarsha/icons");
 
   IdeApplication *self = (IdeApplication *)app;
 
@@ -152,7 +152,7 @@ ide_application_startup (GApplication *app)
    */
   if (g_getenv ("DBUS_SESSION_BUS_ADDRESS") == NULL)
     g_warning ("%s",
-               _("GNOME Builder requires a session with D-Bus which was not found. Please set DBUS_SESSION_BUS_ADDRESS. Some features may not be available."));
+               _("Alwarsha requires a session with D-Bus which was not found. Please set DBUS_SESSION_BUS_ADDRESS. Some features may not be available."));
 
   G_APPLICATION_CLASS (ide_application_parent_class)->startup (app);
 
@@ -402,7 +402,7 @@ ide_application_init (IdeApplication *self)
   self->started_at = g_date_time_new_now_local ();
   self->workspace_type = IDE_TYPE_PRIMARY_WORKSPACE;
   self->workbenches = g_ptr_array_new_with_free_func (g_object_unref);
-  self->settings = g_settings_new ("org.gnome.builder");
+  self->settings = g_settings_new ("org.alusus.alwarsha");
   self->plugin_gresources = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                                    (GDestroyNotify)g_resource_unref);
 
@@ -434,7 +434,7 @@ _ide_application_new (gboolean     standalone,
   self = g_object_new (IDE_TYPE_APPLICATION,
                        "application-id", ide_get_application_id (),
                        "flags", flags,
-                       "resource-base-path", "/org/gnome/builder",
+                       "resource-base-path", "/org/alusus/alwarsha",
                        NULL);
 
   self->type = g_strdup (type);

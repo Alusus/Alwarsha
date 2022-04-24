@@ -20,7 +20,7 @@
 
     SPDX-License-Identifier: GPL-2.0-or-later
   -->
-  <interface name="org.gnome.Builder.Git.Progress">
+  <interface name="org.alusus.Alwarsha.Git.Progress">
     <property name="Fraction" type="d" access="readwrite"/>
     <property name="Message" type="s" access="readwrite"/>
   </interface>

@@ -58,7 +58,7 @@
     <file compressed="true">resources/po/POTFILES</file>
     <file compressed="true">resources/po/LINGUAS</file>
   </gresource>
-  <gresource prefix="/org/gnome/builder">
+  <gresource prefix="/org/alusus/alwarsha">
     <file compressed="true">icons/scalable/actions/pattern-legacy.svg</file>
     <file compressed="true">icons/scalable/actions/pattern-library.svg</file>
     <file compressed="true">icons/scalable/actions/pattern-grid.svg</file>

@@ -1005,7 +1005,7 @@ gbp_project_tree_addin_class_init (GbpProjectTreeAddinClass *klass)
 static void
 gbp_project_tree_addin_init (GbpProjectTreeAddin *self)
 {
-  self->settings = g_settings_new ("org.gnome.builder.project-tree");
+  self->settings = g_settings_new ("org.alusus.alwarsha.project-tree");
 
   g_signal_connect_object (self->settings,
                            "changed",

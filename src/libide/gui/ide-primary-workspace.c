@@ -83,7 +83,7 @@ ide_primary_workspace_context_set (IdeWorkspace *workspace,
   g_autofree gchar *title = NULL;
   g_autofree gchar *formatted = NULL;
   title = ide_context_dup_title (context);
-  formatted = g_strdup_printf (_("Builder — %s"), title);
+  formatted = g_strdup_printf (_("Alwarsha — %s"), title);
   gtk_label_set_text(self->project_title, formatted);
 
   // if (project_info)

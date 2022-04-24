@@ -40,7 +40,7 @@ struct _IdeApplication
 
   /* We keep a hashtable of GSettings for each of the loaded plugins
    * so that we can keep track if they are manually disabled using
-   * the org.gnome.builder.plugin gschema.
+   * the org.alusus.alwarsha.plugin gschema.
    */
   GHashTable *plugin_settings;
 
@@ -53,7 +53,7 @@ struct _IdeApplication
   /* D-Bus Proxy used to track color settings (Night Light) */
   GDBusProxy *color_proxy;
 
-  /* org.gnome.Builder GSettings object to avoid creating a bunch
+  /* org.alusus.Alwarsha GSettings object to avoid creating a bunch
    * of them (and ensuring it lives long enough to trigger signals
    * for various keys.
    */

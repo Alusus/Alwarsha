@@ -184,7 +184,7 @@ add_buttons (GbpEditorWorkspaceAddin *self,
                          "visible", TRUE,
                          NULL);
   self->tooltip1 = g_object_new (DZL_TYPE_SHORTCUT_TOOLTIP,
-                                 "command-id", "org.gnome.builder.editor.navigation-panel",
+                                 "command-id", "org.alusus.alwarsha.editor.navigation-panel",
                                  "widget", button,
                                  NULL);
   gtk_container_add (GTK_CONTAINER (self->panels_box), button);
@@ -201,7 +201,7 @@ add_buttons (GbpEditorWorkspaceAddin *self,
                          "visible", TRUE,
                          NULL);
   self->tooltip2 = g_object_new (DZL_TYPE_SHORTCUT_TOOLTIP,
-                                 "command-id", "org.gnome.builder.editor.utilities-panel",
+                                 "command-id", "org.alusus.alwarsha.editor.utilities-panel",
                                  "widget", button,
                                  NULL);
   gtk_container_add (GTK_CONTAINER (self->panels_box), button);

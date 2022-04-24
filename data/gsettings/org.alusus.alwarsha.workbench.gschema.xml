@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="org.gnome.builder.workbench" path="/org/gnome/builder/workbench/" gettext-domain="gnome-builder">
+  <schema id="org.alusus.alwarsha.workbench" path="/org/alusus/alwarsha/workbench/" gettext-domain="alwarsha">
     <key name="left-visible" type="b">
       <default>false</default>
       <summary>Show Left Panel</summary>

@@ -1,4 +1,4 @@
-@import url("resource:///org/gnome/builder/themes/shared.css");
+@import url("resource:///org/alusus/alwarsha/themes/shared.css");
 
 /* Darker grey accents used throughtout */
 @define-color theme_accent_color #858c98;

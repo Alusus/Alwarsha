@@ -286,7 +286,7 @@ class DocumentationDB(object):
     def open(self):
         "Open the DB (if needed)"
         if self.db is None:
-            doc_db_path = os.path.join(GLib.get_user_cache_dir(), 'gnome-builder', 'jedi', 'girdoc.db')
+            doc_db_path = os.path.join(GLib.get_user_cache_dir(), 'alwarsha', 'jedi', 'girdoc.db')
             try:
                 os.makedirs(os.path.dirname(doc_db_path))
             except:
@@ -621,7 +621,7 @@ class JediService(Ide.DBusService):
         self.queue = {}
         self.handler_id = 0
 
-    @Ide.DBusMethod('org.gnome.builder.plugins.jedi', in_signature='siis', out_signature='a(issass)', is_async=True)
+    @Ide.DBusMethod('org.alusus.alwarsha.plugins.jedi', in_signature='siis', out_signature='a(issass)', is_async=True)
     def CodeComplete(self, invocation, filename, line, column, content):
         if filename in self.queue:
             request = self.queue.pop(filename)
@@ -652,7 +652,7 @@ class JediWorker(GObject.Object, Ide.Worker):
                                       None,
                                       None,
                                       '/',
-                                      'org.gnome.builder.plugins.jedi',
+                                      'org.alusus.alwarsha.plugins.jedi',
                                       None)
 
 
@@ -660,8 +660,8 @@ class JediPreferences(GObject.Object, Ide.PreferencesAddin):
     def do_load(self, prefs):
         self.completion_id = prefs.add_switch(
                 'completion', 'providers',
-                'org.gnome.builder.extension-type', 'enabled',
-                '/org/gnome/builder/extension-types/jedi_plugin/IdeCompletionProvider/',
+                'org.alusus.alwarsha.extension-type', 'enabled',
+                '/org/alusus/alwarsha/extension-types/jedi_plugin/IdeCompletionProvider/',
                 None,
                 _("Suggest completions from Python"),
                 _("Use Jedi to provide completions for the Python language"),

@@ -29,13 +29,13 @@
 #define I_(s) (g_intern_static_string(s))
 
 static DzlShortcutEntry workspace_shortcuts[] = {
-  { "org.gnome.builder.workspace.show-menu",
+  { "org.alusus.alwarsha.workspace.show-menu",
     0, NULL,
     N_("Window shortcuts"),
     N_("General"),
     N_("Show window menu") },
 
-  { "org.gnome.builder.workspace.fullscreen",
+  { "org.alusus.alwarsha.workspace.fullscreen",
     0, NULL,
     N_("Window shortcuts"),
     N_("General"),
@@ -50,13 +50,13 @@ _ide_header_bar_init_shortcuts (IdeHeaderBar *self)
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.workspace.show-menu"),
+                                              I_("org.alusus.alwarsha.workspace.show-menu"),
                                               "F10",
                                               DZL_SHORTCUT_PHASE_BUBBLE | DZL_SHORTCUT_PHASE_GLOBAL,
                                               I_("win.show-menu"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.workspace.fullscreen"),
+                                              I_("org.alusus.alwarsha.workspace.fullscreen"),
                                               "F11",
                                               DZL_SHORTCUT_PHASE_DISPATCH | DZL_SHORTCUT_PHASE_GLOBAL,
                                               I_("win.fullscreen"));

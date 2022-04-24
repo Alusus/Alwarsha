@@ -550,7 +550,7 @@ ide_debugger_breakpoints_view_init (IdeDebuggerBreakpointsView *self)
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self->tree_view));
 
   dzl_shortcut_controller_add_command_callback (controller,
-                                                "org.gnome.builder.debugger.delete-breakpoint",
+                                                "org.alusus.alwarsha.debugger.delete-breakpoint",
                                                 "Delete",
                                                 DZL_SHORTCUT_PHASE_BUBBLE,
                                                 (GtkCallback) ide_debugger_breakpoints_view_delete_breakpoint,

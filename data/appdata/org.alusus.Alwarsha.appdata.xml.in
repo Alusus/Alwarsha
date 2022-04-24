@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2014 Igor Gnatenko <ignatenko@src.gnome.org> -->
 <component type="desktop-application">
-  <id>org.gnome.Builder.desktop</id>
+  <id>org.alusus.Alwarsha.desktop</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0+ and GPL-2.0+ and LGPL-3.0+ and LGPL-2.0+ and MIT</project_license>
-  <name>Builder</name>
-  <summary>An IDE for GNOME</summary>
+  <name>Alwarsha</name>
+  <summary>An multi-purpose IDE</summary>
   <developer_name>Christian Hergert, et al.</developer_name>
 
   <description>
     <p>
+      Alwarsha is a fork of Gnome Builder that makes it less specific to Gnome
+      and adds support for Alusus language.
       Builder is an actively developed Integrated Development Environment for
       GNOME. It combines integrated support for essential GNOME technologies
       such as GTK+, GLib, and GNOME APIs with features that any developer will
@@ -67,7 +69,7 @@
       <image width="2400" height="1350">https://gitlab.gnome.org/GNOME/gnome-builder/raw/master/data/appdata/06-debugger.png</image>
     </screenshot>
   </screenshots>
-  <launchable type="desktop-id">org.gnome.Builder.desktop</launchable>
+  <launchable type="desktop-id">org.alusus.Alwarsha.desktop</launchable>
   <url type="homepage">https://wiki.gnome.org/Apps/Builder</url>
   <url type="bugtracker">https://gitlab.gnome.org/GNOME/gnome-builder/issues</url>
   <url type="donation">http://www.gnome.org/friends/</url>
@@ -83,7 +85,7 @@
   </kudos>
 
   <update_contact>chergert@gnome.org</update_contact>
-  <translation type="gettext">gnome-builder</translation>
+  <translation type="gettext">alwarsha</translation>
 
   <releases>
     <release version="40.2" date="2021-05-05">

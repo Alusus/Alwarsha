@@ -130,7 +130,7 @@ ide_primary_workspace_actions_update_dependencies (GSimpleAction *action,
 
   notif = ide_notification_new ();
   ide_notification_set_title (notif, _("Updating Dependencies…"));
-  ide_notification_set_body (notif, _("Builder is updating your projects configured dependencies."));
+  ide_notification_set_body (notif, _("Alwarsha is updating your projects configured dependencies."));
   ide_notification_set_icon_name (notif, "software-update-available-symbolic");
   ide_notification_set_has_progress (notif, TRUE);
   ide_notification_set_progress_is_imprecise (notif, TRUE);

@@ -1,5 +1,5 @@
-plugindir = join_paths(get_option('libdir'), 'gnome-builder/plugins')
-plugindatadir = join_paths(get_option('datadir'), 'gnome-builder/plugins')
+plugindir = join_paths(get_option('libdir'), 'alwarsha/plugins')
+plugindatadir = join_paths(get_option('datadir'), 'alwarsha/plugins')
 
 plugins_sources = []
 plugins_include_directories = []

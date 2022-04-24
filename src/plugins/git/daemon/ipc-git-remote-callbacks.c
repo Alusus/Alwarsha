@@ -98,7 +98,7 @@ ipc_git_remote_callbacks_real_credentials (GgitRemoteCallbacks  *callbacks,
   g_set_error (error,
                G_IO_ERROR,
                G_IO_ERROR_NOT_SUPPORTED,
-               _("Builder failed to provide appropriate credentials when cloning the repository."));
+               _("Alwarsha failed to provide appropriate credentials when cloning the repository."));
 
   return NULL;
 }

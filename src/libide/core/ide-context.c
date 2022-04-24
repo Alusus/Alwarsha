@@ -745,7 +745,7 @@ ide_context_build_filename (IdeContext  *self,
  * ide_context_ref_project_settings:
  * @self: a #IdeContext
  *
- * Gets an org.gnome.builder.project #GSettings.
+ * Gets an org.alusus.alwarsha.project #GSettings.
  *
  * This creates a new #GSettings instance for the project.
  *
@@ -761,10 +761,10 @@ ide_context_ref_project_settings (IdeContext *self)
   g_return_val_if_fail (IDE_IS_CONTEXT (self), NULL);
 
   ide_object_lock (IDE_OBJECT (self));
-  path = g_strdup_printf ("/org/gnome/builder/projects/%s/", self->project_id);
+  path = g_strdup_printf ("/org/alusus/alwarsha/projects/%s/", self->project_id);
   ide_object_unlock (IDE_OBJECT (self));
 
-  return g_settings_new_with_path ("org.gnome.builder.project", path);
+  return g_settings_new_with_path ("org.alusus.alwarsha.project", path);
 }
 
 /**

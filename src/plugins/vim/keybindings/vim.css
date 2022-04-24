@@ -74,7 +74,7 @@
  *   -- Christian
  */
 
-@import url("resource:///org/gnome/builder/keybindings/shared.css");
+@import url("resource:///org/alusus/alwarsha/keybindings/shared.css");
 
 @binding-set builder-vim-source-view
 {

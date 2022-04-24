@@ -314,7 +314,7 @@ static GVariant *
 get_parse_options (void)
 {
   if (G_UNLIKELY (gca_settings == NULL))
-    gca_settings = g_settings_new ("org.gnome.builder.gnome-code-assistance");
+    gca_settings = g_settings_new ("org.alusus.alwarsha.gnome-code-assistance");
 
   if (g_settings_get_boolean (gca_settings, "enable-pylint"))
     {

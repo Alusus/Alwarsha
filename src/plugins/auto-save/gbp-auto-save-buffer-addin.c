@@ -122,7 +122,7 @@ gbp_auto_save_buffer_addin_load (IdeBufferAddin *addin,
   g_assert (IDE_IS_BUFFER (buffer));
 
   self->buffer = buffer;
-  self->settings = g_settings_new ("org.gnome.builder.editor");
+  self->settings = g_settings_new ("org.alusus.alwarsha.editor");
 
   self->auto_save = g_settings_get_boolean (self->settings, "auto-save");
   self->auto_save_timeout = g_settings_get_int (self->settings, "auto-save-timeout");

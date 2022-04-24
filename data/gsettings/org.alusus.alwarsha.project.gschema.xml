@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <schema id="org.gnome.builder.project" gettext-domain="gnome-builder">
+  <schema id="org.alusus.alwarsha.project" gettext-domain="alwarsha">
 
     <key name="config-id" type="s">
       <default>"default"</default>

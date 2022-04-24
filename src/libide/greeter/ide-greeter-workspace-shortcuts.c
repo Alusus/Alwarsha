@@ -37,13 +37,13 @@ _ide_greeter_workspace_init_shortcuts (IdeGreeterWorkspace *self)
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.greeter.close"),
+                                              I_("org.alusus.alwarsha.greeter.close"),
                                               "<Primary>w",
                                               DZL_SHORTCUT_PHASE_DISPATCH,
                                               I_("win.close"));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.greeter.back-button"),
+                                              I_("org.alusus.alwarsha.greeter.back-button"),
                                               "<alt>Left",
                                               DZL_SHORTCUT_PHASE_DISPATCH,
                                               I_("win.surface('sections')"));

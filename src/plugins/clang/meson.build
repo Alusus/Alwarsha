@@ -88,6 +88,6 @@ executable('test-daemon', ['test-daemon.c'],
                pie: true,
 )
 
-install_data(['org.gnome.builder.clang.gschema.xml'], install_dir: schema_dir)
+install_data(['org.alusus.alwarsha.clang.gschema.xml'], install_dir: schema_dir)
 
 endif

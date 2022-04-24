@@ -39,7 +39,7 @@
       </item>
       <item>
         <attribute name="id">ide-primary-workspace-menu-about</attribute>
-        <attribute name="label" translatable="yes">About Builder</attribute>
+        <attribute name="label" translatable="yes">About Alwarsha</attribute>
         <attribute name="action">app.about</attribute>
       </item>
     </section>

@@ -82,11 +82,11 @@ ide_extension_adapter_get_settings (IdeExtensionAdapter *self,
   g_assert (IDE_IS_MAIN_THREAD ());
   g_assert (IDE_IS_EXTENSION_ADAPTER (self));
 
-  path = g_strdup_printf ("/org/gnome/builder/extension-types/%s/%s/",
+  path = g_strdup_printf ("/org/alusus/alwarsha/extension-types/%s/%s/",
                           peas_plugin_info_get_module_name (plugin_info),
                           g_type_name (self->interface_type));
 
-  return g_settings_new_with_path ("org.gnome.builder.extension-type", path);
+  return g_settings_new_with_path ("org.alusus.alwarsha.extension-type", path);
 }
 
 static void

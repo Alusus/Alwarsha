@@ -108,7 +108,7 @@ ide_notification_addin_notify (IdeNotificationAddin *self,
       msg_body = g_strdup_printf (_("Project “%s” failed to build"), project_name);
     }
 
-  icon = g_themed_icon_new ("org.gnome.Builder-symbolic");
+  icon = g_themed_icon_new ("org.alusus.Alwarsha-symbolic");
 
   notification = g_notification_new (msg_title);
   g_notification_set_body (notification, msg_body);

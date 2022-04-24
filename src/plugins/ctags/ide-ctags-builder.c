@@ -333,7 +333,7 @@ ide_ctags_builder_build_async (IdeTagsBuilder      *builder,
       IDE_EXIT;
     }
 
-  settings = g_settings_new ("org.gnome.builder.code-insight");
+  settings = g_settings_new ("org.gnomealusus.alwarsha.code-insight");
 
   task_data = g_slice_new0 (BuildTaskData);
   task_data->ctags = g_settings_get_string (settings, "ctags-path");

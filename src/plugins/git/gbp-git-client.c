@@ -95,7 +95,7 @@ gbp_git_client_subprocess_spawned (GbpGitClient            *self,
   self->service = ipc_git_service_proxy_new_sync (self->connection,
                                                   G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES,
                                                   NULL,
-                                                  "/org/gnome/Builder/Git",
+                                                  "/org/alusus/Alwarsha/Git",
                                                   NULL,
                                                   NULL);
 

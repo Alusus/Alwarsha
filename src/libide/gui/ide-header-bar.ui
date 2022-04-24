@@ -65,11 +65,11 @@
     </child>
   </template>
   <object class="DzlShortcutTooltip" id="fullscreen_tooltip">
-    <property name="command-id">org.gnome.builder.workspace.fullscreen</property>
+    <property name="command-id">org.alusus.alwarsha.workspace.fullscreen</property>
     <property name="widget">fullscreen_button</property>
   </object>
   <object class="DzlShortcutTooltip" id="menu_tooltip">
-    <property name="command-id">org.gnome.builder.workspace.show-menu</property>
+    <property name="command-id">org.alusus.alwarsha.workspace.show-menu</property>
     <property name="widget">menu_button</property>
   </object>
 </interface>

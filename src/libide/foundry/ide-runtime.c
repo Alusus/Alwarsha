@@ -158,7 +158,7 @@ ide_runtime_real_prepare_configuration (IdeRuntime *self,
       project_id = ide_context_dup_project_id (context);
 
       install_path = g_build_filename (g_get_user_cache_dir (),
-                                       "gnome-builder",
+                                       "alwarsha",
                                        "install",
                                        project_id,
                                        priv->id,

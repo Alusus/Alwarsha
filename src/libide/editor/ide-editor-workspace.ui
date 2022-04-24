@@ -62,7 +62,7 @@
   </template>
   <object class="DzlShortcutTooltip" id="search_tooltip">
     <property name="title" translatable="yes">Search your project</property>
-    <property name="command-id">org.gnome.builder.workspace.global-search</property>
+    <property name="command-id">org.alusus.alwarsha.workspace.global-search</property>
     <property name="widget">search_button</property>
   </object>
 </interface>

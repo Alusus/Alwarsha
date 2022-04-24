@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="org.gnome.builder.extension-type" gettext-domain="gnome-builder">
+  <schema id="org.alusus.alwarsha.extension-type" gettext-domain="alwarsha">
     <key name="enabled" type="b">
       <default>true</default>
       <summary>Enabled</summary>

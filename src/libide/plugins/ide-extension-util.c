@@ -113,10 +113,10 @@ ide_extension_util_can_use_plugin (PeasEngine     *engine,
    * two modules using different plugin loaders could have the same module
    * name. But we can enforce this issue socially.
    */
-  path = g_strdup_printf ("/org/gnome/builder/extension-types/%s/%s/",
+  path = g_strdup_printf ("/org/alusus/alwarsha/extension-types/%s/%s/",
                           peas_plugin_info_get_module_name (plugin_info),
                           g_type_name (interface_type));
-  settings = g_settings_new_with_path ("org.gnome.builder.extension-type", path);
+  settings = g_settings_new_with_path ("org.alusus.alwarsha.extension-type", path);
   return g_settings_get_boolean (settings, "enabled");
 }
 

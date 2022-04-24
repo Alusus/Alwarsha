@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <schema id="org.gnome.builder.clang" path="/org/gnome/builder/plugins/clang/" gettext-domain="gnome-builder">
+  <schema id="org.alusus.alwarsha.clang" path="/org/alusus/alwarsha/plugins/clang/" gettext-domain="alwarsha">
     <key name="complete-parens" type="b">
       <default>true</default>
       <summary>Complete parentheses</summary>

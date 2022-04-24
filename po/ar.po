@@ -1,11 +1,11 @@
-# Ararbic translation for gnome-builder.
+# Arabic translation for gnome-builder.
 # Copyright (C) 2022 gnome-builder's COPYRIGHT HOLDER
 # This file is distributed under the same license as the gnome-builder package.
 # sleman alr <sleman.alrstum231@gmail.com>2021.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gnome-builder master\n"
+"Project-Id-Version: alwarsha master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-builder/issues\n"
 "POT-Creation-Date: 2021-08-19 21:08+0000\n"
 "PO-Revision-Date: 2021-08-28 10:58+0100\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Gtranslator 40.0\n"
 "X-DL-Team: ar\n"
-"X-DL-Module: gnome-builder\n"
+"X-DL-Module: alwarsha\n"
 "X-DL-Branch: master\n"
 "X-DL-Domain: po\n"
 "X-DL-State: Translating\n"
@@ -28,13 +28,13 @@ msgstr ""
 #: data/style-schemes/builder.style-scheme.xml:22
 #: src/libide/gui/ide-preferences-builtin.c:140 src/main.c:234
 #: src/plugins/newcomers/gbp-newcomers-section.ui:47
-msgid "Builder"
-msgstr "الباني"
+msgid "Alwarsha"
+msgstr "الورشة"
 
 #: data/appdata/org.gnome.Builder.appdata.xml.in:8
 #: src/libide/gui/ide-application-actions.c:141
-msgid "An IDE for GNOME"
-msgstr "محرر لجنوم"
+msgid "An IDE with support for Alusus Language"
+msgstr "محرر لتطوير البرمجيات مع دعم للغة الاسس"
 
 #: data/appdata/org.gnome.Builder.appdata.xml.in:9
 msgid "Christian Hergert, et al."
@@ -483,8 +483,8 @@ msgid "Projects directory"
 msgstr "مجلد المشاريع"
 
 #: data/gsettings/org.gnome.builder.gschema.xml:34
-msgid "Directory for all Builder projects."
-msgstr "مجلد لكل مشاريع الباني."
+msgid "Directory for all Alwarsha projects."
+msgstr "مجلد لكل مشاريع الورشة."
 
 #: data/gsettings/org.gnome.builder.gschema.xml:38
 msgid "Restore Previous Files"
@@ -507,8 +507,8 @@ msgid "Clear build caches at startup"
 msgstr "نظف ملفات البناء المؤقتة عند التشغيل"
 
 #: data/gsettings/org.gnome.builder.gschema.xml:49
-msgid "If enabled, Builder will clear build caches upon startup."
-msgstr "عند التفعيل سيقوم الباني بتنظيف ملفات البناء المؤقتة عند التشغيل"
+msgid "If enabled, Alwarsha will clear build caches upon startup."
+msgstr "عند التفعيل ستقوم الورشة بتنظيف ملفات البناء المؤقتة عند التشغيل"
 
 #: data/gsettings/org.gnome.builder.plugin.gschema.xml:5
 msgid "Plugin enabled"
@@ -606,8 +606,8 @@ msgid "The height in pixel units of the bottom panel."
 msgstr "الارتفاع بالبكسل للوحة السفلى"
 
 #: data/org.gnome.Builder.desktop.in.in:4
-msgid "Build software for GNOME"
-msgstr "بناء برمجيات لجنوم"
+msgid "Build software using Alusus Language"
+msgstr "طوّر برامجًا باستخدام لغة الأسس"
 
 #. Translators: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
 #: data/org.gnome.Builder.desktop.in.in:14
@@ -1073,10 +1073,10 @@ msgstr "_أعد التحميل"
 
 #: src/libide/editor/ide-editor-page.ui:64
 msgid ""
-"Builder has discovered that this file has been modified externally. Would "
+"Alwarsha has discovered that this file has been modified externally. Would "
 "you like to reload the file?"
 msgstr ""
-"استشعر الباني تعديلاً خارجيًا على هذا الملف. هل ترغب بإعادة تحميله؟"
+"استشعرت الورشة تعديلاً خارجيًا على هذا الملف. هل ترغب بإعادة تحميله؟"
 
 #: src/libide/editor/ide-editor-search-bar.c:180
 msgid "Regular expressions"
@@ -1101,10 +1101,16 @@ msgstr "%u من %u"
 msgid "_Replace"
 msgstr "استبدل_"
 
+msgid "Replace"
+msgstr "استبدل"
+
 #: src/libide/editor/ide-editor-search-bar.ui:128
 #| msgid "Replace All"
 msgid "Replace _All"
-msgstr "استبدل _كل"
+msgstr "استبدل ال_كل"
+
+msgid "Replace All"
+msgstr "استبدل الكل"
 
 #: src/libide/editor/ide-editor-search-bar.ui:148
 msgid "Switch between Search and Search-and-Replace"
@@ -1560,8 +1566,8 @@ msgstr "كل أنواع المشاريع"
 #: src/libide/greeter/ide-greeter-workspace.c:219
 #: src/libide/gui/ide-workbench.c:315 src/libide/gui/ide-workbench.c:839
 #, c-format
-msgid "Builder — %s"
-msgstr "الباني — %s"
+msgid "Alwarsha — %s"
+msgstr "الورشة — %s"
 
 #: src/libide/greeter/ide-greeter-workspace.c:327
 msgid "Failed to load the project"
@@ -1636,8 +1642,8 @@ msgstr "مساعدة"
 
 #: src/libide/gui/gtk/menus.ui:42 src/plugins/editor/gtk/menus.ui:54
 #: src/plugins/greeter/gtk/menus.ui:40
-msgid "About Builder"
-msgstr "عن الباني"
+msgid "About Alwarsha"
+msgstr "عن الورشة"
 
 #: src/libide/gui/gtk/menus.ui:49 src/plugins/editor/gtk/menus.ui:62
 msgid "_Quit"
@@ -1648,12 +1654,12 @@ msgid "Run Options"
 msgstr "خيارات التنفيذ"
 
 #: src/libide/gui/ide-application-actions.c:78
-msgid "Builder — Preferences"
-msgstr "الباني — تفضيلات"
+msgid "Alwarsha — Preferences"
+msgstr "الورشة — تفضيلات"
 
 #: src/libide/gui/ide-application-actions.c:147
-msgid "GNOME Builder"
-msgstr "باني جنوم"
+# msgid "Alwarsha"
+# msgstr "الورشة"
 
 #: src/libide/gui/ide-application-actions.c:149
 msgid "translator-credits"
@@ -1661,8 +1667,8 @@ msgstr ""
 "Sleman Alrstum <sleman.alrstum231@gmail.com>"
 
 #: src/libide/gui/ide-application-actions.c:153
-msgid "Learn more about GNOME Builder"
-msgstr "تعلم المزيد عن باني جنوم"
+msgid "Learn more about Alwarsha"
+msgstr "تعلم المزيد عن الورشة"
 
 #: src/libide/gui/ide-application-actions.c:156
 msgid "Funded By"
@@ -1708,7 +1714,7 @@ msgstr "أظهر نافذة الاختصارات"
 
 #: src/libide/gui/ide-application.c:136
 msgid ""
-"GNOME Builder requires a session with D-Bus which was not found. Please set "
+"Alwarsha requires a session with D-Bus which was not found. Please set "
 "DBUS_SESSION_BUS_ADDRESS. Some features may not be available."
 msgstr ""
 "باني جنوم يتطلب جلسة مع D-Bus لكنها غير موجودة. يرجى تحديد قيمة لـ"
@@ -1836,8 +1842,8 @@ msgid "Dark Mode"
 msgstr "الوضع الداكن"
 
 #: src/libide/gui/ide-preferences-builtin.c:101
-msgid "Whether Builder should use a dark theme"
-msgstr "تحديد ما إن كان على الباني استخدام الوضع الداكن"
+msgid "Whether Alwarsha should use a dark theme"
+msgstr "تحديد ما إن كان على الورشة استخدام الوضع الداكن"
 
 #: src/libide/gui/ide-preferences-builtin.c:101
 msgid "dark theme"
@@ -2248,8 +2254,8 @@ msgid "Clear build cache at startup"
 msgstr "تنظيف ذاكرة البناء المخبئية عند البدء"
 
 #: src/libide/gui/ide-preferences-builtin.c:409
-msgid "Expired caches will be purged when Builder is started"
-msgstr "سيتم حذف الذاكرة الخبيئة منتهية الصلاحية عند تشغيل الباني"
+msgid "Expired caches will be purged when Alwarsha is started"
+msgstr "سيتم حذف الذاكرة الخبيئة منتهية الصلاحية عند تشغيل الورشة"
 
 #: src/libide/gui/ide-preferences-builtin.c:411
 msgid "Network"
@@ -2325,8 +2331,8 @@ msgid "Updating Dependencies…"
 msgstr "تحديث الاعتماديات…"
 
 #: src/libide/gui/ide-primary-workspace-actions.c:133
-msgid "Builder is updating your projects configured dependencies."
-msgstr "الباني يقوم بتحديث اعتماديات مشاريعك المهيأة"
+msgid "Alwarsha is updating your projects configured dependencies."
+msgstr "الورشة تقوم بتحديث اعتماديات مشاريعك المهيأة"
 
 #: src/libide/gui/ide-run-button.c:168
 msgid "Stop running"
@@ -3051,8 +3057,8 @@ msgid "unversioned"
 msgstr "غير مرقم"
 
 #: src/main.c:147
-msgid "Run a new instance of Builder"
-msgstr "شغل نسخة إضافية من الباني"
+msgid "Run a new instance of Alwarsha"
+msgstr "شغل نسخة إضافية من الورشة"
 
 #: src/plugins/autotools/ide-autotools-makecache-stage.c:198
 msgid "Building cache…"
@@ -3699,8 +3705,8 @@ msgid "GIMP palette"
 msgstr "لوحة GIMP"
 
 #: src/plugins/color-picker/gb-color-picker-prefs.c:719
-msgid "GNOME Builder palette"
-msgstr "لوحة باني جينوم"
+msgid "Alwarsha palette"
+msgstr "لوحة الورشة"
 
 #: src/plugins/color-picker/gsettings/org.gnome.builder.plugins.color_picker_plugin.gschema.xml:13
 msgid "HSV visibility"
@@ -4665,10 +4671,10 @@ msgstr "تثبيت_"
 
 #: src/plugins/flatpak/gbp-flatpak-install-dialog.ui:49
 msgid ""
-"Builder needs to install the following software development kits to build "
+"Alwarsha needs to install the following software development kits to build "
 "your project."
 msgstr ""
-"يحتاج الباني إلى تثبيت عدد تطوير البرمجيات التالية لبناء "
+"تحتاج الورشة إلى تثبيت عدد تطوير البرمجيات التالية لبناء "
 "مشروعك."
 
 #: src/plugins/flatpak/gbp-flatpak-install-dialog.ui:93
@@ -4764,10 +4770,10 @@ msgstr "ألغيت العملية"
 #: src/plugins/git/daemon/ipc-git-remote-callbacks.c:138
 #, c-format
 msgid ""
-"Builder failed to provide appropriate credentials when cloning the "
+"Alwarsha failed to provide appropriate credentials when cloning the "
 "repository."
 msgstr ""
-"فشل الباني في توفير معطيات المصادقة المناسبة عند استنساخ "
+"فشلت الورشة في توفير معطيات المصادقة المناسبة عند استنساخ "
 "المستودع."
 
 #: src/plugins/git/daemon/ipc-git-repository-impl.c:608
@@ -5053,6 +5059,9 @@ msgstr "_جد في %s"
 #| msgid "Replace With"
 msgid "_Replace in %s"
 msgstr "ا_ستبدل في %s"
+
+msgid "Replace With"
+msgstr "استبدل بـ"
 
 #: src/plugins/grep/gbp-grep-panel.ui:5 src/plugins/grep/gbp-grep-popover.ui:12
 msgid "Find in Files"
@@ -5400,8 +5409,8 @@ msgid "A simple GNOME 3 application to access remote or virtual systems"
 msgstr "تطبيق جنوم 3 بسيط للوصول إلى الأنظمة الافتراضية أو البعيدة"
 
 #: src/plugins/newcomers/gbp-newcomers-section.ui:48
-msgid "An IDE for writing GNOME-based software"
-msgstr "محرر لتطوير برمجيات جنوم"
+# msgid "An IDE with support for Alusus Language"
+# msgstr "محرر لتطوير البرمجيات مع دعم للغة الاسس"
 
 #: src/plugins/newcomers/gbp-newcomers-section.ui:58
 msgid "Calendar"
@@ -6537,12 +6546,12 @@ msgstr "ابحث ضمن الإعدادات"
 #~ msgid "Missing system dependencies"
 #~ msgstr "يفتقد اعتماديات للنظام"
 
-#~ msgid ""
-#~ "The “flatpak-builder” program is necessary for building Flatpak-based "
-#~ "applications. Builder can install it for you."
-#~ msgstr ""
-#~ "ضروري لبناء التطبيقات التي تعتمد على “flatpak-builder” بنامج ال"
-#~ "يمكن للبناني  تنصيبه لك Flatpak"
+msgid ""
+"The “flatpak-builder” program is necessary for building Flatpak-based "
+"applications. Alwarsha can install it for you."
+msgstr ""
+"برنامج “flatpak-builder” ضروري لبناء التطبيقات التي تعتمد على "
+"يمكن للورشة  تنصيبه لك Flatpak"
 
 #~ msgid "Suggest completions from Python"
 #~ msgstr "Python اقتراح الإكمال من"

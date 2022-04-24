@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="org.gnome.builder.build" path="/org/gnome/builder/build/" gettext-domain="gnome-builder">
+  <schema id="org.alusus.alwarsha.build" path="/org/alusus/alwarsha/build/" gettext-domain="alwarsha">
     <key name="parallel" type="i">
       <default>-1</default>
       <range min="-1" max="512"/>

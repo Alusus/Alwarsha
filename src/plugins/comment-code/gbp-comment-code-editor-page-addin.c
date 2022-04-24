@@ -365,13 +365,13 @@ gbp_comment_code_editor_page_addin_comment_action (GSimpleAction *action,
 }
 
 static const DzlShortcutEntry comment_code_shortcut_entries[] = {
-  { "org.gnome.builder.editor-page.comment-code",
+  { "org.alusus.alwarsha.editor-page.comment-code",
     0, NULL,
     N_("Editor shortcuts"),
     N_("Editing"),
     N_("Comment the code") },
 
-  { "org.gnome.builder.editor-page.uncomment-code",
+  { "org.alusus.alwarsha.editor-page.uncomment-code",
     0, NULL,
     N_("Editor shortcuts"),
     N_("Editing"),
@@ -405,13 +405,13 @@ gbp_comment_code_editor_page_addin_load (IdeEditorPageAddin *addin,
 
   controller = dzl_shortcut_controller_find (GTK_WIDGET (view));
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.editor-page.comment-code",
+                                              "org.alusus.alwarsha.editor-page.comment-code",
                                               I_("<primary>m"),
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               "comment-code.comment-code::0");
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.editor-page.uncomment-code",
+                                              "org.alusus.alwarsha.editor-page.uncomment-code",
                                               I_("<primary><shift>m"),
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               "comment-code.comment-code::1");

@@ -46,7 +46,7 @@ ipc_git_config_impl_handle_read_key (IpcGitConfig          *config,
   if (!(snapshot = ggit_config_snapshot (self->config, &error)) ||
       !(value = ggit_config_get_string (snapshot, key, &error)))
     g_dbus_method_invocation_return_dbus_error (invocation,
-                                                "org.gnome.Builder.Git.Config.Error.NotFound",
+                                                "org.alusus.Alwarsha.Git.Config.Error.NotFound",
                                                 "No such key");
   else
     ipc_git_config_complete_read_key (config, invocation, value);

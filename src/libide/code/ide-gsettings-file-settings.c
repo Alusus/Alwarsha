@@ -125,7 +125,7 @@ ide_gsettings_file_settings_apply (IdeGsettingsFileSettings *self)
   project_id = ide_context_dup_project_id (context);
   relative_path = g_strdup_printf ("/editor/language/%s/", lang_id);
   self->language_settings = ide_settings_new (project_id,
-                                              "org.gnome.builder.editor.language",
+                                              "org.alusus.alwarsha.editor.language",
                                               relative_path,
                                               FALSE);
 

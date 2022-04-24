@@ -318,7 +318,7 @@ ide_workbench_notify_context_title (IdeWorkbench *self,
   g_assert (IDE_IS_CONTEXT (context));
 
   title = ide_context_dup_title (context);
-  formatted = g_strdup_printf (_("Builder — %s"), title);
+  formatted = g_strdup_printf (_("Alwarsha — %s"), title);
   ide_workbench_foreach_workspace (self,
                                    (GtkCallback)gtk_window_set_title,
                                    formatted);
@@ -843,7 +843,7 @@ ide_workbench_add_workspace (IdeWorkbench *self,
       g_autofree gchar *formatted = NULL;
 
       title = ide_context_dup_title (self->context);
-      formatted = g_strdup_printf (_("Builder — %s"), title);
+      formatted = g_strdup_printf (_("Alwarsha — %s"), title);
       gtk_window_set_title (GTK_WINDOW (workspace), formatted);
     }
 

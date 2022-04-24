@@ -3,7 +3,7 @@
   <gresource prefix="/plugins/snippets">
     <file>snippets.plugin</file>
   </gresource>
-  <gresource prefix="/org/gnome/builder">
+  <gresource prefix="/org/alusus/alwarsha">
     <!-- compressing these would mean we waste heap to maintain internal
          pointers, so we don't compress them. -->
     <file>snippets/chdr.snippets</file>

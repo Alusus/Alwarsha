@@ -20,7 +20,7 @@
 
     SPDX-License-Identifier: GPL-2.0-or-later
   -->
-  <interface name="org.gnome.Builder.Git.ChangeMonitor">
+  <interface name="org.alusus.Alwarsha.Git.ChangeMonitor">
     <property name="path" type="ay" access="read"/>
     <signal name="Closed"/>
     <method name="UpdateContent">

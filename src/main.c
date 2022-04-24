@@ -145,7 +145,7 @@ early_params_check (gint       *argc,
   g_autoptr(GOptionContext) context = NULL;
   g_autoptr(GOptionGroup) gir_group = NULL;
   GOptionEntry entries[] = {
-    { "standalone", 's', 0, G_OPTION_ARG_NONE, standalone, N_("Run a new instance of Builder") },
+    { "standalone", 's', 0, G_OPTION_ARG_NONE, standalone, N_("Run a new instance of Alwarsha") },
     { "verbose", 'v', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, verbose_cb },
     { "plugin", 0, 0, G_OPTION_ARG_STRING, plugin },
     { "type", 0, 0, G_OPTION_ARG_STRING, type },
@@ -246,12 +246,12 @@ main (gint   argc,
 
   /* Setup various application name/id defaults. */
   g_set_prgname (ide_get_program_name ());
-  g_set_application_name (_("Builder"));
+  g_set_application_name (_("Alwarsha"));
 
 #if 0
   /* TODO: allow support for parallel nightly install */
 #ifdef DEVELOPMENT_BUILD
-  ide_set_application_id ("org.gnome.Builder-Devel");
+  ide_set_application_id ("org.alusus.Alwarsha-Devel");
 #endif
 #endif
 
@@ -265,7 +265,7 @@ main (gint   argc,
   early_params_check (&argc, &argv, &standalone, &type, &plugin, &dbus_address);
 
   /* Log some info so it shows up in logs */
-  g_message ("GNOME Builder %s starting with ABI %s",
+  g_message ("Alwarsha %s starting with ABI %s",
              PACKAGE_VERSION, PACKAGE_ABI_S);
 
   /* Make sure $HOME is not a symlink, as that can cause issues with

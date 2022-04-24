@@ -97,7 +97,7 @@ static const GActionEntry actions[] = {
 };
 
 static const DzlShortcutEntry spellchecker_shortcut_entry[] = {
-  { "org.gnome.builder.editor-page.spellchecker",
+  { "org.alusus.alwarsha.editor-page.spellchecker",
     0, NULL,
     N_("Editor shortcuts"),
     N_("Editing"),
@@ -163,7 +163,7 @@ gbp_spell_editor_page_addin_load (IdeEditorPageAddin *addin,
 
   controller = dzl_shortcut_controller_find (GTK_WIDGET (view));
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.editor-page.spellchecker",
+                                              "org.alusus.alwarsha.editor-page.spellchecker",
                                               I_("<shift>F7"),
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               "spellcheck.spellcheck");

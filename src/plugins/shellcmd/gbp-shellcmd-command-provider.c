@@ -185,7 +185,7 @@ on_model_keybindings_changed_cb (GbpShellcmdCommandProvider *self,
       if (id == NULL || shortcut == NULL || shortcut[0] == 0)
         continue;
 
-      dzlcmdid = g_strdup_printf ("org.gnome.builder.plugins.shellcmd.%s", id);
+      dzlcmdid = g_strdup_printf ("org.alusus.alwarsha.plugins.shellcmd.%s", id);
       dzlcmdaction = g_strdup_printf ("win.command('%s')", id);
 
       for (guint j = 0; j < self->controllers->len; j++)

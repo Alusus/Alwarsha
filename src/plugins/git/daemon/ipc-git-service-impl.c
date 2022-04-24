@@ -125,7 +125,7 @@ ipc_git_service_impl_handle_open (IpcGitService         *service,
 
   conn = g_dbus_method_invocation_get_connection (invocation);
   uuid = g_dbus_generate_guid ();
-  obj_path = g_strdup_printf ("/org/gnome/Builder/Repository/%s", uuid);
+  obj_path = g_strdup_printf ("/org/alusus/Alwarsha/Repository/%s", uuid);
   g_hash_table_insert (self->repos, g_object_ref (repository), g_strdup (uuid));
 
   g_signal_connect_object (repository,
@@ -259,7 +259,7 @@ ipc_git_service_impl_handle_load_config (IpcGitService         *service,
 
   conn = g_dbus_method_invocation_get_connection (invocation);
   uuid = g_dbus_generate_guid ();
-  obj_path = g_strdup_printf ("/org/gnome/Builder/Config/%s", uuid);
+  obj_path = g_strdup_printf ("/org/alusus/Alwarsha/Config/%s", uuid);
   g_hash_table_insert (self->configs, g_object_ref (config), g_strdup (uuid));
 
   g_signal_connect_object (config,

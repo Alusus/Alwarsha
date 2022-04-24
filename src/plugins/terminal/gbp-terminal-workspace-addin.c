@@ -352,19 +352,19 @@ static const GActionEntry terminal_actions[] = {
 #define I_ g_intern_string
 
 static const DzlShortcutEntry gbp_terminal_shortcut_entries[] = {
-  { "org.gnome.builder.workspace.new-terminal",
+  { "org.alusus.alwarsha.workspace.new-terminal",
     0, NULL,
     N_("Workspace shortcuts"),
     N_("General"),
     N_("Terminal") },
 
-  { "org.gnome.builder.workspace.new-terminal-in-runtime",
+  { "org.alusus.alwarsha.workspace.new-terminal-in-runtime",
     0, NULL,
     N_("Workspace shortcuts"),
     N_("General"),
     N_("Terminal in Build Runtime") },
 
-  { "org.gnome.builder.workspace.new-terminal-in-runner",
+  { "org.alusus.alwarsha.workspace.new-terminal-in-runner",
     0, NULL,
     N_("Workspace shortcuts"),
     N_("General"),
@@ -383,19 +383,19 @@ gbp_terminal_workspace_addin_setup_shortcuts (GbpTerminalWorkspaceAddin *self,
   controller = dzl_shortcut_controller_find (GTK_WIDGET (workspace));
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.workspace.new-terminal",
+                                              "org.alusus.alwarsha.workspace.new-terminal",
                                               I_("<primary><shift>t"),
                                               DZL_SHORTCUT_PHASE_DISPATCH,
                                               "win.new-terminal");
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.workspace.new-terminal-in-runtime",
+                                              "org.alusus.alwarsha.workspace.new-terminal-in-runtime",
                                               I_("<primary><alt><shift>t"),
                                               DZL_SHORTCUT_PHASE_DISPATCH,
                                               "win.new-terminal-in-runtime");
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.workspace.new-terminal-in-runner",
+                                              "org.alusus.alwarsha.workspace.new-terminal-in-runner",
                                               I_("<primary><alt>t"),
                                               DZL_SHORTCUT_PHASE_DISPATCH,
                                               "win.new-terminal-in-runner");

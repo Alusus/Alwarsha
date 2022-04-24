@@ -231,7 +231,7 @@ ide_notifications_init (IdeNotifications *self)
   g_autoptr(GIcon) icon7 = NULL;
 
   notif = ide_notification_new ();
-  ide_notification_set_title (notif, "Builder ready.");
+  ide_notification_set_title (notif, "Alwarsha ready.");
   ide_notification_set_has_progress (notif, FALSE);
   ide_notification_add_button (notif, "Foo", (icon1 = g_icon_new_for_string ("media-playback-pause-symbolic", NULL)), "debugger.pause");
   ide_notifications_add_notification (self, notif);

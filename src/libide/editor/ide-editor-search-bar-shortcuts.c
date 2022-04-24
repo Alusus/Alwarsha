@@ -52,20 +52,20 @@ _ide_editor_search_bar_init_shortcuts (IdeEditorSearchBar *self)
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
 
   dzl_shortcut_controller_add_command_callback (controller,
-                                                "org.gnome.builder.editor.search-bar.activate-previous",
+                                                "org.alusus.alwarsha.editor.search-bar.activate-previous",
                                                 "<Shift>Return",
                                                 DZL_SHORTCUT_PHASE_BUBBLE,
                                                 ide_editor_search_bar_shortcuts_activate_previous,
                                                 self, NULL);
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.editor.search-bar.move-next",
+                                              "org.alusus.alwarsha.editor.search-bar.move-next",
                                               "Down",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               "editor-search.move-next");
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.editor.search-bar.move-previous",
+                                              "org.alusus.alwarsha.editor.search-bar.move-previous",
                                               "Up",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               "editor-search.move-previous");

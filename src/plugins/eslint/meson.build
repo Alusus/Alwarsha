@@ -2,7 +2,7 @@ if get_option('plugin_eslint')
 
 install_data('eslint_plugin.py', install_dir: plugindir)
 
-install_data('org.gnome.builder.plugins.eslint.gschema.xml',
+install_data('org.alusus.alwarsha.plugins.eslint.gschema.xml',
   install_dir: schema_dir)
 
 configure_file(

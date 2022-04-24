@@ -1,6 +1,6 @@
-# Builder
+# Alwarsha
 
-Develop software for GNOME
+A fork of gnome-builder that adds support for Alusus language and makes the IDE less specific to Gnome.
 
 ## Helpful Links
 

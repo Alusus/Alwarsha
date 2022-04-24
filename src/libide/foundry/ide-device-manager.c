@@ -161,7 +161,7 @@ ide_device_manager_provider_device_added_cb (IdeDeviceManager  *self,
       /* translators: %s is replaced with the external device name */
       title = g_strdup_printf (_("Discovered device “%s”"), display_name);
       notif = g_object_new (IDE_TYPE_NOTIFICATION,
-                            "id", "org.gnome.builder.device-manager.added",
+                            "id", "org.alusus.alwarsha.device-manager.added",
                             "title", title,
                             "icon-name", icon_name,
                             NULL);

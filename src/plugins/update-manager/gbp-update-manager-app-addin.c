@@ -60,7 +60,7 @@ on_update_install_cb (GObject      *object,
 
   if (!xdp_portal_update_install_finish (portal, result, &error))
     {
-      g_warning ("Failed to update Builder: %s", error->message);
+      g_warning ("Failed to update Alwarsha: %s", error->message);
     }
   else
     {
@@ -101,9 +101,9 @@ action_update_builder (GSimpleAction *action,
   context = ide_workbench_get_context (workbench);
 
   self->progress_notif = ide_notification_new ();
-  ide_notification_set_id (self->progress_notif, "org.gnome.builder.update-progress");
+  ide_notification_set_id (self->progress_notif, "org.alusus.alwarsha.update-progress");
   ide_notification_set_icon_name (self->progress_notif, "folder-download-symbolic");
-  ide_notification_set_title (self->progress_notif, _("Updating Builder"));
+  ide_notification_set_title (self->progress_notif, _("Updating Alwarsha"));
   ide_notification_set_has_progress (self->progress_notif, TRUE);
   ide_notification_attach (self->progress_notif, IDE_OBJECT (context));
 
@@ -161,10 +161,10 @@ on_update_available_cb (GbpUpdateManagerAppAddin *self,
       context = ide_workbench_get_context (workbench);
 
       self->update_notif = ide_notification_new ();
-      ide_notification_set_id (self->update_notif, "org.gnome.builder.update-available");
+      ide_notification_set_id (self->update_notif, "org.alusus.alwarsha.update-available");
       ide_notification_set_icon_name (self->update_notif, "software-update-available-symbolic");
       ide_notification_set_title (self->update_notif, _("Update Available"));
-      ide_notification_set_body (self->update_notif, _("An update to Builder is available. Builder can download and install it for you."));
+      ide_notification_set_body (self->update_notif, _("An update to Alwarsha is available. Alwarsha can download and install it for you."));
       ide_notification_set_urgent (self->update_notif, TRUE);
       ide_notification_add_button (self->update_notif, _("Update"), NULL, "app.update-builder");
       ide_notification_attach (self->update_notif, IDE_OBJECT (context));

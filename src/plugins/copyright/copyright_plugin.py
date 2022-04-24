@@ -34,7 +34,7 @@ class CopyrightBufferAddin(Ide.Object, Ide.BufferAddin):
     settings = None
 
     def do_load(self, buffer):
-        self.settings = Gio.Settings.new('org.gnome.builder.plugins.copyright')
+        self.settings = Gio.Settings.new('org.alusus.alwarsha.plugins.copyright')
 
     def do_unload(self, buffer):
         self.settings = None
@@ -107,12 +107,12 @@ class CopyrightPreferencesAddin(GObject.Object, Ide.PreferencesAddin):
     def do_load(self, prefs):
         self.update_on_save = prefs.add_switch(
                 "editor", "general",
-                "org.gnome.builder.plugins.copyright",
+                "org.alusus.alwarsha.plugins.copyright",
                 "update-on-save",
                 None,
                 "false",
                 _("Update Copyright"),
-                _("When saving a file Builder will automatically update copyright information for you"),
+                _("When saving a file Alwarsha will automatically update copyright information for you"),
                 # translators: these are keywords used to search for preferences
                 _("update copyright save"),
                 10)

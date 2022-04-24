@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="org.gnome.builder" path="/org/gnome/builder/" gettext-domain="gnome-builder">
+  <schema id="org.alusus.alwarsha" path="/org/alusus/alwarsha/" gettext-domain="alwarsha">
     <key name="window-size" type="(ii)">
       <default>(-1, -1)</default>
       <summary>Window size</summary>
@@ -31,7 +31,7 @@
            language’s convention, e.g. do not use “” or »«.-->
       <default l10n="messages">"Projects"</default>
       <summary>Projects directory</summary>
-      <description>Directory for all Builder projects.</description>
+      <description>Directory for all Alwarsha projects.</description>
     </key>
     <key name="restore-previous-files" type="b">
       <default>true</default>
@@ -46,7 +46,7 @@
     <key name="clear-cache-at-startup" type="b">
       <default>true</default>
       <summary>Clear build caches at startup</summary>
-      <description>If enabled, Builder will clear build caches upon startup.</description>
+      <description>If enabled, Alwarsha will clear build caches upon startup.</description>
     </key>
   </schema>
 </schemalist>

@@ -72,8 +72,8 @@ _ide_application_plugin_get_settings (IdeApplication *self,
     {
       g_autofree gchar *path = NULL;
 
-      path = g_strdup_printf ("/org/gnome/builder/plugins/%s/", module_name);
-      settings = g_settings_new_with_path ("org.gnome.builder.plugin", path);
+      path = g_strdup_printf ("/org/alusus/alwarsha/plugins/%s/", module_name);
+      settings = g_settings_new_with_path ("org.alusus.alwarsha.plugin", path);
       g_hash_table_insert (self->plugin_settings, g_strdup (module_name), settings);
 
       g_signal_connect (settings,
@@ -365,17 +365,17 @@ _ide_application_load_plugins (IdeApplication *self)
   *(strrchr(pathBuf, '/')) = '\0';
   *(strrchr(pathBuf, '/')) = '\0';
 
-  char girepositorydir[PATH_MAX]; // "<exe>/../lib/x86_64-linux-gnu/gnome-builder/girepository-1.0"
+  char girepositorydir[PATH_MAX]; // "<exe>/../lib/x86_64-linux-gnu/alwarsha/girepository-1.0"
   strcpy(girepositorydir, pathBuf);
-  strcat(girepositorydir, "/lib/x86_64-linux-gnu/gnome-builder/girepository-1.0");
+  strcat(girepositorydir, "/lib/x86_64-linux-gnu/alwarsha/girepository-1.0");
 
-  char plugin_lib_dir[PATH_MAX]; // "<exe>/../lib/x86_64-linux-gnu/gnome-builder/plugins"
+  char plugin_lib_dir[PATH_MAX]; // "<exe>/../lib/x86_64-linux-gnu/alwarsha/plugins"
   strcpy(plugin_lib_dir, pathBuf);
-  strcat(plugin_lib_dir, "/lib/x86_64-linux-gnu/gnome-builder/plugins");
+  strcat(plugin_lib_dir, "/lib/x86_64-linux-gnu/alwarsha/plugins");
 
-  char plugin_data_dir[PATH_MAX]; // "<exe>/../share/gnome-builder/plugins"
+  char plugin_data_dir[PATH_MAX]; // "<exe>/../share/alwarsha/plugins"
   strcpy(plugin_data_dir, pathBuf);
-  strcat(plugin_data_dir, "/share/gnome-builder/plugins");
+  strcat(plugin_data_dir, "/share/alwarsha/plugins");
 
   g_autofree gchar *user_plugins_dir = NULL;
   g_autoptr(GError) error = NULL;
@@ -402,7 +402,7 @@ _ide_application_load_plugins (IdeApplication *self)
       plugins_dir = g_build_filename (g_get_home_dir (),
                                       ".local",
                                       "share",
-                                      "gnome-builder",
+                                      "alwarsha",
                                       "plugins",
                                       NULL);
       peas_engine_prepend_search_path (engine, plugins_dir, plugins_dir);
@@ -410,14 +410,14 @@ _ide_application_load_plugins (IdeApplication *self)
       extensions_plugins_dir = g_build_filename ("/app",
                                                  "extensions",
                                                  "lib",
-                                                 "gnome-builder",
+                                                 "alwarsha",
                                                  "plugins",
                                                  NULL);
       peas_engine_prepend_search_path (engine, extensions_plugins_dir, extensions_plugins_dir);
     }
 
   user_plugins_dir = g_build_filename (g_get_user_data_dir (),
-                                       "gnome-builder",
+                                       "alwarsha",
                                        "plugins",
                                        NULL);
   peas_engine_prepend_search_path (engine, user_plugins_dir, NULL);

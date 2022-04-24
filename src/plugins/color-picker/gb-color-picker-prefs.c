@@ -463,7 +463,7 @@ create_palette_list_item (gpointer item,
   row = g_object_new (GB_TYPE_COLOR_PICKER_PREFS_PALETTE_ROW,
                       "visible", TRUE,
                       "key", "selected-palette-id",
-                      "schema-id", "org.gnome.builder.plugins.color_picker_plugin",
+                      "schema-id", "org.alusus.alwarsha.plugins.color_picker_plugin",
                       "palette-name", name,
                       "target", string_to_variant (target),
                       NULL);
@@ -716,7 +716,7 @@ gb_color_picker_prefs_init (GbColorPickerPrefs *self)
   gtk_file_filter_add_pattern (self->gpl_files_filter, "*.gpl");
 
   self->builder_files_filter = g_object_ref_sink (gtk_file_filter_new ());
-  gtk_file_filter_set_name (self->builder_files_filter, _("GNOME Builder palette"));
+  gtk_file_filter_set_name (self->builder_files_filter, _("Alwarsha palette"));
   gtk_file_filter_add_pattern (self->builder_files_filter, "*.xml");
 
   self->components_page = GTK_WIDGET (gtk_builder_get_object (builder, "components_page"));
@@ -741,6 +741,6 @@ gb_color_picker_prefs_init (GbColorPickerPrefs *self)
 
   g_object_unref (builder);
 
-  self->plugin_settings = g_settings_new ("org.gnome.builder.plugins.color_picker_plugin");
-  self->components_settings = g_settings_new ("org.gnome.builder.plugins.color_picker_plugin.components");
+  self->plugin_settings = g_settings_new ("org.alusus.alwarsha.plugins.color_picker_plugin");
+  self->components_settings = g_settings_new ("org.alusus.alwarsha.plugins.color_picker_plugin.components");
 }

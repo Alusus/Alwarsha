@@ -188,7 +188,7 @@ class HtmlWorkbenchAddin(GObject.Object, Ide.WorkbenchAddin):
             return
 
         can_preview_rst = True
-        self.withdraw_notification('org.gnome.builder.html-preview.docutils')
+        self.withdraw_notification('org.alusus.alwarsha.html-preview.docutils')
 
     def sphinx_installed(self, object, result, data):
         global can_preview_sphinx
@@ -201,8 +201,8 @@ class HtmlWorkbenchAddin(GObject.Object, Ide.WorkbenchAddin):
             return
 
         can_preview_sphinx = True
-        self.withdraw_notification('org.gnome.builder.html-preview.docutils')
-        self.withdraw_notification('org.gnome.builder.html-preview.sphinx')
+        self.withdraw_notification('org.alusus.alwarsha.html-preview.docutils')
+        self.withdraw_notification('org.alusus.alwarsha.html-preview.sphinx')
 
 class HtmlPreviewAddin(GObject.Object, Ide.EditorPageAddin):
     def do_load(self, view):
@@ -227,7 +227,7 @@ class HtmlPreviewAddin(GObject.Object, Ide.EditorPageAddin):
 
         # Add a shortcut for activation inside the editor
         controller = Dazzle.ShortcutController.find(view)
-        controller.add_command_action('org.gnome.builder.html-preview.preview',
+        controller.add_command_action('org.alusus.alwarsha.html-preview.preview',
                                       '<Control><Alt>p',
                                       Dazzle.ShortcutPhase.CAPTURE,
                                       'editor-page.preview-as-html')
@@ -338,7 +338,7 @@ class HtmlPreviewAddin(GObject.Object, Ide.EditorPageAddin):
 
     def show_missing_docutils_message(self, view):
         notif = Ide.Notification(
-            id='org.gnome.builder.html-preview.docutils',
+            id='org.alusus.alwarsha.html-preview.docutils',
             title=_('Your computer is missing python3-docutils'),
             body=_('This package is necessary to provide previews of markup-based documents.'),
             icon_name='dialog-warning-symbolic',
@@ -348,7 +348,7 @@ class HtmlPreviewAddin(GObject.Object, Ide.EditorPageAddin):
 
     def show_missing_sphinx_message(self, view):
         notif = Ide.Notification(
-            id='org.gnome.builder.html-preview.sphinx',
+            id='org.alusus.alwarsha.html-preview.sphinx',
             title=_('Your computer is missing python3-sphinx'),
             body=_('This package is necessary to provide previews of markup-based documents.'),
             icon_name='dialog-warning-symbolic',

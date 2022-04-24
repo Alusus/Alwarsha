@@ -131,13 +131,13 @@ ide_worker_manager_constructed (GObject *object)
 
   if (g_unix_socket_address_abstract_names_supported ())
     {
-      address = g_strdup_printf ("unix:abstract=/tmp/gnome-builder-%u", (int)getpid ());
+      address = g_strdup_printf ("unix:abstract=/tmp/alwarsha-%u", (int)getpid ());
     }
   else
     {
       g_autofree gchar *tmpdir = NULL;
 
-      tmpdir = g_dir_make_tmp ("gnome-builder-worker-XXXXXX", NULL);
+      tmpdir = g_dir_make_tmp ("alwarsha-worker-XXXXXX", NULL);
 
       if (tmpdir == NULL)
         {
@@ -261,7 +261,7 @@ ide_worker_manager_get_worker_process (IdeWorkerManager *self,
                                  g_dbus_server_get_client_address (self->dbus_server),
                                  g_dbus_server_get_guid (self->dbus_server));
 
-      worker_process = ide_worker_process_new ("gnome-builder", plugin_name, address);
+      worker_process = ide_worker_process_new ("alwarsha", plugin_name, address);
       g_hash_table_insert (self->plugin_name_to_worker, g_strdup (plugin_name), worker_process);
       ide_worker_process_run (worker_process);
     }

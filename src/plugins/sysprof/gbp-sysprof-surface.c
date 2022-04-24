@@ -57,7 +57,7 @@ gbp_sysprof_surface_init (GbpSysprofSurface *self)
 
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.gnome.builder.sysprof.focus",
+                                              "org.alusus.alwarsha.sysprof.focus",
                                               "<alt>2",
                                               DZL_SHORTCUT_PHASE_GLOBAL,
                                               "win.surface('profiler')");

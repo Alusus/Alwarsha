@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="org.gnome.builder.code-insight" path="/org/gnome/builder/code-insight/" gettext-domain="gnome-builder">
+  <schema id="org.alusus.alwarsha.code-insight" path="/org/alusus/alwarsha/code-insight/" gettext-domain="alwarsha">
     <key name="ctags-autocompletion" type="b">
       <default>true</default>
       <summary>Ctags based autocompletion</summary>

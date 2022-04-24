@@ -20,7 +20,7 @@
 
     SPDX-License-Identifier: GPL-2.0-or-later
   -->
-  <interface name="org.gnome.Builder.Git.Config">
+  <interface name="org.alusus.Alwarsha.Git.Config">
     <signal name="Closed"/>
     <method name="ReadKey">
       <arg name="key" direction="in" type="s"/>

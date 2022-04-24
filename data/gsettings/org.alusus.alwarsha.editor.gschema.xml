@@ -1,6 +1,6 @@
 <schemalist>
 
-  <flags id="org.gnome.builder.editor.DrawSpaces">
+  <flags id="org.alusus.alwarsha.editor.DrawSpaces">
     <value nick="space" value="1"/>
     <value nick="tab" value="2"/>
     <value nick="newline" value="4"/>
@@ -10,7 +10,7 @@
     <value nick="trailing" value="64"/>
   </flags>
 
-  <schema id="org.gnome.builder.editor" path="/org/gnome/builder/editor/" gettext-domain="gnome-builder">
+  <schema id="org.alusus.alwarsha.editor" path="/org/alusus/alwarsha/editor/" gettext-domain="alwarsha">
     <key name="keybindings" type="s">
       <choices>
         <choice value="default"/>
@@ -83,14 +83,14 @@
     <key name="show-map" type="b">
       <default>false</default>
       <summary>Show overview map</summary>
-      <description>If enabled, Builder will display an overview map of the source file next to the editor.</description>
+      <description>If enabled, Alwarsha will display an overview map of the source file next to the editor.</description>
     </key>
     <key name="auto-hide-map" type="b">
       <default>false</default>
       <summary>Automatically Hide Overview Map</summary>
-      <description>If enabled, Builder will automatically hide the overview map when mouse focus leaves the editor, or a timeout occurs.</description>
+      <description>If enabled, Alwarsha will automatically hide the overview map when mouse focus leaves the editor, or a timeout occurs.</description>
     </key>
-    <key name="draw-spaces" flags="org.gnome.builder.editor.DrawSpaces">
+    <key name="draw-spaces" flags="org.alusus.alwarsha.editor.DrawSpaces">
       <default>[]</default>
       <summary>Draw Spaces</summary>
       <description>The various types of space to draw in the editor.</description>
@@ -104,7 +104,7 @@
     <key name="wrap-text" type="b">
       <default>false</default>
       <summary>Wrap Text</summary>
-      <description>If enabled, Builder will automatically wrap text so all of the line text is visible.</description>
+      <description>If enabled, Alwarsha will automatically wrap text so all of the line text is visible.</description>
     </key>
     <key name="auto-save" type="b">
       <default>true</default>
@@ -132,7 +132,7 @@
     <key name="interactive-completion" type="b">
       <default>true</default>
       <summary>Interactive Completion</summary>
-      <description>If enabled, Builder will automatically display completion proposals as you type.</description>
+      <description>If enabled, Alwarsha will automatically display completion proposals as you type.</description>
     </key>
   </schema>
 </schemalist>

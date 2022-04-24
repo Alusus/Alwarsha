@@ -38,7 +38,7 @@
 #include "ide-private.h"
 
 static GThread *main_thread;
-static const gchar *application_id = "org.gnome.Builder";
+static const gchar *application_id = "org.alusus.Alwarsha";
 static IdeProcessKind kind = IDE_PROCESS_KIND_HOST;
 
 #if defined (G_HAS_CONSTRUCTORS)
@@ -107,7 +107,7 @@ ide_get_application_id (void)
  * This must be set at application startup before any GApplication
  * has connected to the D-Bus.
  *
- * The default is "org.gnome.Builder".
+ * The default is "org.alusus.Alwarsha".
  *
  * Since: 3.32
  */
@@ -122,7 +122,7 @@ ide_set_application_id (const gchar *app_id)
 const gchar *
 ide_get_program_name (void)
 {
-  return "gnome-builder";
+  return "alwarsha";
 }
 
 gchar *

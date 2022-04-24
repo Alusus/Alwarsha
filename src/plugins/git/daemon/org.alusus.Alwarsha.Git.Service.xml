@@ -20,7 +20,7 @@
 
     SPDX-License-Identifier: GPL-2.0-or-later
   -->
-  <interface name="org.gnome.Builder.Git.Service">
+  <interface name="org.alusus.Alwarsha.Git.Service">
     <method name="Discover">
       <arg name="location" direction="in" type="ay">
         <doc:doc><doc:summary>The location at which to begin discovery of a repository.</doc:summary></doc:doc>
@@ -61,7 +61,7 @@
       </arg>
       <arg name="config_options" direction="in" type="a{sv}"/>
       <arg name="progress" direction="in" type="o">
-        <doc:doc><doc:summary>The path to an org.gnome.Builder.Git.Progress object on the callers connection.</doc:summary></doc:doc>
+        <doc:doc><doc:summary>The path to an org.alusus.Alwarsha.Git.Progress object on the callers connection.</doc:summary></doc:doc>
       </arg>
       <arg name="git_location" direction="out" type="ay">
         <doc:doc><doc:summary>A repository object.</doc:summary></doc:doc>

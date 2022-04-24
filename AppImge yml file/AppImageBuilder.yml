@@ -3,11 +3,11 @@ version: 1
 AppDir:
   path: /root/AppDir
   app_info:
-    id: org.gnome.Builder
-    name: Builder
-    icon: org.gnome.Builder
+    id: org.alusus.Alwarsha
+    name: Alwarsha
+    icon: org.alusus.Alwarsha
     version: latest
-    exec: usr/bin/gnome-builder
+    exec: usr/bin/alwarsha
     exec_args: $@
   apt:
     arch:

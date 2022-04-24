@@ -37,7 +37,7 @@ _ide_source_view_init_shortcuts (IdeSourceView *self)
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
 
   dzl_shortcut_controller_add_command_signal (controller,
-                                              "org.gnome.builder.sourceview.reset",
+                                              "org.alusus.alwarsha.sourceview.reset",
                                               "Escape",
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               "reset", 0);

@@ -451,7 +451,7 @@ gbp_editor_session_addin_restore_async (IdeSessionAddin     *addin,
                            editor,
                            0);
 
-  settings = g_settings_new ("org.gnome.builder");
+  settings = g_settings_new ("org.alusus.alwarsha");
 
   if (!g_settings_get_boolean (settings, "restore-previous-files"))
     {
