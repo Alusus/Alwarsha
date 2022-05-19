@@ -126,20 +126,17 @@ ide_application_startup (GApplication *app)
     Set the style and icon paths to a path relative the current executable.
     This will allow the locales to be found when the app is running inside an app image.
   */
-  char pathBuf[PATH_MAX];
-  int bytes = MIN(readlink("/proc/self/exe", pathBuf, PATH_MAX), PATH_MAX - 1);
-  pathBuf[bytes]='\0';
-  // Remove /bin/<exe-name> from the path.
-  *(strrchr(pathBuf, '/')) = '\0';
-  *(strrchr(pathBuf, '/')) = '\0';
+
+  const gchar *appDir = g_getenv("APPDIR_PATH");
+  if (appDir == NULL) appDir = "/";
 
   char package_styles_dir[PATH_MAX];
-  strcpy(package_styles_dir, pathBuf);
-  strcat(package_styles_dir, "/share/gtksourceview-4/styles");
+  strcpy(package_styles_dir, appDir);
+  strcat(package_styles_dir, "usr/share/gtksourceview-4/styles");
 
   char package_icons_dir[PATH_MAX]; // "<exe>/../lib/x86_64-linux-gnu/gnome-builder/plugins"
-  strcpy(package_icons_dir, pathBuf);
-  strcat(package_icons_dir, "/share/alwarsha/icons");
+  strcpy(package_icons_dir, appDir);
+  strcat(package_icons_dir, "usr/share/alwarsha/icons");
 
   IdeApplication *self = (IdeApplication *)app;
 

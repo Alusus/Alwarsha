@@ -166,13 +166,10 @@ gbp_git_client_parent_set (IdeObject *object,
     This will allow the locales to be found when the app is running inside an app image.
   */
   char pathBuf[PATH_MAX];
-  int bytes = MIN(readlink("/proc/self/exe", pathBuf, PATH_MAX), PATH_MAX - 1);
-  pathBuf[bytes]='\0';
-  // Remove /bin/<exe-name> from the path.
-  *(strrchr(pathBuf, '/')) = '\0';
-  *(strrchr(pathBuf, '/')) = '\0';
-  // Complete and set the path.
-  strcat(pathBuf, "/libexec/gnome-builder-git");
+  const gchar *appDir = g_getenv("APPDIR_PATH");
+  if (appDir == NULL) appDir = "/";
+  strcpy(pathBuf, appDir);
+  strcat(pathBuf, "usr/libexec/gnome-builder-git");
 
   GbpGitClient *self=  (GbpGitClient *)object;
   g_autoptr(IdeSubprocessLauncher) launcher = NULL;

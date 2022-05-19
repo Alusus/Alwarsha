@@ -61,17 +61,14 @@ ide_editor_page_load_fonts (IdeEditorPage *self)
   PangoFontDescription *font_desc;
 
   /*
-    Set the font path to <exe-path>/../share/gnome-builder/fonts/AlususMono.ttf
+    Set the font path to <AppDir>/usr/share/gnome-builder/fonts/AlususMono.ttf
     This will allow the locales to be found when the app is running inside an app image.
   */
-  char pathBuf[PATH_MAX];
-  int bytes = MIN(readlink("/proc/self/exe", pathBuf, PATH_MAX), PATH_MAX - 1);
-  pathBuf[bytes]='\0';
-  // Remove /bin/<exe-name> from the path.
-  *(strrchr(pathBuf, '/')) = '\0';
-  *(strrchr(pathBuf, '/')) = '\0';
-  // Complete the path.
-  strcat(pathBuf, "/share/alwarsha/fonts/AlususMono.ttf");
+  gchar pathBuf[PATH_MAX];
+  const gchar *appDir = g_getenv("APPDIR_PATH");
+  if (appDir == NULL) appDir = "/";
+  strcpy(pathBuf, appDir);
+  strcat(pathBuf, "usr/share/alwarsha/fonts/AlususMono.ttf");
 
   if (g_once_init_enter (&localFontConfig))
     {
@@ -89,7 +86,7 @@ ide_editor_page_load_fonts (IdeEditorPage *self)
   font_map = pango_cairo_font_map_new_for_font_type (CAIRO_FONT_TYPE_FT);
   pango_fc_font_map_set_config (PANGO_FC_FONT_MAP (font_map), localFontConfig);
   gtk_widget_set_font_map (GTK_WIDGET (self->map), font_map);
-  font_desc = pango_font_description_from_string ("Builder Blocks 1");
+  font_desc = pango_font_description_from_string ("Alusus Mono Medium");
 
   g_assert (localFontConfig != NULL);
   g_assert (font_map != NULL);

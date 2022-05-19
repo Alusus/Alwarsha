@@ -21,7 +21,6 @@
 #define G_LOG_DOMAIN "main"
 
 #include "config.h"
-#include <unistd.h>
 #include <string.h>
 #include <girepository.h>
 #include <glib/gi18n.h>
@@ -43,6 +42,7 @@
 #include "ide-thread-private.h"
 #include "ide-terminal-private.h"
 #include "ide-private.h"
+#include <pango/pangofc-fontmap.h>
 
 #include "bug-buddy.h"
 
@@ -216,6 +216,8 @@ main (gint   argc,
   const gchar *desktop;
   gboolean standalone = FALSE;
   int ret;
+  gchar pathBuf[PATH_MAX];
+  const gchar *appDir;
 
   /* Setup our gdb fork()/exec() helper if we're in a terminal */
   if (is_running_in_shell ())
@@ -228,17 +230,13 @@ main (gint   argc,
   setlocale (LC_ALL, "");
 
   /*
-    Set the locale path to <exe-path>/../share/locale
+    Set the locale path to <AppDir>/usr/share/locale
     This will allow the locales to be found when the app is running inside an app image.
   */
-  char pathBuf[PATH_MAX];
-  int bytes = MIN(readlink("/proc/self/exe", pathBuf, PATH_MAX), PATH_MAX - 1);
-  pathBuf[bytes]='\0';
-  // Remove /bin/<exe-name> from the path.
-  *(strrchr(pathBuf, '/')) = '\0';
-  *(strrchr(pathBuf, '/')) = '\0';
-  // Complete and set the path.
-  strcat(pathBuf, "/share/locale");
+  appDir = g_getenv("APPDIR_PATH");
+  if (appDir == NULL) appDir = "/";
+  strcpy(pathBuf, appDir);
+  strcat(pathBuf, "usr/share/locale");
   bindtextdomain (GETTEXT_PACKAGE, pathBuf);
 
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -247,6 +245,13 @@ main (gint   argc,
   /* Setup various application name/id defaults. */
   g_set_prgname (ide_get_program_name ());
   g_set_application_name (_("Alwarsha"));
+
+  // Load custom fonts.
+  strcpy(pathBuf, appDir);
+  strcat(pathBuf, "usr/share/alwarsha/fonts/");
+  if (FcConfigAppFontAddDir (FcConfigGetCurrent(), (const FcChar8 *)pathBuf) == FcFalse) {
+    g_warning ("Failed to load custom fonts from \"%s\"", pathBuf);
+  }
 
 #if 0
   /* TODO: allow support for parallel nightly install */

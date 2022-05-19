@@ -358,24 +358,21 @@ _ide_application_load_plugins (IdeApplication *self)
     Set the plugins paths to a path relative the current executable.
     This will allow the locales to be found when the app is running inside an app image.
   */
-  char pathBuf[PATH_MAX];
-  int bytes = MIN(readlink("/proc/self/exe", pathBuf, PATH_MAX), PATH_MAX - 1);
-  pathBuf[bytes]='\0';
-  // Remove /bin/<exe-name> from the path.
-  *(strrchr(pathBuf, '/')) = '\0';
-  *(strrchr(pathBuf, '/')) = '\0';
+
+  const gchar *appDir = g_getenv("APPDIR_PATH");
+  if (appDir == NULL) appDir = "/";
 
   char girepositorydir[PATH_MAX]; // "<exe>/../lib/x86_64-linux-gnu/alwarsha/girepository-1.0"
-  strcpy(girepositorydir, pathBuf);
-  strcat(girepositorydir, "/lib/x86_64-linux-gnu/alwarsha/girepository-1.0");
+  strcpy(girepositorydir, appDir);
+  strcat(girepositorydir, "usr/lib/x86_64-linux-gnu/alwarsha/girepository-1.0");
 
   char plugin_lib_dir[PATH_MAX]; // "<exe>/../lib/x86_64-linux-gnu/alwarsha/plugins"
-  strcpy(plugin_lib_dir, pathBuf);
-  strcat(plugin_lib_dir, "/lib/x86_64-linux-gnu/alwarsha/plugins");
+  strcpy(plugin_lib_dir, appDir);
+  strcat(plugin_lib_dir, "usr/lib/x86_64-linux-gnu/alwarsha/plugins");
 
   char plugin_data_dir[PATH_MAX]; // "<exe>/../share/alwarsha/plugins"
-  strcpy(plugin_data_dir, pathBuf);
-  strcat(plugin_data_dir, "/share/alwarsha/plugins");
+  strcpy(plugin_data_dir, appDir);
+  strcat(plugin_data_dir, "usr/share/alwarsha/plugins");
 
   g_autofree gchar *user_plugins_dir = NULL;
   g_autoptr(GError) error = NULL;
