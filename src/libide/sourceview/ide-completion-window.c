@@ -117,6 +117,7 @@ ide_completion_window_reposition (IdeCompletionWindow *self)
 /* TODO: figure out where this comes from */
 #define EXTRA_SPACE 9
 
+  if (rect.x < x_offset) x_offset = rect.x;
   gdk_window_move_to_rect (window,
                            &rect,
                            GDK_GRAVITY_SOUTH_WEST,

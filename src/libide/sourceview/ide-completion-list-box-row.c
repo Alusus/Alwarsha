@@ -354,6 +354,12 @@ _ide_completion_list_box_row_get_x_offset (IdeCompletionListBoxRow *self,
   gtk_widget_get_preferred_width (GTK_WIDGET (self->left), &min, &nat);
   x += nat + margin.left + margin.right;
 
+  style_context = gtk_widget_get_style_context (GTK_WIDGET (self->center));
+  flags = gtk_style_context_get_state (style_context);
+  gtk_style_context_get_margin (style_context, flags, &margin);
+  gtk_widget_get_preferred_width (GTK_WIDGET (self->center), &min, &nat);
+  x += nat / 2 + margin.left;
+
   return x;
 }
 
