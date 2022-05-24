@@ -18,19 +18,23 @@
 
 import gi
 import os
+import re
 import subprocess
 from os import path
 
 from gi.repository import (
     Ide,
     Gio,
+    GIRepository,
     GLib,
     GObject,
+    Gtk,
     GtkSource,
     Template,
 )
 
 _ = Ide.gettext
+
 
 class AlususBuildSystemDiscovery(Ide.SimpleBuildSystemDiscovery):
     def __init__(self, *args, **kwargs):
@@ -38,6 +42,7 @@ class AlususBuildSystemDiscovery(Ide.SimpleBuildSystemDiscovery):
         self.props.glob = '+(.alwarsha|main.alusus|src/main.alusus|.الورشة|بداية.أسس|الشفرة/بداية.أسس)'
         self.props.hint = 'alusus_plugin'
         self.props.priority = 100
+
 
 class AlususBuildSystem(Ide.Object, Ide.BuildSystem):
     project_file = GObject.Property(type=Gio.File)
@@ -51,6 +56,7 @@ class AlususBuildSystem(Ide.Object, Ide.BuildSystem):
     def do_get_priority(self):
         return 0
 
+
 class AlususPipelineAddin(Ide.Object, Ide.PipelineAddin):
     """
     The MakePipelineAddin registers stages to be executed when various
@@ -60,6 +66,7 @@ class AlususPipelineAddin(Ide.Object, Ide.PipelineAddin):
     def do_load(self, pipeline):
         context = pipeline.get_context()
         build_system = Ide.BuildSystem.from_context(context)
+
 
 class AlususBuildTarget(Ide.Object, Ide.BuildTarget):
     def __init__(self, script, **kw):
@@ -87,6 +94,7 @@ class AlususBuildTarget(Ide.Object, Ide.BuildTarget):
 
     def do_get_priority(self):
         return 0
+
 
 class AlususBuildTargetProvider(Ide.Object, Ide.BuildTargetProvider):
     """
@@ -128,6 +136,7 @@ class AlususTemplateProvider(GObject.Object, Ide.TemplateProvider):
             AlususEmptyProjectTemplate(_('Alusus Project - Arabic'), _('Create an Arabic based Alusus project'), "ar"),
             AlususEmptyProjectTemplate(_('Alusus Project - English'), _('Create an English based Alusus project'), "en")
         ]
+
 
 class AlususTemplateLocator(Template.TemplateLocator):
     license = None
@@ -316,8 +325,6 @@ class AlususTemplate(Ide.TemplateBase, Ide.ProjectTemplate):
                 task.return_error(GLib.Error(repr(exc)))
 
 
-
-
 class AlususEmptyProjectTemplate(AlususTemplate):
     def __init__(self, title, description, lang):
         super().__init__(
@@ -335,3 +342,126 @@ class AlususEmptyProjectTemplate(AlususTemplate):
             files['resources/الشفرة/بداية.أسس'] = 'الشفرة/بداية.أسس'
         else:
             files['resources/src/main.alusus'] = 'src/main.alusus'
+
+
+GLOBAL_KEYWORDS_CACHE_EXPIRE_USEC = 10 * 60 * 1000 * 1000
+PROJ_KEYWORDS_CACHE_EXPIRE_USEC = 1 * 60 * 1000 * 1000
+
+global_keywords = set()
+project_keywords = set()
+
+
+class AlususCompletionProvider(Ide.Object, Ide.CompletionProvider):
+    _global_keywords_expire_at = 0
+    _proj_keywords_expire_at = 0
+    _keywords = set()
+
+    def do_get_title(self):
+        return 'Alusus Completion'
+
+    def do_populate_async(self, context, cancellable, callback, data):
+        task = Ide.Task.new(self, cancellable, callback)
+        task.set_name('alusus completion')
+
+        text = context.get_word()
+
+        proposals = Gio.ListStore.new(Ide.CompletionProposal)
+        for library in self.get_proposals(context, True, text):
+            # if library.matches(text):
+            proposals.append(library)
+
+        task.return_object(proposals)
+
+    def do_populate_finish(self, task):
+        return task.propagate_object()
+
+    def do_display_proposal(self, row, context, typed_text, proposal):
+        row.set_left(None)
+        row.set_center(proposal.completion)
+        row.set_right(None)
+
+    def do_activate_proposal(self, context, proposal, key):
+        _, begin, end = context.get_bounds()
+        buffer = context.get_buffer()
+
+        buffer.begin_user_action()
+        buffer.delete(begin, end)
+        buffer.insert(begin, proposal.completion, -1)
+        buffer.end_user_action()
+
+    def do_get_priority(self, context):
+        # This provider only activates when it is very likely that we
+        # want the results. So use high priority (negative is better).
+        return -1000
+
+    def do_refilter(self, context, proposals):
+        text = context.get_word()
+        proposals.remove_all()
+        for proposal in self.get_proposals(context, False, text):
+            # if proposal.matches(text):
+            proposals.append(proposal)
+        return True
+
+    def get_proposals(self, context, new_completion, text):
+        proposals = []
+        keywords = self.get_all_keywords(context, new_completion)
+        if len(text) >= 2:
+            for keyword in sorted(filter(lambda x:x != text and x.startswith(text), keywords)):
+                proposals.append(AlususCompletionProposal(keyword))
+
+        return proposals
+
+    def get_all_keywords(self, context, new_completion):
+        global project_keywords
+        global global_keywords
+
+        if not new_completion:
+            return self._keywords
+
+        # get keywords from current file.
+        buffer = context.get_buffer()
+        fullBufferText = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), True)
+        file_keywords = set(re.findall(r'\b[a-zA-Z_\u0620-\u065F][a-zA-Z0-9_\u0620-\u065F]+', fullBufferText))
+
+        now = GLib.get_monotonic_time()
+
+        if now >= self._proj_keywords_expire_at:
+            self._proj_keywords_expire_at = now + PROJ_KEYWORDS_CACHE_EXPIRE_USEC
+            project_keywords = self.grep_dir_keywords(self.get_context().ref_workdir().get_path())
+
+        if now >= self._global_keywords_expire_at:
+            self._global_keywords_expire_at = now + GLOBAL_KEYWORDS_CACHE_EXPIRE_USEC
+            global_keywords = set()
+            # Fetch keywords from Alusus libs.
+            if os.getenv('ALUSUS_LIBS'):
+                for dir in os.getenv('ALUSUS_LIBS').split(':'):
+                    global_keywords = global_keywords.union(self.grep_dir_keywords(dir))
+            elif os.path.isdir('/opt/Alusus/Lib'):
+                global_keywords = global_keywords.union(self.grep_dir_keywords('/opt/Alusus/Lib'))
+            # Fetch keywords from ~/.apm
+            if os.path.isdir(os.getenv('HOME') + '/.apm'):
+                global_keywords = global_keywords.union(self.grep_dir_keywords(os.getenv('HOME') + '/.apm'))
+
+        project_keywords = file_keywords.union(project_keywords)
+        self._keywords = project_keywords.union(global_keywords)
+        return self._keywords
+
+    def grep_dir_keywords(self, dir):
+        try:
+            return set(subprocess.check_output([
+                'ugrep',
+                '-Pohr',
+                '--include=*.alusus',
+                '--include=*.أسس',
+                '\\b[a-zA-Z_\\x{0620}-\\x{065F}][a-zA-Z0-9_\\x{0620}-\\x{065F}]+',
+                dir
+            ]).decode('utf-8').split('\n'))
+        except subprocess.CalledProcessError as err:
+            print(f"Unexpected {err=},\n\t{type(err)=}\n\tstdout: {err.stdout=}\n\tstderr: {err.stderr=}")
+            return set()
+
+
+class AlususCompletionProposal(GObject.Object, Ide.CompletionProposal):
+    def __init__(self, completion):
+        super().__init__()
+        self.completion = completion

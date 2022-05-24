@@ -76,6 +76,7 @@ AppDir:
       - libgit2-glib-1.0-0
       - python3-gi
       - python3-lxml
+      - ugrep
       # Assets
       - adwaita-icon-theme
       - dmz-cursor-theme
