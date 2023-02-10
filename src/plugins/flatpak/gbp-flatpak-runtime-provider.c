@@ -1,4 +1,4 @@
-/* gbp-flatpak-runtime-provider.c
+/* gbp-flatpak-runtime-provider.h
  *
  * Copyright 2016-2019 Christian Hergert <chergert@redhat.com>
  *
@@ -20,202 +20,175 @@
 
 #define G_LOG_DOMAIN "gbp-flatpak-runtime-provider"
 
-#include <flatpak.h>
-#include <ostree.h>
-#include <string.h>
+#include "config.h"
 
+#include <glib/gi18n.h>
+#include <libide-foundry.h>
 #include <libide-gui.h>
 
-#include "ide-gui-private.h"
-
-#include "gbp-flatpak-application-addin.h"
-#include "gbp-flatpak-install-dialog.h"
+#include "gbp-flatpak-client.h"
 #include "gbp-flatpak-manifest.h"
 #include "gbp-flatpak-runtime.h"
 #include "gbp-flatpak-runtime-provider.h"
-#include "gbp-flatpak-transfer.h"
 #include "gbp-flatpak-util.h"
 
-typedef struct
-{
-  gchar *id;
-  gchar *arch;
-  gchar *branch;
-  gchar *sdk_id;
-  gchar *sdk_arch;
-  gchar *sdk_branch;
-  guint  op_count : 2;
-  guint  failed : 1;
-} InstallRuntime;
+#include "daemon/ipc-flatpak-service.h"
+#include "daemon/ipc-flatpak-transfer.h"
+#include "daemon/ipc-flatpak-util.h"
 
-typedef struct
-{
-  IdeConfig *config;
-  gchar     *runtime_id;
-  gchar     *name;
-  gchar     *arch;
-  gchar     *branch;
-  gint       count;
-} BootstrapState;
+#include "ipc-flatpak-transfer-impl.h"
 
 struct _GbpFlatpakRuntimeProvider
 {
-  IdeObject          parent_instance;
-  IdeRuntimeManager *manager;
-  GPtrArray         *runtimes;
+  IdeObject parent_instance;
+  GPtrArray *runtimes;
 };
 
-static void runtime_provider_iface_init         (IdeRuntimeProviderInterface *iface);
-static void gbp_flatpak_runtime_provider_load   (IdeRuntimeProvider          *provider,
-                                                 IdeRuntimeManager           *manager);
-static void gbp_flatpak_runtime_provider_unload (IdeRuntimeProvider          *provider,
-                                                 IdeRuntimeManager           *manager);
+static void runtime_provider_iface_init (IdeRuntimeProviderInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GbpFlatpakRuntimeProvider, gbp_flatpak_runtime_provider, IDE_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpFlatpakRuntimeProvider, gbp_flatpak_runtime_provider, IDE_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_RUNTIME_PROVIDER, runtime_provider_iface_init))
 
 static void
-bootstrap_state_free (gpointer data)
+gbp_flatpak_runtime_provider_dispose (GObject *object)
 {
-  BootstrapState *state = data;
+  GbpFlatpakRuntimeProvider *self = (GbpFlatpakRuntimeProvider *)object;
 
-  g_assert (state != NULL);
+  g_clear_pointer (&self->runtimes, g_ptr_array_unref);
 
-  g_clear_object (&state->config);
-  g_clear_pointer (&state->runtime_id, g_free);
-  g_clear_pointer (&state->name, g_free);
-  g_clear_pointer (&state->arch, g_free);
-  g_clear_pointer (&state->branch, g_free);
-  g_slice_free (BootstrapState, state);
+  G_OBJECT_CLASS (gbp_flatpak_runtime_provider_parent_class)->dispose (object);
 }
 
 static void
-install_runtime_free (gpointer data)
+gbp_flatpak_runtime_provider_class_init (GbpFlatpakRuntimeProviderClass *klass)
 {
-  InstallRuntime *install = data;
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  g_clear_pointer (&install->id, g_free);
-  g_clear_pointer (&install->arch, g_free);
-  g_clear_pointer (&install->branch, g_free);
-  g_clear_pointer (&install->sdk_id, g_free);
-  g_clear_pointer (&install->sdk_arch, g_free);
-  g_clear_pointer (&install->sdk_branch, g_free);
-
-  g_slice_free (InstallRuntime, install);
-}
-
-static gboolean
-is_same_runtime (GbpFlatpakRuntime   *runtime,
-                 FlatpakInstalledRef *ref)
-{
-  g_autofree gchar *arch = NULL;
-
-  return (g_strcmp0 (flatpak_ref_get_name (FLATPAK_REF (ref)),
-                     gbp_flatpak_runtime_get_platform (runtime)) == 0) &&
-         (g_strcmp0 (flatpak_ref_get_arch (FLATPAK_REF (ref)),
-                     arch = ide_runtime_get_arch (IDE_RUNTIME (runtime))) == 0) &&
-         (g_strcmp0 (flatpak_ref_get_branch (FLATPAK_REF (ref)),
-                     gbp_flatpak_runtime_get_branch (runtime)) == 0);
+  object_class->dispose = gbp_flatpak_runtime_provider_dispose;
 }
 
 static void
-monitor_transfer (GbpFlatpakRuntimeProvider *self,
-                  GbpFlatpakTransfer        *transfer)
+gbp_flatpak_runtime_provider_init (GbpFlatpakRuntimeProvider *self)
 {
-  g_autoptr(IdeNotification) notif = NULL;
-
-  g_assert (IDE_IS_MAIN_THREAD ());
-  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
-  g_assert (GBP_IS_FLATPAK_TRANSFER (transfer));
-
-  notif = ide_transfer_create_notification (IDE_TRANSFER (transfer));
-  ide_notification_attach (notif, IDE_OBJECT (self));
+  self->runtimes = g_ptr_array_new_with_free_func (g_object_unref);
 }
 
 static void
-runtime_added_cb (GbpFlatpakRuntimeProvider  *self,
-                  FlatpakInstalledRef        *ref,
-                  GbpFlatpakApplicationAddin *app_addin)
+on_runtime_added_cb (GbpFlatpakRuntimeProvider *self,
+                     GVariant                  *info,
+                     IpcFlatpakService         *service)
+
 {
-  g_autoptr(GbpFlatpakRuntime) new_runtime = NULL;
-  g_autoptr(GError) error = NULL;
+  g_autoptr(GbpFlatpakRuntime) runtime = NULL;
+  g_autoptr(IdeContext) context = NULL;
+  IdeRuntimeManager *manager;
   const gchar *name;
+  const gchar *arch;
+  const gchar *branch;
+  const gchar *sdk_name;
+  const gchar *sdk_branch;
+  const gchar *deploy_dir;
+  const gchar *metadata;
+  gboolean is_extension;
 
   IDE_ENTRY;
 
-  g_assert (GBP_IS_FLATPAK_APPLICATION_ADDIN (app_addin));
-  g_assert (FLATPAK_IS_INSTALLED_REF (ref));
   g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
-  g_assert (IDE_IS_RUNTIME_MANAGER (self->manager));
+  g_assert (info != NULL);
+  g_assert (IPC_IS_FLATPAK_SERVICE (service));
+  g_assert (g_variant_is_of_type (info, RUNTIME_VARIANT_TYPE));
 
-  name = flatpak_ref_get_name (FLATPAK_REF (ref));
-  if (gbp_flatpak_is_ignored (name))
+  if (self->runtimes == NULL)
     IDE_EXIT;
 
-  for (guint i = 0; i < self->runtimes->len; i++)
-    {
-      GbpFlatpakRuntime *runtime = g_ptr_array_index (self->runtimes, i);
+  if (!runtime_variant_parse (info,
+                              &name, &arch, &branch,
+                              &sdk_name, &sdk_branch,
+                              &deploy_dir,
+                              &metadata,
+                              &is_extension))
+    IDE_EXIT;
 
-      /*
-       * If this is the same as a previous runtime, there is no sense in
-       * doing anything about this because our runtime objects don't hold
-       * anything as private state that would matter.
-       */
-      if (is_same_runtime (runtime, ref))
-        IDE_EXIT;
-    }
+  /* Ignore extensions for now */
+  if (is_extension)
+    IDE_EXIT;
 
-  /*
-   * We didn't already have this runtime, so go ahead and just
-   * add it now (and keep a copy so we can find it later).
-   */
-  new_runtime = gbp_flatpak_runtime_new (ref, FALSE, NULL, &error);
+  context = ide_object_ref_context (IDE_OBJECT (self));
+  manager = ide_runtime_manager_from_context (context);
+  runtime = gbp_flatpak_runtime_new (name,
+                                     arch,
+                                     branch,
+                                     sdk_name,
+                                     sdk_branch,
+                                     deploy_dir,
+                                     metadata,
+                                     is_extension);
 
-  if (new_runtime == NULL)
-    {
-      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED))
-        g_warning ("Failed to create GbpFlatpakRuntime: %s", error->message);
-    }
-  else
-    {
-      ide_object_append (IDE_OBJECT (self), IDE_OBJECT (new_runtime));
-      ide_runtime_manager_add (self->manager, IDE_RUNTIME (new_runtime));
-      g_ptr_array_add (self->runtimes, g_steal_pointer (&new_runtime));
-    }
+  g_debug ("Discovered Flatpak runtime %s/%s/%s using SDK %s//%s from %s",
+           name, arch, branch, sdk_name, sdk_branch, deploy_dir);
+
+  g_ptr_array_add (self->runtimes, g_object_ref (runtime));
+  ide_object_append (IDE_OBJECT (self), IDE_OBJECT (runtime));
+  ide_runtime_manager_add (manager, IDE_RUNTIME (runtime));
 
   IDE_EXIT;
+}
+
+static void
+gbp_flatpak_runtime_provider_load_list_runtimes_cb (GObject      *object,
+                                                    GAsyncResult *result,
+                                                    gpointer      user_data)
+{
+  IpcFlatpakService *service = (IpcFlatpakService *)object;
+  g_autoptr(GbpFlatpakRuntimeProvider) self = user_data;
+  g_autoptr(GVariant) runtimes = NULL;
+  g_autoptr(GError) error = NULL;
+  GVariantIter iter;
+  GVariant *info;
+
+  g_assert (IPC_IS_FLATPAK_SERVICE (service));
+  g_assert (G_IS_ASYNC_RESULT (result));
+  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
+
+  if (!ipc_flatpak_service_call_list_runtimes_finish (service, &runtimes, result, &error))
+    {
+      g_warning ("Failed to list flatpak runtimes: %s", error->message);
+      return;
+    }
+
+  g_variant_iter_init (&iter, runtimes);
+  while ((info = g_variant_iter_next_value (&iter)))
+    {
+      on_runtime_added_cb (self, info, service);
+      g_variant_unref (info);
+    }
 }
 
 static void
 gbp_flatpak_runtime_provider_load (IdeRuntimeProvider *provider,
                                    IdeRuntimeManager  *manager)
 {
-  GbpFlatpakRuntimeProvider *self = (GbpFlatpakRuntimeProvider *)provider;
-  GbpFlatpakApplicationAddin *app_addin = gbp_flatpak_application_addin_get_default ();
-  g_autoptr(GPtrArray) refs = NULL;
+  g_autoptr(IpcFlatpakService) service = NULL;
+  g_autoptr(IdeContext) context = NULL;
+  GbpFlatpakClient *client;
 
-  IDE_ENTRY;
-
-  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
+  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (provider));
   g_assert (IDE_IS_RUNTIME_MANAGER (manager));
 
-  g_set_weak_pointer (&self->manager, manager);
-  self->runtimes = g_ptr_array_new_with_free_func (g_object_unref);
-  refs = gbp_flatpak_application_addin_get_runtimes (app_addin);
-
-  g_signal_connect_object (app_addin,
-                           "runtime-added",
-                           G_CALLBACK (runtime_added_cb),
-                           self,
-                           G_CONNECT_SWAPPED);
-
-  for (guint i = 0; i < refs->len; i++)
+  if ((context = ide_object_ref_context (IDE_OBJECT (provider))) &&
+      (client = gbp_flatpak_client_get_default ()) &&
+      (service = gbp_flatpak_client_get_service (client, NULL, NULL)))
     {
-      FlatpakInstalledRef *ref = g_ptr_array_index (refs, i);
-      runtime_added_cb (self, ref, app_addin);
+      g_signal_connect_object (service,
+                               "runtime-added",
+                               G_CALLBACK (on_runtime_added_cb),
+                               provider,
+                               G_CONNECT_SWAPPED);
+      ipc_flatpak_service_call_list_runtimes (service,
+                                              NULL,
+                                              gbp_flatpak_runtime_provider_load_list_runtimes_cb,
+                                              g_object_ref (provider));
     }
-
-  IDE_EXIT;
 }
 
 static void
@@ -223,392 +196,58 @@ gbp_flatpak_runtime_provider_unload (IdeRuntimeProvider *provider,
                                      IdeRuntimeManager  *manager)
 {
   GbpFlatpakRuntimeProvider *self = (GbpFlatpakRuntimeProvider *)provider;
-  GbpFlatpakApplicationAddin *app_addin = gbp_flatpak_application_addin_get_default ();
 
-  IDE_ENTRY;
-
-  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
+  g_assert (IDE_IS_RUNTIME_PROVIDER (provider));
   g_assert (IDE_IS_RUNTIME_MANAGER (manager));
 
-  if (app_addin != NULL)
-    g_signal_handlers_disconnect_by_func (app_addin,
-                                          G_CALLBACK (runtime_added_cb),
-                                          self);
+  if (self->runtimes == NULL || self->runtimes->len == 0)
+    return;
 
-  if (self->runtimes != NULL)
-    {
-      for (guint i= 0; i < self->runtimes->len; i++)
-        {
-          IdeRuntime *runtime = g_ptr_array_index (self->runtimes, i);
-
-          ide_runtime_manager_remove (manager, runtime);
-        }
-    }
-
-  g_clear_pointer (&self->runtimes, g_ptr_array_unref);
-
-  g_clear_weak_pointer (&self->manager);
-
-  IDE_EXIT;
+  for (guint i = 0; i < self->runtimes->len; i++)
+    ide_runtime_manager_remove (manager, g_ptr_array_index (self->runtimes, i));
+  g_ptr_array_remove_range (self->runtimes, 0, self->runtimes->len);
 }
+
+typedef struct
+{
+  char               *runtime_id;
+  char               *transfer_path;
+  char               *sdk;
+  GPtrArray          *to_install;
+  IpcFlatpakTransfer *transfer;
+  IpcFlatpakService  *service;
+  IdeNotification    *notif;
+} Bootstrap;
 
 static void
-gbp_flatpak_runtime_provider_class_init (GbpFlatpakRuntimeProviderClass *klass)
+bootstrap_free (Bootstrap *b)
 {
+  g_clear_pointer (&b->runtime_id, g_free);
+  g_clear_pointer (&b->sdk, g_free);
+  g_clear_pointer (&b->transfer_path, g_free);
+  g_clear_object (&b->notif);
+  g_clear_object (&b->service);
+  g_clear_object (&b->transfer);
+  g_clear_pointer (&b->to_install, g_ptr_array_unref);
+  g_slice_free (Bootstrap, b);
 }
 
-static void
-gbp_flatpak_runtime_provider_init (GbpFlatpakRuntimeProvider *self)
+static IdeRuntime *
+find_runtime (GbpFlatpakRuntimeProvider *self,
+              const char                *runtime_id)
 {
-}
-
-static gboolean
-gbp_flatpak_runtime_provider_provides (IdeRuntimeProvider *provider,
-                                          const gchar        *runtime_id)
-{
-  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (provider));
-  g_assert (runtime_id != NULL);
-
-  return g_str_has_prefix (runtime_id, "flatpak:");
-}
-
-static void
-gbp_flatpak_runtime_provider_install_cb (GObject      *object,
-                                         GAsyncResult *result,
-                                         gpointer      user_data)
-{
-  IdeTransferManager *transfer_manager = (IdeTransferManager *)object;
-  g_autoptr(IdeTask) task = user_data;
-  g_autoptr(GError) error = NULL;
-  InstallRuntime *install;
-
-  IDE_ENTRY;
-
-  g_assert (IDE_IS_TRANSFER_MANAGER (transfer_manager));
-  g_assert (G_IS_ASYNC_RESULT (result));
-  g_assert (IDE_IS_TASK (task));
-
-  install = ide_task_get_task_data (task);
-
-  if (!ide_transfer_manager_execute_finish (transfer_manager, result, &error))
-    {
-      if (!install->failed)
-        {
-          ide_task_return_error (task, g_steal_pointer (&error));
-          install->failed = TRUE;
-        }
-    }
-
-  install->op_count--;
-
-  if (install->op_count == 0 && !install->failed)
-    ide_task_return_boolean (task, TRUE);
-
-  IDE_EXIT;
-}
-
-static void
-gbp_flatpak_runtime_provider_install_docs_cb (GObject      *object,
-                                              GAsyncResult *result,
-                                              gpointer      user_data)
-{
-  IdeTransferManager *transfer_manager = (IdeTransferManager *)object;
-  g_autoptr(IdeTask) task = user_data;
-  g_autoptr(GError) error = NULL;
-  InstallRuntime *install;
-
-  IDE_ENTRY;
-
-  g_assert (IDE_IS_TRANSFER_MANAGER (transfer_manager));
-  g_assert (G_IS_ASYNC_RESULT (result));
-  g_assert (IDE_IS_TASK (task));
-
-  install = ide_task_get_task_data (task);
-
-  /* This error is not fatal */
-  if (!ide_transfer_manager_execute_finish (transfer_manager, result, &error))
-    g_warning ("Failed to install docs: %s", error->message);
-
-  install->op_count--;
-
-  if (install->op_count == 0 && !install->failed)
-    ide_task_return_boolean (task, TRUE);
-
-  IDE_EXIT;
-}
-
-static void
-gbp_flatpak_runtime_provider_locate_sdk_cb (GObject      *object,
-                                            GAsyncResult *result,
-                                            gpointer      user_data)
-{
-  GbpFlatpakApplicationAddin *app_addin = (GbpFlatpakApplicationAddin *)object;
-  g_autoptr(IdeTask) task = user_data;
-  g_autoptr(GError) error = NULL;
-  g_autofree gchar *docs_id = NULL;
-  GbpFlatpakRuntimeProvider *self;
-  IdeTransferManager *transfer_manager;
-  InstallRuntime *install;
-  GCancellable *cancellable;
-  gboolean sdk_matches_runtime = FALSE;
-
-  IDE_ENTRY;
-
-  g_assert (GBP_IS_FLATPAK_APPLICATION_ADDIN (app_addin));
-  g_assert (G_IS_ASYNC_RESULT (result));
-  g_assert (IDE_IS_TASK (task));
-  g_assert (!ide_task_get_completed (task));
-
-  self = ide_task_get_source_object (task);
-  install = ide_task_get_task_data (task);
-  cancellable = ide_task_get_cancellable (task);
-
-  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
-  g_assert (install != NULL);
-  g_assert (!cancellable || G_IS_CANCELLABLE (cancellable));
-
-  transfer_manager = ide_transfer_manager_get_default ();
-
-  if (!gbp_flatpak_application_addin_locate_sdk_finish (app_addin,
-                                                        result,
-                                                        &install->sdk_id,
-                                                        &install->sdk_arch,
-                                                        &install->sdk_branch,
-                                                        &error))
-    {
-      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-        {
-          ide_task_return_error (task, g_steal_pointer (&error));
-          IDE_EXIT;
-        }
-    }
-
-  install->op_count = 3;
-
-  /* Make sure the Platform runtime is installed */
-  if (gbp_flatpak_application_addin_has_runtime (app_addin,
-                                                 install->id,
-                                                 install->arch,
-                                                 install->branch))
-    install->op_count--;
-  else
-    {
-      g_autoptr(GbpFlatpakTransfer) transfer = NULL;
-
-      transfer = gbp_flatpak_transfer_new (install->id,
-                                           install->arch,
-                                           install->branch,
-                                           FALSE);
-      monitor_transfer (self, transfer);
-      ide_transfer_manager_execute_async (transfer_manager,
-                                          IDE_TRANSFER (transfer),
-                                          cancellable,
-                                          gbp_flatpak_runtime_provider_install_cb,
-                                          g_object_ref (task));
-    }
-
-  /* Now make sure the SDK is installed */
-  sdk_matches_runtime = (g_strcmp0 (install->sdk_id, install->id) == 0 &&
-                         g_strcmp0 (install->sdk_arch, install->arch) == 0 &&
-                         g_strcmp0 (install->sdk_branch, install->branch) == 0);
-  if (sdk_matches_runtime || install->sdk_id == NULL ||
-      gbp_flatpak_application_addin_has_runtime (app_addin,
-                                                 install->sdk_id,
-                                                 install->sdk_arch,
-                                                 install->sdk_branch))
-    install->op_count--;
-  else
-    {
-      g_autoptr(GbpFlatpakTransfer) transfer = NULL;
-
-      transfer = gbp_flatpak_transfer_new (install->sdk_id,
-                                           install->sdk_arch,
-                                           install->sdk_branch,
-                                           FALSE);
-      monitor_transfer (self, transfer);
-      ide_transfer_manager_execute_async (transfer_manager,
-                                          IDE_TRANSFER (transfer),
-                                          cancellable,
-                                          gbp_flatpak_runtime_provider_install_cb,
-                                          g_object_ref (task));
-    }
-
-  /* If there is a .Docs runtime for the SDK, install that too */
-  if (install->sdk_id == NULL ||
-      !(docs_id = g_strdup_printf ("%s.Docs", install->sdk_id)) ||
-      gbp_flatpak_application_addin_has_runtime (app_addin,
-                                                 docs_id,
-                                                 install->arch,
-                                                 install->branch))
-    install->op_count--;
-  else
-    {
-      g_autoptr(GbpFlatpakTransfer) transfer = NULL;
-
-      transfer = gbp_flatpak_transfer_new (docs_id,
-                                           install->arch,
-                                           install->branch,
-                                           FALSE);
-      monitor_transfer (self, transfer);
-      ide_transfer_manager_execute_async (transfer_manager,
-                                          IDE_TRANSFER (transfer),
-                                          cancellable,
-                                          gbp_flatpak_runtime_provider_install_docs_cb,
-                                          g_object_ref (task));
-    }
-
-  /* Complete the task now if everything is done */
-  if (install->op_count == 0)
-    ide_task_return_boolean (task, TRUE);
-
-  IDE_EXIT;
-}
-
-static void
-install_task_completed_cb (GbpFlatpakRuntimeProvider *self,
-                           GParamSpec                *pspec,
-                           IdeTask                   *task)
-{
-  g_autoptr(IdeContext) context = NULL;
-
-  IDE_ENTRY;
-
-  g_assert (IDE_IS_MAIN_THREAD ());
-  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
-  g_assert (pspec != NULL);
-  g_assert (IDE_IS_TASK (task));
-
-  if (!ide_task_had_error (task))
-    {
-      context = ide_object_ref_context (IDE_OBJECT (self));
-
-      if (context != NULL)
-        ide_build_manager_invalidate (ide_build_manager_from_context (context));
-    }
-
-  IDE_EXIT;
-}
-
-static void
-gbp_flatpak_runtime_provider_install_async (IdeRuntimeProvider  *provider,
-                                            const gchar         *runtime_id,
-                                            GCancellable        *cancellable,
-                                            GAsyncReadyCallback  callback,
-                                            gpointer             user_data)
-{
-  GbpFlatpakRuntimeProvider *self = (GbpFlatpakRuntimeProvider *)provider;
-  g_autoptr(IdeTask) task = NULL;
-  g_autofree gchar *id = NULL;
-  g_autofree gchar *arch = NULL;
-  g_autofree gchar *branch = NULL;
-  InstallRuntime *install;
-
-  IDE_ENTRY;
-
-  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
-  g_assert (runtime_id != NULL);
-  g_assert (!cancellable || G_IS_CANCELLABLE (cancellable));
-
-  /*
-   * The process here is to first locate the SDK for the runtime, and then
-   * to submit transfers for both the runtime and the SDK if they are not
-   * already installed (this is done from the callback). Since we will have
-   * two async operations in flight, we need to keep track of when both are
-   * done before completing the operation.
-   */
-
-  task = ide_task_new (self, cancellable, callback, user_data);
-  ide_task_set_source_tag (task, gbp_flatpak_runtime_provider_install_async);
-
-  /* Track completion so that we can reload the build pipeline. This
-   * may be necessary to pick up new programs like "meson" that are
-   * provided in the SDK which could cause their plugin to not load.
-   */
-  g_signal_connect_object (task,
-                           "notify::completed",
-                           G_CALLBACK (install_task_completed_cb),
-                           self,
-                           G_CONNECT_SWAPPED);
-
-  if (!g_str_has_prefix (runtime_id, "flatpak:"))
-    IDE_GOTO (unknown_runtime_id);
-
-  if (!gbp_flatpak_split_id (runtime_id + strlen ("flatpak:"), &id, &arch, &branch))
-    IDE_GOTO (unknown_runtime_id);
-
-  install = g_slice_new0 (InstallRuntime);
-  install->id = g_steal_pointer (&id);
-  install->arch = g_steal_pointer (&arch);
-  install->branch = g_steal_pointer (&branch);
-
-  ide_task_set_task_data (task, install, install_runtime_free);
-
-  gbp_flatpak_application_addin_locate_sdk_async (gbp_flatpak_application_addin_get_default (),
-                                                  install->id,
-                                                  install->arch,
-                                                  install->branch,
-                                                  cancellable,
-                                                  gbp_flatpak_runtime_provider_locate_sdk_cb,
-                                                  g_steal_pointer (&task));
-
-  IDE_EXIT;
-
-unknown_runtime_id:
-  ide_task_return_new_error (task,
-                             G_IO_ERROR,
-                             G_IO_ERROR_NOT_SUPPORTED,
-                             "Unknown runtime_id %s",
-                             runtime_id);
-
-  IDE_EXIT;
-}
-
-static gboolean
-gbp_flatpak_runtime_provider_install_finish (IdeRuntimeProvider  *provider,
-                                             GAsyncResult        *result,
-                                             GError             **error)
-{
-  gboolean ret;
-
-  IDE_ENTRY;
-
-  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (provider));
-  g_assert (IDE_IS_TASK (result));
-
-  ret = ide_task_propagate_boolean (IDE_TASK (result), error);
-
-  IDE_RETURN (ret);
-}
-
-static void
-gbp_flatpak_runtime_provider_bootstrap_complete (IdeTask *task)
-{
-  IdeRuntimeManager *runtime_manager;
-  BootstrapState *state;
+  IdeRuntimeManager *manager;
   IdeContext *context;
   IdeRuntime *runtime;
-  IdeObject *object;
 
-  g_assert (IDE_IS_MAIN_THREAD ());
-  g_assert (IDE_IS_TASK (task));
+  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
+  g_assert (runtime_id != NULL);
 
-  state = ide_task_get_task_data (task);
+  context = ide_object_get_context (IDE_OBJECT (self));
+  manager = ide_runtime_manager_from_context (context);
+  runtime = ide_runtime_manager_get_runtime (manager, runtime_id);
 
-  g_assert (state != NULL);
-  g_assert (state->count == 0);
-
-  object = ide_task_get_source_object (task);
-  context = ide_object_get_context (object);
-  runtime_manager = ide_runtime_manager_from_context (context);
-  runtime = ide_runtime_manager_get_runtime (runtime_manager, state->runtime_id);
-
-  if (runtime != NULL)
-    ide_task_return_pointer (task, g_object_ref (runtime), g_object_unref);
-  else
-    ide_task_return_new_error (task,
-                               G_IO_ERROR,
-                               G_IO_ERROR_FAILED,
-                               "Failed to install runtime for build");
+  return runtime ? g_object_ref (runtime) : NULL;
 }
 
 static void
@@ -616,132 +255,238 @@ gbp_flatpak_runtime_provider_bootstrap_install_cb (GObject      *object,
                                                    GAsyncResult *result,
                                                    gpointer      user_data)
 {
-  IdeTransferManager *transfer_manager = (IdeTransferManager *)object;
+  GbpFlatpakRuntimeProvider *self;
+  IpcFlatpakService *service = (IpcFlatpakService *)object;
+  g_autoptr(IdeRuntime) runtime = NULL;
   g_autoptr(IdeTask) task = user_data;
   g_autoptr(GError) error = NULL;
-  BootstrapState *state;
+  Bootstrap *state;
 
-  g_assert (IDE_IS_MAIN_THREAD ());
-  g_assert (IDE_IS_TRANSFER_MANAGER (transfer_manager));
+  IDE_ENTRY;
+
+  g_assert (IPC_IS_FLATPAK_SERVICE (service));
   g_assert (G_IS_ASYNC_RESULT (result));
   g_assert (IDE_IS_TASK (task));
 
   state = ide_task_get_task_data (task);
-
-  g_assert (state != NULL);
-  g_assert (state->count > 0);
-
-  state->count--;
-
-  /* We might still be able to find the runtime if the transfer fails */
-  ide_transfer_manager_execute_finish (transfer_manager, result, &error);
-
-  if (error != NULL)
-    g_debug ("Transfer failed: %s", error->message);
-
-  if (!ide_task_had_error (task) && state->count == 0)
-    gbp_flatpak_runtime_provider_bootstrap_complete (task);
-  else if (!ide_task_had_error (task))
-    ide_task_return_error (task, g_steal_pointer (&error));
-}
-
-static gchar *
-resolve_extension_branch (GbpFlatpakRuntimeProvider *self,
-                          const gchar               *sdk,
-                          const gchar               *extension)
-{
-  GbpFlatpakApplicationAddin *addin;
-  g_autofree gchar *resolved = NULL;
-  g_autofree gchar *branch = NULL;
+  self = ide_task_get_source_object (task);
 
   IDE_ENTRY;
 
   g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
-  g_assert (extension != NULL);
+  g_assert (state != NULL);
+  g_assert (IDE_IS_NOTIFICATION (state->notif));
 
-  IDE_TRACE_MSG ("Resolving extension %s for SDK %s",
-                 extension, sdk);
+  if (!ipc_flatpak_service_call_install_finish (service, result, &error))
+    ide_task_return_error (task, g_steal_pointer (&error));
+  else if (!(runtime = find_runtime (self, state->runtime_id)))
+    ide_task_return_new_error (task,
+                               G_IO_ERROR,
+                               G_IO_ERROR_NOT_FOUND,
+                               "Failed to locate %s after installation",
+                               state->runtime_id);
+  else
+    ide_task_return_pointer (task, g_steal_pointer (&runtime), g_object_unref);
 
-  if (extension == NULL)
-    IDE_RETURN (NULL);
-
-  addin = gbp_flatpak_application_addin_get_default ();
-  resolved = gbp_flatpak_application_addin_resolve_extension (addin, sdk, extension);
-
-  if (resolved == NULL || !gbp_flatpak_split_id (resolved, NULL, NULL, &branch))
-    IDE_RETURN (NULL);
-
-  IDE_RETURN (g_steal_pointer (&branch));
+  IDE_EXIT;
 }
 
-static void
-gbp_flatpak_runtime_provider_bootstrap_cb (GObject      *object,
-                                           GAsyncResult *result,
-                                           gpointer      user_data)
+static gboolean
+gbp_flatpak_runtime_provider_bootstrap_complete (gpointer data)
 {
-  GbpFlatpakInstallDialog *dialog = (GbpFlatpakInstallDialog *)object;
   GbpFlatpakRuntimeProvider *self;
-  g_autoptr(IdeTask) task = user_data;
-  g_autoptr(GError) error = NULL;
-  g_auto(GStrv) runtimes = NULL;
-  IdeTransferManager *transfer_manager;
-  BootstrapState *state;
-  const gchar *sdk;
+  g_autoptr(IdeRuntime) runtime = NULL;
+  IdeTask *task = data;
+  Bootstrap *state;
 
-  g_assert (IDE_IS_MAIN_THREAD ());
-  g_assert (GBP_IS_FLATPAK_INSTALL_DIALOG (dialog));
-  g_assert (G_IS_ASYNC_RESULT (result));
+  IDE_ENTRY;
+
   g_assert (IDE_IS_TASK (task));
-
-  if (ide_task_had_error (task))
-    return;
 
   self = ide_task_get_source_object (task);
   state = ide_task_get_task_data (task);
 
   g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (self));
   g_assert (state != NULL);
+  g_assert (!state->notif || IDE_IS_NOTIFICATION (state->notif));
+  g_assert (!state->service || IPC_IS_FLATPAK_SERVICE (state->service));
+  g_assert (!state->transfer || IPC_IS_FLATPAK_TRANSFER (state->transfer));
 
-  if (!gbp_flatpak_install_dialog_run_finish (dialog, result, &error))
+  if (state->to_install->len > 0)
     {
-      gbp_flatpak_runtime_provider_bootstrap_complete (task);
-      return;
+      g_autofree char *detailed_action_name = NULL;
+      g_autoptr(GIcon) icon = g_themed_icon_new ("builder-build-stop-symbolic");
+
+      g_assert (IDE_IS_NOTIFICATION (state->notif));
+      g_assert (IPC_IS_FLATPAK_SERVICE (state->service));
+      g_assert (IPC_IS_FLATPAK_TRANSFER (state->transfer));
+
+      /* Register an action that can be cancelled */
+      detailed_action_name = ide_application_create_cancel_action (IDE_APPLICATION_DEFAULT,
+                                                                   ide_task_get_cancellable (task));
+      ide_notification_add_button (state->notif, _("_Cancel"), icon, detailed_action_name);
+      ide_notification_attach (state->notif, IDE_OBJECT (self));
+
+      ipc_flatpak_service_call_install (state->service,
+                                        (const char * const *)state->to_install->pdata,
+                                        TRUE,
+                                        state->transfer_path,
+                                        "",
+                                        ide_task_get_cancellable (task),
+                                        gbp_flatpak_runtime_provider_bootstrap_install_cb,
+                                        g_object_ref (task));
+    }
+  else
+    {
+      if (!(runtime = find_runtime (self, state->runtime_id)))
+        ide_task_return_new_error (task,
+                                   G_IO_ERROR,
+                                   G_IO_ERROR_NOT_FOUND,
+                                   "Failed to locate runtime %s",
+                                   state->runtime_id);
+      else
+        ide_task_return_pointer (task, g_steal_pointer (&runtime), g_object_unref);
     }
 
-  runtimes = gbp_flatpak_install_dialog_get_runtimes (dialog);
-  transfer_manager = ide_transfer_manager_get_default ();
-  sdk = gbp_flatpak_install_dialog_get_sdk (dialog);
+  IDE_RETURN (G_SOURCE_REMOVE);
+}
 
-  for (guint i = 0; runtimes[i]; i++)
+static void
+gbp_flatpak_runtime_provider_bootstrap (IdeTask      *task,
+                                        gpointer      source_object,
+                                        gpointer      task_data,
+                                        GCancellable *cancellable)
+{
+  g_autoptr(IdeContext) context = NULL;
+  g_autoptr(IpcFlatpakService) service = NULL;
+  g_autoptr(IpcFlatpakTransfer) transfer = NULL;
+  g_autoptr(IdeNotification) notif = NULL;
+  Bootstrap *state = task_data;
+  g_autoptr(GString) debug_install = NULL;
+  GbpFlatpakClient *client;
+
+  IDE_ENTRY;
+
+  g_assert (IDE_IS_TASK (task));
+  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (source_object));
+  g_assert (state != NULL);
+  g_assert (state->to_install != NULL);
+  g_assert (state->to_install->len > 0);
+
+  if (!(context = ide_object_ref_context (source_object)) ||
+      !(client = gbp_flatpak_client_get_default ()) ||
+      !(service = gbp_flatpak_client_get_service (client, NULL, NULL)))
     {
-      g_autofree gchar *name = NULL;
-      g_autofree gchar *arch = NULL;
-      g_autofree gchar *branch = NULL;
+      ide_task_return_new_error (task,
+                                 G_IO_ERROR,
+                                 G_IO_ERROR_CANCELLED,
+                                 "Operation was cancelled");
+      IDE_GOTO (failure);
+    }
 
-      if (gbp_flatpak_split_id (runtimes[i], &name, &arch, &branch))
+  debug_install = g_string_new (NULL);
+  for (guint i = 0; i < state->to_install->len; i++)
+    g_string_append_printf (debug_install,
+                            "%s, ",
+                            (char *)g_ptr_array_index(state->to_install, i));
+  if (debug_install->len > 2)
+    g_string_truncate (debug_install, debug_install->len-2);
+  g_debug ("Needed flatpak runtimes: %s", debug_install->str);
+
+  /* Filter out anything we can't find or is already installed */
+  for (guint i = state->to_install->len; i > 0; i--)
+    {
+      char *id = g_ptr_array_index (state->to_install, i-1);
+      gboolean is_known = FALSE;
+      gint64 size = 0;
+
+      /* If this is a plain SDK extension name, resolve it now */
+      if (strchr (id, '/') == NULL)
         {
-          g_autoptr(GbpFlatpakTransfer) transfer = NULL;
-          g_autoptr(IdeNotification) notif = NULL;
+          g_autofree char *resolved = NULL;
 
-          state->count++;
-
-          if (branch == NULL)
-            branch = resolve_extension_branch (self, sdk, name);
-
-          transfer = gbp_flatpak_transfer_new (name, arch, branch, FALSE);
-          notif = ide_transfer_create_notification (IDE_TRANSFER (transfer));
-          ide_notification_attach (notif, IDE_OBJECT (self));
-
-          ide_transfer_manager_execute_async (transfer_manager,
-                                              IDE_TRANSFER (transfer),
-                                              ide_task_get_cancellable (task),
-                                              gbp_flatpak_runtime_provider_bootstrap_install_cb,
-                                              g_object_ref (task));
+          if (ipc_flatpak_service_call_resolve_extension_sync (service, state->sdk, id, &resolved, NULL, NULL))
+            {
+              G_GNUC_UNUSED g_autofree char *old = g_steal_pointer (&id);
+              g_ptr_array_index (state->to_install, i-1) = id = g_steal_pointer (&resolved);
+            }
         }
+
+      /* If we're missing runtime/ (or app/) prefix, add it now */
+      if (!g_str_has_prefix (id, "runtime/") && !g_str_has_prefix (id, "app/"))
+        {
+          g_autofree char *old = id;
+          g_ptr_array_index (state->to_install, i-1) = id = g_strdup_printf ("runtime/%s", old);
+        }
+
+      /* Ignore this unless we know it can be installed from a peer */
+      if (!ipc_flatpak_service_call_runtime_is_known_sync (service, id, &is_known, &size, NULL, NULL) ||
+          is_known == FALSE)
+        g_ptr_array_remove_index (state->to_install, i-1);
     }
 
-  if (state->count == 0)
-    gbp_flatpak_runtime_provider_bootstrap_complete (task);
+  /* Now create a transfer to install the rest */
+  if (state->to_install->len > 0)
+    {
+      g_autofree char *guid = g_dbus_generate_guid ();
+      g_autofree char *transfer_path = g_strdup_printf ("/org/gnome/Builder/Flatpak/Transfer/%s", guid);
+      g_autoptr(GError) error = NULL;
+
+      notif = ide_notification_new ();
+      ide_notification_set_icon_name (notif, "system-software-install-symbolic");
+      ide_notification_set_title (notif, _("Installing Necessary SDKs"));
+      ide_notification_set_body (notif, _("Builder is installing Software Development Kits necessary for building your application."));
+      ide_notification_set_has_progress (notif, TRUE);
+      ide_notification_set_progress_is_imprecise (notif, FALSE);
+
+      g_signal_connect_object (task,
+                               "notify::completed",
+                               G_CALLBACK (ide_notification_withdraw),
+                               notif,
+                               G_CONNECT_SWAPPED);
+
+      transfer = ipc_flatpak_transfer_impl_new (context);
+      g_signal_connect_object (ide_task_get_cancellable (task),
+                               "cancelled",
+                               G_CALLBACK (ipc_flatpak_transfer_emit_cancel),
+                               transfer,
+                               G_CONNECT_SWAPPED);
+      g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (transfer),
+                                        g_dbus_proxy_get_connection (G_DBUS_PROXY (service)),
+                                        transfer_path,
+                                        &error);
+
+      if (error != NULL)
+        {
+          g_warning ("Failed to register transfer object on D-Bus: %s", error->message);
+          g_clear_error (&error);
+        }
+
+      g_object_bind_property (transfer, "fraction", notif, "progress", G_BINDING_SYNC_CREATE);
+      g_object_bind_property (transfer, "message", notif, "body", G_BINDING_DEFAULT);
+
+      state->service = g_object_ref (service);
+      state->notif = g_object_ref (notif);
+      state->transfer = g_object_ref (transfer);
+      state->transfer_path = g_strdup (transfer_path);
+
+      g_ptr_array_add (state->to_install, NULL);
+    }
+
+  g_timeout_add_full (G_PRIORITY_DEFAULT,
+                      0,
+                      gbp_flatpak_runtime_provider_bootstrap_complete,
+                      g_object_ref (task),
+                      g_object_unref);
+
+  IDE_EXIT;
+
+failure:
+
+  if (transfer != NULL)
+    g_dbus_interface_skeleton_unexport (G_DBUS_INTERFACE_SKELETON (transfer));
+
+  IDE_EXIT;
 }
 
 static void
@@ -752,20 +497,11 @@ gbp_flatpak_runtime_provider_bootstrap_async (IdeRuntimeProvider  *provider,
                                               gpointer             user_data)
 {
   GbpFlatpakRuntimeProvider *self = (GbpFlatpakRuntimeProvider *)provider;
-  g_autofree gchar *name = NULL;
-  g_autofree gchar *arch = NULL;
-  g_autofree gchar *branch = NULL;
-  g_autofree gchar *docs_id = NULL;
   g_autoptr(IdeTask) task = NULL;
-  g_auto(GStrv) runtimes = NULL;
-  GbpFlatpakApplicationAddin *addin;
-  GbpFlatpakInstallDialog *dialog;
-  BootstrapState *state;
-  IdeWorkbench *workbench;
-  IdeWorkspace *workspace;
-  const gchar *runtime_id;
-  const gchar *build_arch;
-  IdeContext *context;
+  g_autofree char *full_sdk = NULL;
+  g_autofree char *full_platform = NULL;
+  const char *arch;
+  Bootstrap *state;
   IdeConfig *config;
 
   IDE_ENTRY;
@@ -774,132 +510,83 @@ gbp_flatpak_runtime_provider_bootstrap_async (IdeRuntimeProvider  *provider,
   g_assert (IDE_IS_PIPELINE (pipeline));
   g_assert (!cancellable || G_IS_CANCELLABLE (cancellable));
 
-  task = ide_task_new (self, cancellable, callback, user_data);
-  ide_task_set_release_on_propagate (task, FALSE);
-  ide_task_set_source_tag (task, gbp_flatpak_runtime_provider_bootstrap_async);
-
-  context = ide_object_get_context (IDE_OBJECT (self));
-  build_arch = ide_pipeline_get_arch (pipeline);
+  arch = ide_pipeline_get_arch (pipeline);
   config = ide_pipeline_get_config (pipeline);
-  runtime_id = ide_config_get_runtime_id (config);
 
-  if (runtime_id == NULL ||
-      !g_str_has_prefix (runtime_id, "flatpak:") ||
-      !gbp_flatpak_split_id (runtime_id + strlen ("flatpak:"), &name, &arch, &branch))
+  state = g_slice_new0 (Bootstrap);
+  state->runtime_id = g_strdup (ide_config_get_runtime_id (config));
+  state->to_install = g_ptr_array_new_with_free_func (g_free);
+
+  task = ide_task_new (self, cancellable, callback, user_data);
+  ide_task_set_source_tag (task, gbp_flatpak_runtime_provider_bootstrap_async);
+  ide_task_set_task_data (task, state, bootstrap_free);
+  ide_task_set_return_on_cancel (task, FALSE);
+  ide_task_set_release_on_propagate (task, FALSE);
+
+  /* Collect all of the runtimes that could be needed */
+  if (GBP_IS_FLATPAK_MANIFEST (config))
     {
-      ide_task_return_new_error (task,
-                                 G_IO_ERROR,
-                                 G_IO_ERROR_NOT_FOUND,
-                                 "No runtime available");
-      IDE_EXIT;
-    }
+      const char *sdk = gbp_flatpak_manifest_get_sdk (GBP_FLATPAK_MANIFEST (config));
+      const char *platform = gbp_flatpak_manifest_get_platform (GBP_FLATPAK_MANIFEST (config));
+      const char *branch = gbp_flatpak_manifest_get_branch (GBP_FLATPAK_MANIFEST (config));
+      const char * const *extensions = gbp_flatpak_manifest_get_sdk_extensions (GBP_FLATPAK_MANIFEST (config));
 
-  /* Create dialog to potentially query user if we are allowed to install */
-  workbench = ide_workbench_from_context (context);
-  workspace = ide_workbench_get_current_workspace (workbench);
-  dialog = gbp_flatpak_install_dialog_new (GTK_WINDOW (workspace));
-  gtk_window_group_add_window (GTK_WINDOW_GROUP (workbench), GTK_WINDOW (dialog));
+      if (sdk == NULL)
+        sdk = platform;
 
-  /* Create state for async op */
-  state = g_slice_new0 (BootstrapState);
-  state->config = g_object_ref (config);
-  state->runtime_id = g_strdup_printf ("flatpak:%s/%s/%s", name, build_arch, branch);
-  state->name = g_steal_pointer (&name);
-  state->branch = g_steal_pointer (&branch);
-  state->arch = g_strdup (build_arch);
-  ide_task_set_task_data (task, state, bootstrap_state_free);
+      if (branch == NULL)
+        branch = "master";
 
-  addin = gbp_flatpak_application_addin_get_default ();
+      full_sdk = g_strdup_printf ("runtime/%s/%s/%s", sdk, arch, branch);
+      full_platform = g_strdup_printf ("runtime/%s/%s/%s", platform, arch, branch);
 
-  /* Add all the runtimes the manifest needs */
-  if (GBP_IS_FLATPAK_MANIFEST (state->config))
-    {
-      g_auto(GStrv) all = NULL;
-      g_autofree gchar *sdk_full = NULL;
-      g_autofree gchar *platform_full = NULL;
-      const char * const *sdk_extensions;
-      const gchar *sdk;
-      const gchar *platform;
+      g_ptr_array_add (state->to_install, g_strdup (full_sdk));
+      if (g_strcmp0 (full_sdk, full_platform) != 0)
+        g_ptr_array_add (state->to_install, g_strdup (full_platform));
 
-      /* Tell the dialog about the SDK so it can resolve common ancestors for
-       * SDK extensions missing a branch name.
-       */
-      platform = gbp_flatpak_manifest_get_platform (GBP_FLATPAK_MANIFEST (state->config));
-      platform_full = g_strdup_printf ("%s/%s/%s", platform, state->arch, state->branch);
-      sdk = gbp_flatpak_manifest_get_sdk (GBP_FLATPAK_MANIFEST (state->config));
-      sdk_full = g_strdup_printf ("%s/%s/%s", sdk, state->arch, state->branch);
-      sdk_extensions = gbp_flatpak_manifest_get_sdk_extensions (GBP_FLATPAK_MANIFEST (state->config));
-
-      gbp_flatpak_install_dialog_set_sdk (dialog, sdk_full);
-
-      /* Make sure we have the SDK installed (org.gnome.Sdk) */
-      if (!gbp_flatpak_application_addin_has_runtime (addin, sdk, state->arch, state->branch))
-        gbp_flatpak_install_dialog_add_runtime (dialog, sdk_full);
-
-      /* Make sure we have the platform for running it too (org.gnome.Platform) */
-      if (!gbp_flatpak_application_addin_has_runtime (addin, platform, state->arch, state->branch))
-        gbp_flatpak_install_dialog_add_runtime (dialog, platform_full);
-
-      /* Resolve the extensions ASAP so we can show them in the dialog and also
-       * ensure that we have the right extension for the SDK.
-       */
-      if (sdk_extensions != NULL)
+      if (extensions != NULL)
         {
-          for (guint i = 0; sdk_extensions[i]; i++)
-            {
-              g_autofree char *resolved = gbp_flatpak_application_addin_resolve_extension (addin, sdk_full, sdk_extensions[i]);
-
-              if (resolved == NULL)
-                {
-                  gbp_flatpak_install_dialog_add_runtime (dialog, sdk_extensions[i]);
-                }
-              else
-                {
-                  g_autofree char *resolved_id = NULL;
-                  g_autofree char *resolved_arch = NULL;
-                  g_autofree char *resolved_branch = NULL;
-
-                  if (gbp_flatpak_split_id (resolved, &resolved_id, &resolved_arch, &resolved_branch) &&
-                      !gbp_flatpak_application_addin_has_runtime (addin, resolved_id, resolved_arch, resolved_branch))
-                    gbp_flatpak_install_dialog_add_runtime (dialog, resolved);
-                }
-            }
+          for (guint i = 0; extensions[i]; i++)
+            g_ptr_array_add (state->to_install, g_strdup (extensions[i]));
         }
     }
   else
     {
-      /* Add runtime specifically (in case no manifest is set) */
-      if (!gbp_flatpak_application_addin_has_runtime (addin, state->name, state->arch, state->branch))
-        gbp_flatpak_install_dialog_add_runtime_full (dialog, state->name, state->arch, state->branch);
+      const char *runtime_id = ide_config_get_runtime_id (config);
+
+      if (g_str_has_prefix (runtime_id, "flatpak:"))
+        {
+          g_autofree char *resolved_id = NULL;
+          g_autofree char *resolved_arch = NULL;
+          g_autofree char *resolved_branch = NULL;
+
+          if (gbp_flatpak_split_id (runtime_id + strlen ("flatpak:"),
+                                    &resolved_id,
+                                    &resolved_arch,
+                                    &resolved_branch))
+            {
+              full_sdk = g_strdup_printf ("runtime/%s/%s/%s",
+                                          resolved_id,
+                                          arch,
+                                          resolved_branch ?: "master");
+              g_ptr_array_add (state->to_install, g_strdup (full_sdk));
+            }
+        }
     }
 
-  runtimes = gbp_flatpak_install_dialog_get_runtimes (dialog);
+  state->sdk = g_strdup (full_sdk);
 
-  if (runtimes == NULL || runtimes[0] == NULL)
+  if (state->to_install->len == 0)
     {
-      gtk_widget_destroy (GTK_WIDGET (dialog));
-      gbp_flatpak_runtime_provider_bootstrap_complete (task);
+      ide_task_return_new_error (task,
+                                 G_IO_ERROR,
+                                 G_IO_ERROR_NOT_SUPPORTED,
+                                 "No runtime provided to bootstrap");
+      g_warn_if_reached ();
+      IDE_EXIT;
     }
-  else
-    {
-      /* We need to invalidate the pipeline if there are runtimes
-       * to install after they've been installed or we risk having
-       * missing bits like meson not found.
-       */
-      g_signal_connect_object (task,
-                               "notify::completed",
-                               G_CALLBACK (install_task_completed_cb),
-                               self,
-                               G_CONNECT_SWAPPED);
 
-      /* Do not propagate cancellable to this operation or we risk cancelling
-       * in-flight operations that the user is expecting to complete.
-       */
-      gbp_flatpak_install_dialog_run_async (dialog,
-                                            NULL,
-                                            gbp_flatpak_runtime_provider_bootstrap_cb,
-                                            g_object_ref (task));
-    }
+  ide_task_run_in_thread (task, gbp_flatpak_runtime_provider_bootstrap);
 
   IDE_EXIT;
 }
@@ -913,12 +600,19 @@ gbp_flatpak_runtime_provider_bootstrap_finish (IdeRuntimeProvider  *provider,
 
   IDE_ENTRY;
 
-  g_assert (GBP_IS_FLATPAK_RUNTIME_PROVIDER (provider));
-  g_assert (IDE_IS_TASK (result));
+  g_return_val_if_fail (GBP_IS_FLATPAK_RUNTIME_PROVIDER (provider), NULL);
+  g_return_val_if_fail (IDE_IS_TASK (result), NULL);
 
   ret = ide_task_propagate_pointer (IDE_TASK (result), error);
 
   IDE_RETURN (ret);
+}
+
+static gboolean
+gbp_flatpak_runtime_provider_provides (IdeRuntimeProvider *provider,
+                                       const char         *runtime_id)
+{
+  return g_str_has_prefix (runtime_id, "flatpak:");
 }
 
 static void
@@ -926,9 +620,7 @@ runtime_provider_iface_init (IdeRuntimeProviderInterface *iface)
 {
   iface->load = gbp_flatpak_runtime_provider_load;
   iface->unload = gbp_flatpak_runtime_provider_unload;
-  iface->provides = gbp_flatpak_runtime_provider_provides;
-  iface->install_async = gbp_flatpak_runtime_provider_install_async;
-  iface->install_finish = gbp_flatpak_runtime_provider_install_finish;
   iface->bootstrap_async = gbp_flatpak_runtime_provider_bootstrap_async;
   iface->bootstrap_finish = gbp_flatpak_runtime_provider_bootstrap_finish;
+  iface->provides = gbp_flatpak_runtime_provider_provides;
 }

@@ -379,6 +379,7 @@ ide_debugger_editor_addin_load (IdeEditorAddin   *addin,
   IdeContext *context;
   IdeRunManager *run_manager;
   IdeDebugManager *debug_manager;
+  IdeWorkspace *workspace;
 
   IDE_ENTRY;
 
@@ -387,8 +388,9 @@ ide_debugger_editor_addin_load (IdeEditorAddin   *addin,
 
   self->editor = editor;
   self->workbench = ide_widget_get_workbench (GTK_WIDGET (editor));
+  workspace = ide_widget_get_workspace (GTK_WIDGET (editor));
 
-  if (!ide_workbench_has_project (self->workbench))
+  if (!ide_workbench_has_project (self->workbench) || !IDE_IS_PRIMARY_WORKSPACE (workspace))
     return;
 
   context = ide_widget_get_context (GTK_WIDGET (editor));
@@ -484,7 +486,7 @@ editor_addin_iface_init (IdeEditorAddinInterface *iface)
   iface->unload = ide_debugger_editor_addin_unload;
 }
 
-G_DEFINE_TYPE_WITH_CODE (IdeDebuggerEditorAddin, ide_debugger_editor_addin, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (IdeDebuggerEditorAddin, ide_debugger_editor_addin, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_EDITOR_ADDIN, editor_addin_iface_init))
 
 static void

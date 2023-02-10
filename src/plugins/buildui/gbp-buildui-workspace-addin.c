@@ -214,6 +214,7 @@ gbp_buildui_workspace_addin_build_started (GbpBuilduiWorkspaceAddin *self,
                                            IdeBuildManager          *build_manager)
 {
   // IdePipelinePhase phase;
+  g_autoptr(GSettings) settings = NULL;
 
   IDE_ENTRY;
 
@@ -225,6 +226,10 @@ gbp_buildui_workspace_addin_build_started (GbpBuilduiWorkspaceAddin *self,
   // phase = ide_pipeline_get_requested_phase (pipeline);
 
   // IDE_TRACE_MSG ("Pipeline phase 0x%x requested", phase);
+
+  settings = g_settings_new ("org.alusus.alwarsha.build");
+  if (g_settings_get_boolean (settings, "clear-build-log-pane"))
+      gbp_buildui_log_pane_clear (self->log_pane);
 
   // if (phase > IDE_PIPELINE_PHASE_CONFIGURE)
   //   dzl_dock_item_present (DZL_DOCK_ITEM (self->log_pane));
@@ -272,7 +277,7 @@ gbp_buildui_workspace_addin_load (IdeWorkspaceAddin *addin,
                                               "build-manager.rebuild");
 
   // headerbar = ide_workspace_get_header_bar (workspace);
-  // omnibar = IDE_OMNI_BAR (gtk_header_bar_get_custom_title (GTK_HEADER_BAR (headerbar)));
+  // omnibar = IDE_OMNI_BAR (hdy_header_bar_get_custom_title (HDY_HEADER_BAR (headerbar)));
   workbench = ide_widget_get_workbench (GTK_WIDGET (workspace));
   context = ide_workbench_get_context (workbench);
   build_manager = ide_build_manager_from_context (context);
@@ -352,7 +357,7 @@ gbp_buildui_workspace_addin_load (IdeWorkspaceAddin *addin,
   self->cancel_button = g_object_new (GTK_TYPE_BUTTON,
                                       "action-name", "build-manager.cancel",
                                       "child", g_object_new (GTK_TYPE_IMAGE,
-                                                             "icon-name", "process-stop-symbolic",
+                                                             "icon-name", "builder-build-stop-symbolic",
                                                              "visible", TRUE,
                                                              NULL),
                                       "focus-on-click", FALSE,
@@ -376,7 +381,7 @@ gbp_buildui_workspace_addin_load (IdeWorkspaceAddin *addin,
   // ide_editor_sidebar_add_section (sidebar,
   //                                 "build-issues",
   //                                 _("Build Issues"),
-  //                                 "builder-build-symbolic",
+  //                                 "builder-build-issues-symbolic",
   //                                 NULL, NULL,
   //                                 GTK_WIDGET (self->pane),
   //                                 100);
@@ -462,7 +467,7 @@ workspace_addin_iface_init (IdeWorkspaceAddinInterface *iface)
   iface->unload = gbp_buildui_workspace_addin_unload;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GbpBuilduiWorkspaceAddin, gbp_buildui_workspace_addin, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpBuilduiWorkspaceAddin, gbp_buildui_workspace_addin, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_WORKSPACE_ADDIN, workspace_addin_iface_init))
 
 static void

@@ -37,7 +37,7 @@
 
 static void editor_addin_iface_init (IdeEditorAddinInterface *iface);
 
-G_DEFINE_TYPE_EXTENDED (GbBeautifierEditorAddin, gb_beautifier_editor_addin, IDE_TYPE_OBJECT, 0,
+G_DEFINE_TYPE_EXTENDED (GbBeautifierEditorAddin, gb_beautifier_editor_addin, IDE_TYPE_OBJECT, G_TYPE_FLAG_FINAL,
                         G_IMPLEMENT_INTERFACE (IDE_TYPE_EDITOR_ADDIN, editor_addin_iface_init))
 
 static void
@@ -219,6 +219,7 @@ view_populate_submenu (GbBeautifierEditorAddin *self,
             {
               item = g_menu_item_new (entry->name, NULL);
               g_menu_item_set_action_and_target (item, "view.beautify-default", "s", param);
+              g_menu_item_set_attribute (item, "accel", "s", "<ctrl><alt>b");
               g_menu_append_item (default_menu, item);
 
               default_set = TRUE;

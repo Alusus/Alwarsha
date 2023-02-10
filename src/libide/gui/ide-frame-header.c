@@ -79,7 +79,7 @@ enum {
   N_PROPS
 };
 
-G_DEFINE_TYPE (IdeFrameHeader, ide_frame_header, DZL_TYPE_PRIORITY_BOX)
+G_DEFINE_FINAL_TYPE (IdeFrameHeader, ide_frame_header, DZL_TYPE_PRIORITY_BOX)
 
 static GParamSpec *properties [N_PROPS];
 
@@ -274,6 +274,7 @@ create_document_row (gpointer item,
                                                       "icon-name", "window-close-symbolic",
                                                       "visible", TRUE,
                                                       NULL),
+                               "valign", GTK_ALIGN_CENTER,
                                "visible", TRUE,
                                NULL);
   g_signal_connect_object (close_button,
@@ -282,7 +283,7 @@ create_document_row (gpointer item,
                            self, 0);
   dzl_gtk_widget_add_style_class (GTK_WIDGET (close_button), "image-button");
 
-  g_object_bind_property (item, "icon-name", image, "icon-name", G_BINDING_SYNC_CREATE);
+  g_object_bind_property (item, "icon", image, "gicon", G_BINDING_SYNC_CREATE);
   g_object_bind_property_full (item, "modified", label, "attributes", G_BINDING_SYNC_CREATE,
                                modified_to_attrs, NULL, NULL, NULL);
   g_object_bind_property (item, "title", label, "label", G_BINDING_SYNC_CREATE);

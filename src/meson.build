@@ -70,7 +70,7 @@ gnome_builder_static = [
   plugins,
 ]
 
-if libwebkit_dep.found()
+if get_option('webkit').enabled()
   gnome_builder_deps += [libide_webkit_dep]
   gnome_builder_static += [libide_webkit]
 endif
@@ -80,7 +80,6 @@ if libsysprof_capture.found()
 endif
 
 gnome_builder = executable('alwarsha', 'main.c', 'bug-buddy.c',
-           gui_app: true,
            install: true,
             c_args: libide_args + exe_c_args + release_args,
          link_args: exe_link_args,
@@ -99,7 +98,7 @@ pkgconfig.generate(
          name: 'alwarsha-@0@.@1@'.format(MAJOR_VERSION, MINOR_VERSION),
      filebase: 'alwarsha-@0@.@1@'.format(MAJOR_VERSION, MINOR_VERSION),
   description: 'Contains the plugin container for Alwarsha.',
-  install_dir: join_paths(pkglibdir, 'pkgconfig'),
+  install_dir: join_paths(get_option('libdir'), 'pkgconfig'),
      requires: [ 'gio-2.0', 'gio-unix-2.0', 'gtk+-3.0', 'gtksourceview-4', 'libdazzle-1.0', 'vte-2.91', 'template-glib-1.0', 'libpeas-1.0' ],
 )
 

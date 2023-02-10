@@ -73,7 +73,7 @@ enum {
   N_PROPS
 };
 
-G_DEFINE_TYPE (IdeHoverPopover, ide_hover_popover, GTK_TYPE_POPOVER)
+G_DEFINE_FINAL_TYPE (IdeHoverPopover, ide_hover_popover, GTK_TYPE_POPOVER)
 
 static GParamSpec *properties [N_PROPS];
 
@@ -94,6 +94,7 @@ ide_hover_popover_add_content (const gchar      *title,
                       "visible", TRUE,
                       NULL);
   gtk_container_add (GTK_CONTAINER (self->box), GTK_WIDGET (box));
+  dzl_gtk_widget_add_style_class (GTK_WIDGET (box), "hoverer-box");
 
   if (!dzl_str_empty0 (title))
     {
@@ -274,6 +275,7 @@ static void
 ide_hover_popover_init (IdeHoverPopover *self)
 {
   GtkStyleContext *style_context;
+  GtkWidget *scroller;
 
   self->context = g_object_new (IDE_TYPE_HOVER_CONTEXT, NULL);
   self->cancellable = g_cancellable_new ();
@@ -281,11 +283,20 @@ ide_hover_popover_init (IdeHoverPopover *self)
   style_context = gtk_widget_get_style_context (GTK_WIDGET (self));
   gtk_style_context_add_class (style_context, "hoverer");
 
+  scroller = g_object_new (GTK_TYPE_SCROLLED_WINDOW,
+                           "visible", TRUE,
+                           "propagate-natural-width", TRUE,
+                           "propagate-natural-height", TRUE,
+                           "max-content-width", 600,
+                           "max-content-height", 600,
+                           NULL);
+  gtk_container_add (GTK_CONTAINER (self), scroller);
+
   self->box = g_object_new (GTK_TYPE_BOX,
                             "orientation", GTK_ORIENTATION_VERTICAL,
                             "visible", TRUE,
                             NULL);
-  gtk_container_add (GTK_CONTAINER (self), GTK_WIDGET (self->box));
+  gtk_container_add (GTK_CONTAINER (scroller), GTK_WIDGET (self->box));
 }
 
 IdeHoverContext *
@@ -312,12 +323,19 @@ void
 _ide_hover_popover_show (IdeHoverPopover *self)
 {
   GtkWidget *view;
+  g_autoptr(GCancellable) cancellable = NULL;
 
   g_return_if_fail (IDE_IS_HOVER_POPOVER (self));
   g_return_if_fail (self->context != NULL);
 
+  cancellable = g_steal_pointer(&self->cancellable);
+  self->cancellable = g_cancellable_new();
+  if (!g_cancellable_is_cancelled(cancellable))
+    {
+      g_cancellable_cancel(cancellable);
+    }
+
   if (self->has_providers &&
-      !g_cancellable_is_cancelled (self->cancellable) &&
       (view = gtk_popover_get_relative_to (GTK_POPOVER (self))) &&
       GTK_IS_TEXT_VIEW (view))
     {

@@ -33,6 +33,7 @@
 #include "ide-buffer-addin-private.h"
 #include "ide-buffer-manager.h"
 #include "ide-buffer-private.h"
+#include "ide-code-action-provider.h"
 #include "ide-code-enums.h"
 #include "ide-diagnostic.h"
 #include "ide-diagnostics.h"
@@ -53,12 +54,14 @@
 #define TAG_ERROR            "diagnostician::error"
 #define TAG_WARNING          "diagnostician::warning"
 #define TAG_DEPRECATED       "diagnostician::deprecated"
+#define TAG_UNUSED           "diagnostician::unused"
 #define TAG_NOTE             "diagnostician::note"
 #define TAG_SNIPPET_TAB_STOP "snippet::tab-stop"
 #define TAG_DEFINITION       "action::hover-definition"
 #define TAG_CURRENT_BKPT     "debugger::current-breakpoint"
 
 #define DEPRECATED_COLOR     "#babdb6"
+#define UNUSED_COLOR         "#c17d11"
 #define ERROR_COLOR          "#ff0000"
 #define NOTE_COLOR           "#708090"
 #define WARNING_COLOR        "#fcaf3e"
@@ -74,6 +77,7 @@ struct _IdeBuffer
   IdeExtensionSetAdapter *symbol_resolvers;
   IdeExtensionAdapter    *rename_provider;
   IdeExtensionAdapter    *formatter;
+  IdeExtensionAdapter    *code_action_provider;
   IdeBufferManager       *buffer_manager;
   IdeBufferChangeMonitor *change_monitor;
   GBytes                 *content;
@@ -96,6 +100,7 @@ struct _IdeBuffer
   IdeBufferState          state : 3;
   guint                   can_restore_cursor : 1;
   guint                   is_temporary : 1;
+  guint                   enable_addins : 1;
   guint                   changed_on_volume : 1;
   guint                   read_only : 1;
   guint                   highlight_diagnostics : 1;
@@ -122,13 +127,14 @@ typedef struct
   IdeSymbol   *symbol;
 } LookUpSymbolData;
 
-G_DEFINE_TYPE (IdeBuffer, ide_buffer, GTK_SOURCE_TYPE_BUFFER)
+G_DEFINE_FINAL_TYPE (IdeBuffer, ide_buffer, GTK_SOURCE_TYPE_BUFFER)
 
 enum {
   PROP_0,
   PROP_BUFFER_MANAGER,
   PROP_CHANGE_MONITOR,
   PROP_CHANGED_ON_VOLUME,
+  PROP_ENABLE_ADDINS,
   PROP_DIAGNOSTICS,
   PROP_FAILED,
   PROP_FILE,
@@ -274,6 +280,7 @@ lookup_symbol_data_free (LookUpSymbolData *data)
 IdeBuffer *
 _ide_buffer_new (IdeBufferManager *buffer_manager,
                  GFile            *file,
+                 gboolean          enable_addins,
                  gboolean          is_temporary)
 {
   g_return_val_if_fail (IDE_IS_MAIN_THREAD (), NULL);
@@ -283,7 +290,9 @@ _ide_buffer_new (IdeBufferManager *buffer_manager,
   return g_object_new (IDE_TYPE_BUFFER,
                        "buffer-manager", buffer_manager,
                        "file", file,
+                       "enable-addins", enable_addins,
                        "is-temporary", is_temporary,
+                       "implicit-trailing-newline", FALSE,
                        NULL);
 }
 
@@ -306,7 +315,7 @@ _ide_buffer_set_file (IdeBuffer *self,
       self->readlink_file = _ide_g_file_readlink (file);
       ide_buffer_reload_file_settings (self);
 
-      if (self->addins != NULL)
+      if (self->addins != NULL && self->enable_addins)
         {
           IdeBufferFileLoad closure = { self, file };
           ide_extension_set_adapter_foreach (self->addins,
@@ -340,9 +349,84 @@ ide_buffer_set_state (IdeBuffer      *self,
 }
 
 static void
+ide_buffer_update_implicit_newline (IdeBuffer *self)
+{
+  IdeFileSettings *file_settings;
+  gboolean was_implicit;
+  gboolean now_implicit;
+
+  IDE_ENTRY;
+
+  g_assert (IDE_IS_BUFFER (self));
+  g_assert (!ide_buffer_get_loading (self));
+
+  if (!(file_settings = ide_buffer_get_file_settings (self)))
+    IDE_EXIT;
+
+  /* If the new file-settings object does not match our
+   * current setting for trailing newlines, then we need
+   * to adjust that immediately to ensure our buffer contains
+   * the contents as expected.
+   *
+   * Otherwise, buffer change monitors will not line up with
+   * the the expectation on storage.
+   */
+  was_implicit = gtk_source_buffer_get_implicit_trailing_newline (GTK_SOURCE_BUFFER (self));
+  now_implicit = ide_file_settings_get_insert_trailing_newline (file_settings);
+
+  if (was_implicit != now_implicit)
+    {
+      GtkTextIter iter;
+
+      gtk_source_buffer_set_implicit_trailing_newline (GTK_SOURCE_BUFFER (self), now_implicit);
+
+      if (now_implicit)
+        {
+          gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (self), &iter);
+
+          if (gtk_text_iter_starts_line (&iter))
+            {
+              GtkTextIter begin = iter;
+
+              gtk_text_iter_backward_char (&begin);
+
+              if (!gtk_text_iter_equal (&begin, &iter))
+                {
+                  gboolean modified = gtk_text_buffer_get_modified (GTK_TEXT_BUFFER (self));
+
+                  gtk_text_buffer_begin_user_action (GTK_TEXT_BUFFER (self));
+                  gtk_text_buffer_delete (GTK_TEXT_BUFFER (self), &begin, &iter);
+                  gtk_text_buffer_end_user_action (GTK_TEXT_BUFFER (self));
+
+                  if (!modified)
+                    gtk_text_buffer_set_modified (GTK_TEXT_BUFFER (self), modified);
+                }
+            }
+        }
+      else
+        {
+          gboolean modified = gtk_text_buffer_get_modified (GTK_TEXT_BUFFER (self));
+
+          gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (self), &iter);
+
+          gtk_text_buffer_begin_user_action (GTK_TEXT_BUFFER (self));
+          gtk_text_buffer_insert (GTK_TEXT_BUFFER (self), &iter, "\n", 1);
+          gtk_text_buffer_end_user_action (GTK_TEXT_BUFFER (self));
+
+          if (!modified)
+            gtk_text_buffer_set_modified (GTK_TEXT_BUFFER (self), modified);
+        }
+    }
+
+  IDE_EXIT;
+}
+
+static void
 ide_buffer_real_loaded (IdeBuffer *self)
 {
   g_assert (IDE_IS_BUFFER (self));
+
+  ide_buffer_update_implicit_newline (self);
 
   if (self->buffer_manager != NULL)
     _ide_buffer_manager_buffer_loaded (self->buffer_manager, self);
@@ -362,7 +446,7 @@ ide_buffer_notify_language (IdeBuffer  *self,
 
   lang_id = ide_buffer_get_language_id (self);
 
-  if (self->addins != NULL)
+  if (self->addins != NULL && self->enable_addins)
     {
       IdeBufferLanguageSet state = { self, lang_id };
 
@@ -380,6 +464,9 @@ ide_buffer_notify_language (IdeBuffer  *self,
 
   if (self->formatter)
     ide_extension_adapter_set_value (self->formatter, lang_id);
+
+  if (self->code_action_provider)
+    ide_extension_adapter_set_value (self->code_action_provider, lang_id);
 }
 
 static void
@@ -414,6 +501,7 @@ ide_buffer_dispose (GObject *object)
   ide_clear_and_destroy_object (&self->rename_provider);
   ide_clear_and_destroy_object (&self->symbol_resolvers);
   ide_clear_and_destroy_object (&self->formatter);
+  ide_clear_and_destroy_object (&self->code_action_provider);
   ide_clear_and_destroy_object (&self->highlight_engine);
   g_clear_object (&self->buffer_manager);
   ide_clear_and_destroy_object (&self->change_monitor);
@@ -452,6 +540,10 @@ ide_buffer_get_property (GObject    *object,
 
     case PROP_CHANGED_ON_VOLUME:
       g_value_set_boolean (value, ide_buffer_get_changed_on_volume (self));
+      break;
+
+    case PROP_ENABLE_ADDINS:
+      g_value_set_boolean (value, self->enable_addins);
       break;
 
     case PROP_DIAGNOSTICS:
@@ -527,6 +619,10 @@ ide_buffer_set_property (GObject      *object,
 
     case PROP_CHANGE_MONITOR:
       ide_buffer_set_change_monitor (self, g_value_get_object (value));
+      break;
+
+    case PROP_ENABLE_ADDINS:
+      self->enable_addins = g_value_get_boolean (value);
       break;
 
     case PROP_DIAGNOSTICS:
@@ -621,6 +717,22 @@ ide_buffer_class_init (IdeBufferClass *klass)
                           "If the buffer has been modified externally",
                           FALSE,
                           (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+
+  /**
+   * IdeBuffer:enable-addins:
+   *
+   * The "enable-addins" property determines whether addins will be aware of
+   * this buffer. When set to %FALSE no ide_buffer_addin_*() functions will be
+   * called on this buffer.
+   *
+   * Since: 41.0
+   */
+  properties [PROP_ENABLE_ADDINS] =
+    g_param_spec_boolean ("enable-addins",
+                          "Enable Addins",
+                          "Whether to enable addins for this buffer",
+                          TRUE,
+                          (G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY));
 
   /**
    * IdeBuffer:diagnostics:
@@ -952,6 +1064,7 @@ ide_buffer_init (IdeBuffer *self)
   self->source_file = gtk_source_file_new ();
   self->can_restore_cursor = TRUE;
   self->highlight_diagnostics = TRUE;
+  self->enable_addins = TRUE;
 
   g_assert (IDE_IS_MAIN_THREAD ());
 
@@ -997,6 +1110,21 @@ ide_buffer_formatter_notify_extension (IdeBuffer           *self,
 
   if ((formatter = ide_extension_adapter_get_extension (adapter)))
     ide_formatter_load (formatter);
+}
+
+static void
+ide_buffer_code_action_provider_notify_extension (IdeBuffer           *self,
+                                                  GParamSpec          *pspec,
+                                                  IdeExtensionAdapter *adapter)
+{
+  IdeCodeActionProvider *code_action_provider;
+
+  g_assert (IDE_IS_MAIN_THREAD ());
+  g_assert (IDE_IS_BUFFER (self));
+  g_assert (IDE_IS_EXTENSION_ADAPTER (adapter));
+
+  if ((code_action_provider = ide_extension_adapter_get_extension (adapter)))
+    ide_code_action_provider_load (code_action_provider);
 }
 
 static void
@@ -1110,6 +1238,20 @@ _ide_buffer_attach (IdeBuffer *self,
                            self,
                            G_CONNECT_SWAPPED);
   ide_buffer_formatter_notify_extension (self, NULL, self->formatter);
+
+  /* Setup our code action provider, if any */
+  self->code_action_provider = ide_extension_adapter_new (parent,
+                                                          peas_engine_get_default (),
+                                                          IDE_TYPE_CODE_ACTION_PROVIDER,
+                                                          "Code-Action-Languages",
+                                                          ide_buffer_get_language_id (self));
+
+  g_signal_connect_object (self->code_action_provider,
+                           "notify::extension",
+                           G_CALLBACK (ide_buffer_code_action_provider_notify_extension),
+                           self,
+                           G_CONNECT_SWAPPED);
+  ide_buffer_code_action_provider_notify_extension (self, NULL, self->code_action_provider);
 
   /* Setup symbol resolvers */
   self->symbol_resolvers = ide_extension_set_adapter_new (parent,
@@ -1398,7 +1540,7 @@ _ide_buffer_load_file_finish (IdeBuffer     *self,
   g_signal_emit (self, signals [LOADED], 0);
 
   /* Notify buffer addins that a file has been loaded */
-  if (self->addins != NULL)
+  if (self->addins != NULL && self->enable_addins)
     {
       IdeBufferFileLoad closure = { self, state->file };
       ide_extension_set_adapter_foreach (self->addins,
@@ -1452,7 +1594,7 @@ ide_buffer_save_file_cb (GObject      *object,
   _ide_buffer_set_changed_on_volume (self, FALSE);
 
   /* Notify addins that a save has completed */
-  if (self->addins != NULL)
+  if (self->addins != NULL && self->enable_addins)
     {
       IdeBufferFileSave closure = { self, state->file };
       ide_extension_set_adapter_foreach (self->addins,
@@ -1494,7 +1636,7 @@ ide_buffer_save_file_settle_cb (GObject      *object,
   g_assert (IDE_IS_NOTIFICATION (state->notif));
   g_assert (GTK_SOURCE_IS_FILE (state->source_file));
 
-  if (self->addins != NULL)
+  if (self->addins != NULL && self->enable_addins)
     {
       IdeBufferFileSave closure = { self, state->file };
       ide_extension_set_adapter_foreach (self->addins,
@@ -1793,12 +1935,17 @@ ide_buffer_set_file_settings (IdeBuffer       *self,
 {
   g_assert (IDE_IS_MAIN_THREAD ());
   g_assert (IDE_IS_BUFFER (self));
+  g_assert (IDE_IS_FILE_SETTINGS (file_settings));
 
   if (self->file_settings == file_settings)
     return;
 
   ide_clear_and_destroy_object (&self->file_settings);
   self->file_settings = g_object_ref (file_settings);
+
+  if (!ide_buffer_get_loading (self))
+    ide_buffer_update_implicit_newline (self);
+
   g_object_notify_by_pspec (G_OBJECT (self), properties [PROP_FILE_SETTINGS]);
 }
 
@@ -2302,7 +2449,7 @@ ide_buffer_settled_cb (gpointer user_data)
   self->settling_source = 0;
   g_signal_emit (self, signals [CHANGE_SETTLED], 0);
 
-  if (self->addins != NULL)
+  if (self->addins != NULL && self->enable_addins)
     ide_extension_set_adapter_foreach (self->addins,
                                        _ide_buffer_addin_change_settled_cb,
                                        self);
@@ -2352,7 +2499,11 @@ ide_buffer_set_diagnostics (IdeBuffer      *self,
 
   if (diagnostics)
     {
+      IdeCodeActionProvider *code_action_provider;
       self->diagnostics = g_object_ref (diagnostics);
+      code_action_provider = ide_extension_adapter_get_extension (self->code_action_provider);
+      if (code_action_provider)
+        ide_code_action_provider_set_diagnostics (IDE_CODE_ACTION_PROVIDER (code_action_provider), self->diagnostics);
       ide_buffer_apply_diagnostics (self);
     }
 
@@ -2430,6 +2581,9 @@ ide_buffer_clear_diagnostics (IdeBuffer *self)
   if (NULL != (tag = gtk_text_tag_table_lookup (table, TAG_DEPRECATED)))
     dzl_gtk_text_buffer_remove_tag (GTK_TEXT_BUFFER (self), tag, &begin, &end, TRUE);
 
+  if (NULL != (tag = gtk_text_tag_table_lookup (table, TAG_UNUSED)))
+    dzl_gtk_text_buffer_remove_tag (GTK_TEXT_BUFFER (self), tag, &begin, &end, TRUE);
+
   if (NULL != (tag = gtk_text_tag_table_lookup (table, TAG_ERROR)))
     dzl_gtk_text_buffer_remove_tag (GTK_TEXT_BUFFER (self), tag, &begin, &end, TRUE);
 }
@@ -2453,6 +2607,10 @@ ide_buffer_apply_diagnostic (IdeBuffer     *self,
     {
     case IDE_DIAGNOSTIC_NOTE:
       tag_name = TAG_NOTE;
+      break;
+
+    case IDE_DIAGNOSTIC_UNUSED:
+      tag_name = TAG_UNUSED;
       break;
 
     case IDE_DIAGNOSTIC_DEPRECATED:
@@ -2913,6 +3071,113 @@ ide_buffer_format_selection_finish (IdeBuffer     *self,
   IDE_RETURN (ret);
 }
 
+static void
+ide_buffer_query_code_action_cb(GObject      *object,
+                                GAsyncResult *result,
+                                gpointer user_data)
+{
+  IdeCodeActionProvider *code_action_provider = (IdeCodeActionProvider *)object;
+
+  g_autoptr(GError) error = NULL;
+  g_autoptr(IdeTask) task = user_data;
+  g_autoptr(GPtrArray) code_actions = NULL;
+
+  g_assert(IDE_IS_CODE_ACTION_PROVIDER(object));
+  g_assert(G_IS_ASYNC_RESULT(result));
+  g_assert(IDE_IS_TASK(task));
+
+  code_actions = ide_code_action_provider_query_finish(code_action_provider, result, &error);
+
+  if (!code_actions)
+    ide_task_return_error(task, g_steal_pointer(&error));
+  else
+    ide_task_return_pointer(task, g_steal_pointer(&code_actions), g_ptr_array_unref);
+}
+
+/**
+ * ide_buffer_code_action_query_async:
+ * @self: an #IdeBuffer
+ * @cancellable: (nullable): a #GCancellable, or %NULL
+ * @callback: the callback upon completion
+ * @user_data: user data for @callback
+ *
+ * Queries for code actions in the current buffer.
+ *
+ * Since: 42.0
+ */
+void
+ide_buffer_code_action_query_async(IdeBuffer           *self,
+                                   GCancellable        *cancellable,
+                                   GAsyncReadyCallback callback,
+                                   gpointer user_data)
+{
+  g_autoptr(IdeTask)     task = NULL;
+  IdeCodeActionProvider *code_action_provider;
+
+  IDE_ENTRY;
+
+  g_return_if_fail(IDE_IS_MAIN_THREAD());
+  g_return_if_fail(IDE_IS_BUFFER(self));
+  g_return_if_fail(!cancellable || G_IS_CANCELLABLE(cancellable));
+
+  task = ide_task_new(self, cancellable, callback, user_data);
+  ide_task_set_source_tag(task, ide_buffer_code_action_query_async);
+
+  if (!(code_action_provider = ide_extension_adapter_get_extension(self->code_action_provider)))
+    {
+      const gchar *language_id = ide_buffer_get_language_id(self);
+
+      if (language_id == NULL)
+        language_id = "none";
+
+      ide_task_return_new_error(task,
+                                G_IO_ERROR,
+                                G_IO_ERROR_NOT_SUPPORTED,
+                                "No code action provider registered for language %s",
+                                language_id);
+
+      IDE_EXIT;
+    }
+
+  ide_code_action_provider_query_async(code_action_provider,
+                                       self,
+                                       cancellable,
+                                       ide_buffer_query_code_action_cb,
+                                       g_steal_pointer(&task));
+
+  IDE_EXIT;
+}
+
+/**
+ * ide_buffer_code_action_query_finish:
+ * @self: an #IdeBuffer
+ * @result: a #GAsyncResult
+ * @error: a location for a #GError, or %NULL
+ *
+ * Completes an asynchronous request to ide_buffer_query_code_action_async().
+ *
+ * Returns: (transfer full) (element-type IdeCodeAction): a #GPtrArray of #IdeCodeAction.
+ *
+ * Since: 42.0
+ */
+GPtrArray*
+ide_buffer_code_action_query_finish(IdeBuffer     *self,
+                                    GAsyncResult  *result,
+                                    GError       **error)
+{
+  GPtrArray* ret;
+
+  IDE_ENTRY;
+
+  g_return_val_if_fail(IDE_IS_MAIN_THREAD(), NULL);
+  g_return_val_if_fail(IDE_IS_BUFFER(self), NULL);
+  g_return_val_if_fail(IDE_IS_TASK(result), NULL);
+
+  ret = ide_task_propagate_pointer(IDE_TASK(result), error);
+
+  IDE_RETURN(ret);
+}
+
 /**
  * ide_buffer_get_insert_location:
  *
@@ -3067,6 +3332,7 @@ ide_buffer_notify_style_scheme (IdeBuffer  *self,
   GtkSourceStyleScheme *style_scheme;
   GtkTextTagTable *table;
   GdkRGBA deprecated_rgba;
+  GdkRGBA unused_rgba;
   GdkRGBA error_rgba;
   GdkRGBA note_rgba;
   GdkRGBA warning_rgba;
@@ -3084,6 +3350,7 @@ ide_buffer_notify_style_scheme (IdeBuffer  *self,
     {
       /* These are a fall-back if our style scheme isn't installed. */
       gdk_rgba_parse (&deprecated_rgba, DEPRECATED_COLOR);
+      gdk_rgba_parse (&unused_rgba, UNUSED_COLOR);
       gdk_rgba_parse (&error_rgba, ERROR_COLOR);
       gdk_rgba_parse (&note_rgba, NOTE_COLOR);
       gdk_rgba_parse (&warning_rgba, WARNING_COLOR);
@@ -3094,6 +3361,14 @@ ide_buffer_notify_style_scheme (IdeBuffer  *self,
         apply_style (GET_TAG (TAG_DEPRECATED),
                      "underline", PANGO_UNDERLINE_ERROR,
                      "underline-rgba", &deprecated_rgba,
+                     NULL);
+
+      if (!ide_source_style_scheme_apply_style (style_scheme,
+                                                TAG_UNUSED,
+                                                GET_TAG (TAG_UNUSED)))
+        apply_style (GET_TAG (TAG_UNUSED),
+                     "underline", PANGO_UNDERLINE_ERROR,
+                     "underline-rgba", &unused_rgba,
                      NULL);
 
       if (!ide_source_style_scheme_apply_style (style_scheme,
@@ -3145,7 +3420,7 @@ ide_buffer_notify_style_scheme (IdeBuffer  *self,
 
 #undef GET_TAG
 
-  if (self->addins != NULL)
+  if (self->addins != NULL && self->enable_addins)
     ide_extension_set_adapter_foreach (self->addins,
                                        _ide_buffer_addin_style_scheme_changed_cb,
                                        self);
@@ -3179,10 +3454,12 @@ ide_buffer_init_tags (IdeBuffer *self)
   GtkTextTagTable *tag_table;
   GtkSourceStyleScheme *style_scheme;
   g_autoptr(GtkTextTag) deprecated_tag = NULL;
+  g_autoptr(GtkTextTag) unused_tag = NULL;
   g_autoptr(GtkTextTag) error_tag = NULL;
   g_autoptr(GtkTextTag) note_tag = NULL;
   g_autoptr(GtkTextTag) warning_tag = NULL;
   GdkRGBA deprecated_rgba;
+  GdkRGBA unused_rgba;
   GdkRGBA error_rgba;
   GdkRGBA note_rgba;
   GdkRGBA warning_rgba;
@@ -3195,6 +3472,7 @@ ide_buffer_init_tags (IdeBuffer *self)
 
   /* These are fall-back if our style scheme isn't installed. */
   gdk_rgba_parse (&deprecated_rgba, DEPRECATED_COLOR);
+  gdk_rgba_parse (&unused_rgba, UNUSED_COLOR);
   gdk_rgba_parse (&error_rgba, ERROR_COLOR);
   gdk_rgba_parse (&note_rgba, NOTE_COLOR);
   gdk_rgba_parse (&warning_rgba, WARNING_COLOR);
@@ -3207,6 +3485,7 @@ ide_buffer_init_tags (IdeBuffer *self)
    */
 
   deprecated_tag = gtk_text_tag_new (TAG_DEPRECATED);
+  unused_tag = gtk_text_tag_new (TAG_UNUSED);
   error_tag = gtk_text_tag_new (TAG_ERROR);
   note_tag = gtk_text_tag_new (TAG_NOTE);
   warning_tag = gtk_text_tag_new (TAG_WARNING);
@@ -3215,6 +3494,12 @@ ide_buffer_init_tags (IdeBuffer *self)
     apply_style (deprecated_tag,
                  "underline", PANGO_UNDERLINE_ERROR,
                  "underline-rgba", &deprecated_rgba,
+                 NULL);
+
+  if (!ide_source_style_scheme_apply_style (style_scheme, TAG_UNUSED, unused_tag))
+    apply_style (unused_tag,
+                 "underline", PANGO_UNDERLINE_ERROR,
+                 "underline-rgba", &unused_rgba,
                  NULL);
 
   if (!ide_source_style_scheme_apply_style (style_scheme, TAG_ERROR, error_tag))
@@ -3236,6 +3521,7 @@ ide_buffer_init_tags (IdeBuffer *self)
                  NULL);
 
   gtk_text_tag_table_add (tag_table, deprecated_tag);
+  gtk_text_tag_table_add (tag_table, unused_tag);
   gtk_text_tag_table_add (tag_table, error_tag);
   gtk_text_tag_table_add (tag_table, note_tag);
   gtk_text_tag_table_add (tag_table, warning_tag);
@@ -3856,7 +4142,7 @@ settle_async (IdeBuffer           *self,
   ide_task_set_source_tag (task, settle_async);
   ide_task_set_task_data (task, n_active, g_free);
 
-  if (self->addins != NULL)
+  if (self->addins != NULL && self->enable_addins)
     ide_extension_set_adapter_foreach (self->addins,
                                        settle_foreach_cb,
                                        task);

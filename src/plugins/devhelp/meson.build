@@ -1,11 +1,16 @@
 if get_option('plugin_devhelp')
 
-if not libwebkit_dep.found()
+if not get_option('webkit').enabled()
   error('WebKit must be enabled for devhelp support')
+endif
+
+if not libportal_dep.found()
+  error('libportal is required for devhelp plugin support')
 endif
 
 plugins_deps += [
   dependency('libdevhelp-3.0', version: '>=3.25.1'),
+  libportal_dep,
 ]
 
 plugins_sources += files([
@@ -16,6 +21,7 @@ plugins_sources += files([
   'gbp-devhelp-menu-button.c',
   'gbp-devhelp-page.c',
   'gbp-devhelp-search.c',
+  'gbp-devhelp-session-addin.c',
 ])
 
 plugin_devhelp_resources = gnome.compile_resources(

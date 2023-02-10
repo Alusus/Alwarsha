@@ -9,7 +9,6 @@ libide_include_directories += include_directories('.')
 version_data = configuration_data()
 version_data.set('MAJOR_VERSION', MAJOR_VERSION)
 version_data.set('MINOR_VERSION', MINOR_VERSION)
-version_data.set('MICRO_VERSION', MICRO_VERSION)
 version_data.set('VERSION', meson.project_version())
 version_data.set_quoted('BUILD_CHANNEL', get_option('channel'))
 version_data.set_quoted('BUILD_TYPE', get_option('buildtype'))
@@ -24,6 +23,7 @@ libide_core_version_h = configure_file(
 libide_core_generated_headers = [libide_core_version_h]
 
 libide_build_ident_h = vcs_tag(
+      command: ['git', 'describe'],
      fallback: meson.project_version(),
         input: 'ide-build-ident.h.in',
        output: 'ide-build-ident.h',

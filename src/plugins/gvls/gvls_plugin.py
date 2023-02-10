@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # gvls_plugin.py
 #
@@ -36,11 +36,12 @@ class GVlsService(Ide.Object):
     _has_started = False
     _supervisor = None
     _monitor = None
+    autoconfigure = True
     meson_build_system = True
     initialized = True
     default_namespaces = True
     default_vapi_dirs = True
-    scan_work_space = True
+    scan_work_space = False
     add_using_namespaces = True
     library_vapidir = ""
     system_vapidir = ""
@@ -71,24 +72,14 @@ class GVlsService(Ide.Object):
         self._client = value
         self.notify('client')
 
-    def do_parent_set(self, parent):
-        """
-        No useful for VLS
-        """
-        if parent is None:
-            return
-
-    def do_stop(self):
+    @staticmethod
+    def on_destroy(self):
         """
         Stops the Vala Language Server upon request to shutdown the
         GVlsService.
         """
-        if self._client is not None:
-            Ide.warning ("Shutting down server")
-            self._client.stop()
-            self._client.destroy()
-
         if self._supervisor is not None:
+            Ide.warning('Stopping GVls supervisor')
             supervisor, self._supervisor = self._supervisor, None
             supervisor.stop()
 
@@ -154,7 +145,7 @@ class GVlsService(Ide.Object):
             b2.add_value(div)
             b.add_value(GLib.Variant.new_variant(b2.end()))
         return b.end()
-    
+
     def create_dict_entry_boolean(self, key, val):
         vk = GLib.Variant.new_string (key)
         vv = GLib.Variant.new_variant(GLib.Variant.new_boolean(val))
@@ -177,10 +168,16 @@ class GVlsService(Ide.Object):
             b.add_value(self.create_dict_entry_string('libraryVapi', self.library_vapidir))
             Ide.debug('Library VAPI dir:{0}'.format(self.library_vapidir))
             b.add_value(self.create_dict_entry_string('systemVapi', self.system_vapidir))
-            Ide.debug('System VAPI dir:{0}'.format(self.system_vapidir))
-            b.add_value(self.create_dict_entry_string('valaApiVersion', self.vala_api_version))
             b.add_value(self.create_dict_entry_string('mesonCompileCommands', self.meson_compile_commands))
             b.add_value(self.create_dict_entry_string('mesonTargetsIntro', self.meson_targets_intro))
+            Ide.debug('System VAPI dir:{0}'.format(self.system_vapidir))
+            if (self.library_vapidir == "" or self.system_vapidir == "" or self.meson_compile_commands == ""):
+                self.autoconfigure = True
+            else:
+                self.autoconfigure = False
+
+            b.add_value(self.create_dict_entry_boolean('autoConfigure', self.autoconfigure))
+            b.add_value(self.create_dict_entry_string('valaApiVersion', self.vala_api_version))
             ad = GLib.Variant.new_string ('valaArgs')
             vadi = self.dict_to_array_variant(self.vala_args)
             adi = GLib.Variant.new_dict_entry(ad, GLib.Variant.new_variant (vadi))
@@ -201,7 +198,7 @@ class GVlsService(Ide.Object):
         except Error as e:
             Ide.debug ('On Load Configuration Error: {}'.format(e.message))
             return GLib.Variant ('a{sv}', {})
-    
+
     def _build_config_changed(self, obj, mfile, ofile, event_type):
         if event_type == Gio.FileMonitorEvent.CHANGED or event_type == Gio.FileMonitorEvent.CREATED:
             self._parse_build_commands()
@@ -222,7 +219,7 @@ class GVlsService(Ide.Object):
         ostream.close()
         b = ostream.steal_as_bytes()
         self.meson_compile_commands = str(b.get_data(),encoding='utf8')
-    
+
     def _parse_build_commands(self):
         try:
             self.build_args = []
@@ -375,7 +372,7 @@ class GVlsService(Ide.Object):
             self._client.send_notification_finish(result)
         except BaseException as exc:
             Ide.debug('Change Configuration Notification error: {}'.format(exc.args))
-    
+
     def _notify_change_configuration(self):
         try:
             vconf = self.create_configuration_variant(None)
@@ -389,7 +386,7 @@ class GVlsService(Ide.Object):
             self._client.send_notification_async("workspace/didChangeConfiguration", vnotify, cancellable, self._did_change_configuration, None)
         except BaseException as exc:
             Ide.debug('Notify change configuration error: {}'.format(exc.args))
-    
+
     def _on_load_configuration(self, data):
         ctx = self._client.get_context()
         bufm = Ide.BufferManager.from_context(ctx)
@@ -401,7 +398,7 @@ class GVlsService(Ide.Object):
                 self._parse_build_commands()
                 break
         return self.create_configuration_variant()
-    
+
     def _on_pipeline_loaded(self, obj):
         try:
             Ide.debug('GVls: Pipeline loaded')
@@ -430,7 +427,7 @@ class GVlsService(Ide.Object):
             self.system_vapidir = rtfgdvapi.get_uri() + "/vala/vapi"
         except BaseException as exc:
             Ide.debug('On get Vala DATA VAPI DIR: {}'.format(str(exc)))
-    
+
     def on_get_vapidir(self, vpkgp, cancellable, data):
         try:
             if self.pipeline == None:
@@ -455,7 +452,7 @@ class GVlsService(Ide.Object):
             vdp.wait_async(None, self.on_get_vala_data_dir, None)
         except BaseException as exc:
             Ide.debug('On get Vala VAPI DIR: {}'.format(str(exc)))
-    
+
     def on_get_vala_api_version(self, valacp, cancellable, data):
         try:
             vstdio = valacp.get_stdout_pipe()
@@ -478,7 +475,7 @@ class GVlsService(Ide.Object):
             vpkgp.wait_async(None, self.on_get_vapidir, None)
         except BaseException as exc:
             Ide.debug('On get Vala API VERSION Runtime Configuration: {}'.format(str(exc)))
-    
+
     def _update_config_from_runtime(self):
         try:
             if self.pipeline == None:
@@ -497,7 +494,7 @@ class GVlsService(Ide.Object):
             valacp.wait_async(None, self.on_get_vala_api_version, None)
         except BaseException as exc:
             Ide.debug('On Update Runtime Configuration: {}'.format(str(exc)))
-    
+
     def on_config_changed_cb(self, data):
         try:
             ctx = self._client.ref_context()
@@ -565,6 +562,7 @@ class GVlsService(Ide.Object):
         context = provider.get_context()
         self = GVlsService.from_context(context)
         self._ensure_started()
+        self.connect('destroy', GVlsService.on_destroy)
         self.bind_property('client', provider, 'client', GObject.BindingFlags.SYNC_CREATE)
 
 class GVlsDiagnosticProvider(Ide.LspDiagnosticProvider, Ide.DiagnosticProvider):
@@ -578,7 +576,7 @@ class GVlsCompletionProvider(Ide.LspCompletionProvider, Ide.CompletionProvider):
     def do_get_priority(self, context):
         # This provider only activates when it is very likely that we
         # want the results. So use high priority (negative is better).
-        return -1000
+        return -900
 
 class GVlsHighlighter(Ide.LspHighlighter, Ide.Highlighter):
     def do_load(self):

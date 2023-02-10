@@ -78,7 +78,7 @@ gbp_restore_cursor_buffer_addin_file_loaded_cb (GObject      *object,
   g_assert (IDE_IS_BUFFER (buffer));
 
   /* Don't do anything if the user already moved */
-  if (_ide_buffer_can_restore_cursor (buffer))
+  if (!_ide_buffer_can_restore_cursor (buffer))
     return;
 
   if (!(file_info = g_file_query_info_finish (file, result, &error)))
@@ -136,7 +136,7 @@ buffer_addin_iface_init (IdeBufferAddinInterface *iface)
   iface->file_saved = gbp_restore_cursor_buffer_addin_file_saved;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GbpRestoreCursorBufferAddin, gbp_restore_cursor_buffer_addin, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpRestoreCursorBufferAddin, gbp_restore_cursor_buffer_addin, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_BUFFER_ADDIN, buffer_addin_iface_init))
 
 static void

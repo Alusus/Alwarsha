@@ -80,7 +80,7 @@ gbp_editor_hover_provider_hover_async (IdeHoverProvider    *provider,
 
               content = ide_marked_content_new_from_data (text,
                                                           strlen (text),
-                                                          IDE_MARKED_KIND_PLAINTEXT);
+                                                          ide_diagnostic_get_marked_kind (diag));
               ide_hover_context_add_content (context,
                                              DIAGNOSTICS_HOVER_PRIORITY,
                                              _("Diagnostics"),
@@ -114,7 +114,7 @@ hover_provider_iface_init (IdeHoverProviderInterface *iface)
   iface->hover_finish = gbp_editor_hover_provider_hover_finish;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GbpEditorHoverProvider, gbp_editor_hover_provider, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpEditorHoverProvider, gbp_editor_hover_provider, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_HOVER_PROVIDER, hover_provider_iface_init))
 
 static void

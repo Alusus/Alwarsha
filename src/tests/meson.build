@@ -1,10 +1,10 @@
-template_libdir = dependency('template-glib-1.0').get_pkgconfig_variable('libdir')
-dazzle_libdir = dependency('libdazzle-1.0').get_pkgconfig_variable('libdir')
-gsv_libdir = dependency('gtksourceview-4').get_pkgconfig_variable('libdir')
+template_libdir = dependency('template-glib-1.0').get_variable('libdir')
+dazzle_libdir = dependency('libdazzle-1.0').get_variable('libdir')
+gsv_libdir = dependency('gtksourceview-4').get_variable('libdir')
 
 typelib_dirs = [
-  '@0@/src/libide'.format(meson.build_root()),
-  '@0@/src/gstyle'.format(meson.build_root()),
+  '@0@/src/libide'.format(meson.project_build_root()),
+  '@0@/src/gstyle'.format(meson.project_build_root()),
   join_paths(template_libdir, 'girepository-1.0'),
   join_paths(dazzle_libdir, 'girepository-1.0'),
   join_paths(gsv_libdir, 'girepository-1.0'),
@@ -16,7 +16,7 @@ test_env = [
   'G_TEST_BUILDDIR=@0@'.format(meson.current_build_dir()),
   'G_DEBUG=gc-friendly',
   'GSETTINGS_BACKEND=memory',
-  'GSETTINGS_SCHEMA_DIR=@0@/data/gsettings'.format(meson.build_root()),
+  'GSETTINGS_SCHEMA_DIR=@0@/data/gsettings'.format(meson.project_build_root()),
   'PYTHONDONTWRITEBYTECODE=yes',
   'MALLOC_CHECK_=2',
   'NO_AT_BRIDGE=1',
@@ -24,7 +24,7 @@ test_env = [
 
 test_cflags = [
   '-DTEST_DATA_DIR="@0@/data/"'.format(meson.current_source_dir()),
-  '-I' + join_paths(meson.source_root(), 'src'),
+  '-I' + join_paths(meson.project_source_root(), 'src'),
 ]
 
 
@@ -33,6 +33,13 @@ test_libide_core = executable('test-libide-core', 'test-libide-core.c',
   dependencies: [ libide_core_dep ],
 )
 test('test-libide-core', test_libide_core, env: test_env)
+
+
+test_libide_io = executable('test-libide-io', 'test-libide-io.c',
+        c_args: test_cflags,
+  dependencies: [ libide_io_dep ],
+)
+test('test-libide-io', test_libide_io, env: test_env)
 
 
 test_snippet_parser = executable('test-snippet-parser', 'test-snippet-parser.c',

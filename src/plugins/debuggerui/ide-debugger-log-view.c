@@ -29,13 +29,12 @@ struct _IdeDebuggerLogView
   GtkBox parent_instance;
 
   IdeTerminal *terminal;
-  GtkScrollbar *scroller;
   GtkEntry *commandentry;
 
   IdeDebugger *debugger;
 };
 
-G_DEFINE_TYPE (IdeDebuggerLogView, ide_debugger_log_view, GTK_TYPE_BOX)
+G_DEFINE_FINAL_TYPE (IdeDebuggerLogView, ide_debugger_log_view, GTK_TYPE_BOX)
 
 enum {
   PROP_0,
@@ -52,13 +51,13 @@ ide_debugger_log_view_new (void)
 }
 
 static void
-ide_debugger_log_view_finalize (GObject *object)
+ide_debugger_log_view_dispose (GObject *object)
 {
   IdeDebuggerLogView *self = (IdeDebuggerLogView *)object;
 
   g_clear_object (&self->debugger);
 
-  G_OBJECT_CLASS (ide_debugger_log_view_parent_class)->finalize (object);
+  G_OBJECT_CLASS (ide_debugger_log_view_parent_class)->dispose (object);
 }
 
 static void
@@ -74,6 +73,7 @@ ide_debugger_log_view_get_property (GObject    *object,
     case PROP_DEBUGGER:
       g_value_set_object (value, ide_debugger_log_view_get_debugger (self));
       break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -92,6 +92,7 @@ ide_debugger_log_view_set_property (GObject      *object,
     case PROP_DEBUGGER:
       ide_debugger_log_view_set_debugger (self, g_value_get_object (value));
       break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -161,7 +162,7 @@ ide_debugger_log_view_class_init (IdeDebuggerLogViewClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
-  object_class->finalize = ide_debugger_log_view_finalize;
+  object_class->dispose = ide_debugger_log_view_dispose;
   object_class->get_property = ide_debugger_log_view_get_property;
   object_class->set_property = ide_debugger_log_view_set_property;
 
@@ -178,7 +179,6 @@ ide_debugger_log_view_class_init (IdeDebuggerLogViewClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/plugins/debuggerui/ide-debugger-log-view.ui");
   gtk_widget_class_bind_template_child (widget_class, IdeDebuggerLogView, terminal);
   gtk_widget_class_bind_template_child (widget_class, IdeDebuggerLogView, commandentry);
-  gtk_widget_class_bind_template_child (widget_class, IdeDebuggerLogView, scroller);
   gtk_widget_class_bind_template_callback (widget_class, on_entry_activate);
 }
 
@@ -186,9 +186,6 @@ static void
 ide_debugger_log_view_init (IdeDebuggerLogView *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
-
-  gtk_range_set_adjustment (GTK_RANGE (self->scroller),
-                            gtk_scrollable_get_vadjustment (GTK_SCROLLABLE (self->terminal)));
 }
 
 void
@@ -237,7 +234,8 @@ ide_debugger_log_view_set_debugger (IdeDebuggerLogView *self,
   g_return_if_fail (IDE_IS_DEBUGGER_LOG_VIEW (self));
   g_return_if_fail (!debugger || IDE_IS_DEBUGGER (debugger));
 
-  self->debugger = g_object_ref (debugger);
+  if (g_set_object (&self->debugger, debugger))
+    g_object_notify_by_pspec (G_OBJECT (self), properties [PROP_DEBUGGER]);
 }
 
 IdeDebugger *

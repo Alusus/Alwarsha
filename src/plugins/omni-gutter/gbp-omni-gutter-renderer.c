@@ -236,7 +236,7 @@ typedef struct
 static void gbp_omni_gutter_renderer_reload_icons (GbpOmniGutterRenderer *self);
 static void gutter_iface_init                     (IdeGutterInterface    *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GbpOmniGutterRenderer,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpOmniGutterRenderer,
                          gbp_omni_gutter_renderer,
                          GTK_SOURCE_TYPE_GUTTER_RENDERER,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_GUTTER, gutter_iface_init))
@@ -427,13 +427,16 @@ reload_style_colors (GbpOmniGutterRenderer *self,
   /* These gutter:: prefix values come from Builder's style-scheme xml
    * files, but other style schemes may also support them now too.
    */
-  if (!get_style_rgba (scheme, "gutter::added-line", FOREGROUND, &self->changes.add))
+  if (!get_style_rgba (scheme, "gutter::added-line", FOREGROUND, &self->changes.add) &&
+      !get_style_rgba (scheme, "diff:added-line", FOREGROUND, &self->changes.add))
     gdk_rgba_parse (&self->changes.add, "#8ae234");
 
-  if (!get_style_rgba (scheme, "gutter::changed-line", FOREGROUND, &self->changes.change))
+  if (!get_style_rgba (scheme, "gutter::changed-line", FOREGROUND, &self->changes.change) &&
+      !get_style_rgba (scheme, "diff:changed-line", FOREGROUND, &self->changes.change))
     gdk_rgba_parse (&self->changes.change, "#fcaf3e");
 
-  if (!get_style_rgba (scheme, "gutter::removed-line", FOREGROUND, &self->changes.remove))
+  if (!get_style_rgba (scheme, "gutter::removed-line", FOREGROUND, &self->changes.remove) &&
+      !get_style_rgba (scheme, "diff:removed-line", FOREGROUND, &self->changes.remove))
     gdk_rgba_parse (&self->changes.remove, "#ef2929");
 
   /*
@@ -541,9 +544,11 @@ populate_diagnostics_cb (guint                 line,
   g_assert (line <= state->end_line);
 
   info = &g_array_index (state->lines, LineInfo, line - state->begin_line);
-  info->is_warning |= !!(severity & (IDE_DIAGNOSTIC_WARNING | IDE_DIAGNOSTIC_DEPRECATED));
-  info->is_error |= !!(severity & (IDE_DIAGNOSTIC_ERROR | IDE_DIAGNOSTIC_FATAL));
-  info->is_note |= !!(severity & IDE_DIAGNOSTIC_NOTE);
+  info->is_warning |= severity == IDE_DIAGNOSTIC_WARNING
+                      || severity == IDE_DIAGNOSTIC_DEPRECATED
+                      || severity == IDE_DIAGNOSTIC_UNUSED;
+  info->is_error |= severity == IDE_DIAGNOSTIC_ERROR || severity == IDE_DIAGNOSTIC_FATAL;
+  info->is_note |= severity == IDE_DIAGNOSTIC_NOTE;
 }
 
 static void
@@ -1411,11 +1416,11 @@ gbp_omni_gutter_renderer_reload_icons (GbpOmniGutterRenderer *self)
 
   self->note_surface = get_icon_surface (self, GTK_WIDGET (view), "dialog-information-symbolic", self->diag_size, FALSE);
   self->warning_surface = get_icon_surface (self, GTK_WIDGET (view), "dialog-warning-symbolic", self->diag_size, FALSE);
-  self->error_surface = get_icon_surface (self, GTK_WIDGET (view), "process-stop-symbolic", self->diag_size, FALSE);
+  self->error_surface = get_icon_surface (self, GTK_WIDGET (view), "builder-build-stop-symbolic", self->diag_size, FALSE);
 
   self->note_selected_surface = get_icon_surface (self, GTK_WIDGET (view), "dialog-information-symbolic", self->diag_size, TRUE);
   self->warning_selected_surface = get_icon_surface (self, GTK_WIDGET (view), "dialog-warning-symbolic", self->diag_size, TRUE);
-  self->error_selected_surface = get_icon_surface (self, GTK_WIDGET (view), "process-stop-symbolic", self->diag_size, TRUE);
+  self->error_selected_surface = get_icon_surface (self, GTK_WIDGET (view), "builder-build-stop-symbolic", self->diag_size, TRUE);
 }
 
 static void

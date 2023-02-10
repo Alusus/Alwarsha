@@ -292,7 +292,7 @@ struct _IdePipeline
 
   /*
    * Precalculation if we need to look for errors on stdout. We can't rely
-   * on @current_stage for this, becase log entries might come in
+   * on @current_stage for this, because log entries might come in
    * asynchronously and after the processes/stage has completed.
    */
   guint errors_on_stdout : 1;
@@ -361,7 +361,7 @@ static void ide_pipeline_tick_rebuild (IdePipeline         *self,
 static void initable_iface_init       (GInitableIface      *iface);
 static void list_model_iface_init     (GListModelInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (IdePipeline, ide_pipeline, IDE_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (IdePipeline, ide_pipeline, IDE_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_LIST_MODEL, list_model_iface_init)
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init))
 
@@ -515,6 +515,9 @@ parse_severity (const gchar *str)
 
   if (strstr (lower, "ignored") != NULL)
     return IDE_DIAGNOSTIC_IGNORED;
+
+  if (strstr (lower, "unused") != NULL)
+    return IDE_DIAGNOSTIC_UNUSED;
 
   if (strstr (lower, "deprecated") != NULL)
     return IDE_DIAGNOSTIC_DEPRECATED;
@@ -798,7 +801,8 @@ ide_pipeline_release_transients (IdePipeline *self)
           IDE_TRACE_MSG ("Releasing transient stage %s at index %u",
                          G_OBJECT_TYPE_NAME (entry->stage),
                          i - 1);
-          g_array_remove_index (self->pipeline, i);
+          g_array_remove_index (self->pipeline, i - 1);
+          g_list_model_items_changed (G_LIST_MODEL (self), i - 1, 1, 0);
         }
     }
 
@@ -1179,6 +1183,9 @@ ide_pipeline_load_cb (IdleLoadState *state)
       IdePipelineAddin *addin = g_ptr_array_index (state->addins, state->addins->len - 1);
       gint64 begin, end;
 
+      /* Keep in sync with ide_pipeline_extension_added() */
+      g_object_set_data (G_OBJECT (addin), "HAS_LOADED", GINT_TO_POINTER (1));
+
       begin = g_get_monotonic_time ();
       ide_pipeline_addin_load (addin, state->self);
       end = g_get_monotonic_time ();
@@ -1353,7 +1360,7 @@ ide_pipeline_unload (IdePipeline *self)
 
   g_assert (IDE_IS_PIPELINE (self));
 
-  g_clear_object (&self->addins);
+  ide_clear_and_destroy_object (&self->addins);
 
   IDE_EXIT;
 }
@@ -2065,7 +2072,7 @@ ide_pipeline_task_notify_completed (IdePipeline *self,
   g_object_notify_by_pspec (G_OBJECT (self), properties [PROP_MESSAGE]);
 
   /*
-   * XXX: How do we ensure transients are buildd with the part of the
+   * XXX: How do we ensure transients are built with the part of the
    *      pipeline we care about? We might just need to ensure that :busy is
    *      FALSE before adding transients.
    */
@@ -4236,6 +4243,32 @@ ide_pipeline_get_arch (IdePipeline *self)
   return NULL;
 }
 
+static gboolean
+contains_in_runtime_with_alt_path (IdeRuntime *runtime,
+                                   const char *name,
+                                   const char *path)
+{
+  g_auto(GStrv) pathsplit = NULL;
+
+  g_assert (IDE_IS_RUNTIME (runtime));
+  g_assert (name != NULL);
+
+  if (path == NULL)
+    return FALSE;
+
+  pathsplit = g_strsplit (path, ":", 0);
+
+  for (guint i = 0; pathsplit[i]; i++)
+    {
+      g_autofree char *filename = g_build_filename (pathsplit[i], name, NULL);
+
+      if (ide_runtime_contains_program_in_path (runtime, filename, NULL))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 /**
  * ide_pipeline_contains_program_in_path:
  * @self: a #IdePipeline
@@ -4253,13 +4286,24 @@ ide_pipeline_contains_program_in_path (IdePipeline  *self,
                                        const gchar  *name,
                                        GCancellable *cancellable)
 {
+  const char *append_path = NULL;
+  const char *prepend_path = NULL;
+
   g_return_val_if_fail (IDE_IS_PIPELINE (self), FALSE);
   g_return_val_if_fail (name != NULL, FALSE);
   g_return_val_if_fail (!cancellable || G_IS_CANCELLABLE (cancellable), FALSE);
 
+  if (self->config != NULL)
+    {
+      append_path = ide_config_get_append_path (self->config);
+      prepend_path = ide_config_get_prepend_path (self->config);
+    }
+
   if (self->runtime != NULL)
     {
-      if (ide_runtime_contains_program_in_path (self->runtime, name, cancellable))
+      if (ide_runtime_contains_program_in_path (self->runtime, name, cancellable) ||
+          contains_in_runtime_with_alt_path (self->runtime, name, prepend_path) ||
+          contains_in_runtime_with_alt_path (self->runtime, name, append_path))
         return TRUE;
     }
 
@@ -4279,7 +4323,9 @@ ide_pipeline_contains_program_in_path (IdePipeline  *self,
 
           g_assert (IDE_IS_RUNTIME (runtime));
 
-          if (ide_runtime_contains_program_in_path (runtime, name, cancellable))
+          if (ide_runtime_contains_program_in_path (runtime, name, cancellable) ||
+              contains_in_runtime_with_alt_path (runtime, name, prepend_path) ||
+              contains_in_runtime_with_alt_path (runtime, name, append_path))
             return TRUE;
         }
     }

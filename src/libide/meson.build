@@ -1,4 +1,4 @@
-libide_header_subdir = join_paths('alwarsha-@0@.@1@'.format(MAJOR_VERSION, MINOR_VERSION), 'libide')
+libide_header_subdir = join_paths('alwarsha-@0@'.format(MAJOR_VERSION), 'libide')
 libide_header_dir = join_paths(get_option('includedir'), libide_header_subdir)
 libide_include_directories = []
 
@@ -19,11 +19,11 @@ subdir('sourceview')
 subdir('editor')
 subdir('lsp')
 subdir('greeter')
-if libwebkit_dep.found()
+subdir('tree')
+
+if get_option('webkit').enabled()
   subdir('webkit')
 endif
-
-subdir('tree')
 
 py_installation = pymod.find_installation('python3')
 py_installation.install_sources('Ide.py', subdir: 'gi' / 'overrides')

@@ -35,7 +35,6 @@ struct _GbpBuilduiLogPane
 
   IdePipeline  *pipeline;
 
-  GtkScrollbar      *scrollbar;
   IdeTerminal       *terminal;
 
   guint              log_observer;
@@ -47,7 +46,7 @@ enum {
   N_PROPS
 };
 
-G_DEFINE_TYPE (GbpBuilduiLogPane, gbp_buildui_log_pane, IDE_TYPE_PANE)
+G_DEFINE_FINAL_TYPE (GbpBuilduiLogPane, gbp_buildui_log_pane, IDE_TYPE_PANE)
 
 static GParamSpec *properties [N_PROPS];
 
@@ -129,6 +128,12 @@ gbp_buildui_log_pane_set_pipeline (GbpBuilduiLogPane *self,
                                    G_CONNECT_SWAPPED);
         }
     }
+}
+
+void
+gbp_buildui_log_pane_clear (GbpBuilduiLogPane *self)
+{
+  gbp_buildui_log_pane_reset_view (self);
 }
 
 static void
@@ -231,7 +236,6 @@ gbp_buildui_log_pane_class_init (GbpBuilduiLogPaneClass *klass)
 
   gtk_widget_class_set_css_name (widget_class, "buildlogpanel");
   gtk_widget_class_set_template_from_resource (widget_class, "/plugins/buildui/gbp-buildui-log-pane.ui");
-  gtk_widget_class_bind_template_child (widget_class, GbpBuilduiLogPane, scrollbar);
   gtk_widget_class_bind_template_child (widget_class, GbpBuilduiLogPane, terminal);
 
   properties [PROP_PIPELINE] =
@@ -350,7 +354,7 @@ gbp_buildui_log_pane_init (GbpBuilduiLogPane *self)
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  dzl_dock_widget_set_icon_name (DZL_DOCK_WIDGET (self), "builder-build-symbolic");
+  dzl_dock_widget_set_icon_name (DZL_DOCK_WIDGET (self), "builder-build-info-symbolic");
 
   g_signal_connect_object (self->terminal,
                            "size-allocate",
@@ -363,9 +367,6 @@ gbp_buildui_log_pane_init (GbpBuilduiLogPane *self)
                            G_CALLBACK (gbp_buildui_log_pane_window_title_changed),
                            self,
                            G_CONNECT_SWAPPED);
-
-  gtk_range_set_adjustment (GTK_RANGE (self->scrollbar),
-                            gtk_scrollable_get_vadjustment (GTK_SCROLLABLE (self->terminal)));
 
   dzl_dock_widget_set_title (DZL_DOCK_WIDGET (self), _("Build Output"));
 

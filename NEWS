@@ -1,3 +1,160 @@
+============
+Version 42.1
+============
+
+Changes sincec 42.0
+
+ • Meson templates updates
+ • Fix failure to load project under certain symlink situations
+ • Fix restore-cursor plugin
+ • Improve newline handling with git diffs
+ • Updated GJS snippets
+ • Fixes for podman integration
+ • Language Server Protocol enhancements
+ • Translation updates
+
+============
+Version 42.0
+============
+
+Changes since 42.rc1
+
+ • Template updates for C++ and Vala
+ • Only enable Vala search provider if Vala is supported language
+   by the projects build system to avoid spawning LSP.
+ • Build system changes to default plugins
+ • Translation updates
+
+==============
+Version 42.rc1
+==============
+
+ • Template updates for JavaScript, Python, C, and Vala
+ • Updates for Vala and Intelephense language servers
+ • CMake integration improvements
+ • Additional license options for templates
+ • Translation updates
+
+================
+Version 42.beta1
+================
+
+ • Support for dark style preference
+ • Enable proc-macro with rust-analzyer
+ • Project template updates
+ • Improvements to podman integration
+ • Fix a number of crashes
+ • Use libhandy for window styling to match other GNOME applications
+ • Fullscreen has been temporarily removed until the GTK 4 port to allow
+   for easier transition to libhandy
+ • Updates to syntax highlighting schemes
+ • Addition of IdeDiagnosticTool to simplify plugin creation
+ • Adwaita is now the default style scheme
+ • The gutter will now try to use colors from style scheme for difffs
+ • Build system modernization
+ • Robustness fixes to terminal
+ • Fixes for header include completion
+ • gtk4 validation with RNG
+ • Clang improvements when using podman
+ • CMake integration fixes
+ • Updated icons
+ • VIM emulation fixes
+ • Updated translations
+
+=================
+Version 42.alpha1
+=================
+
+ • Use updated libportal release
+ • Add buildstream plugin
+ • Support for "base runtimes" in flatpak manifests
+ • Use GtkScrolledWindow with terminals
+ • Allow specifying min-length for quick-highlight plugin
+ • Fixes to allow for external addons with Flatpak
+ • rubucop support
+ • Parse languages from meson.build more correctly
+ • CSS, Font, and syntax styling improvements
+ • An experimental clangd plugin, which distributions should not enable
+   by default as it consumes significantly more memory than Builder's
+   integrated clang support
+ • Search result ordering fixes
+ • Modernized mono template
+ • Clang-format integration
+ • Improved SDK download integration with Flatpak
+ • Make application-ids more restrictive when creating projects
+ • Avoid opening known GTK 4 templates with Glade
+ • Fix unloading of some pipeline addins
+ • Work around IBus breakage in how it stole our keybindings
+ • Allow markdown in diagnostics as used by some LSPs, notably rust-analyzer
+ • Improved path detection with SDKs and extensions
+ • Markdown styling improvements
+ • A new LspService object has been added for plugins who need simple integration
+   with language servers, vastly simplifying work necessary by plugins integrating
+   language servers.
+ • Fixes to wordexp() usage when calculating long/short-form paths
+ • CSS plugin now knows about additional CSS property names
+ • Many LSP integration points with newer specifications have been added
+ • You can now set run-options in build preferences
+ • Additional snippets have been added
+ • Support for integrating with intelephense language server
+ • Support for integrating with Blueprint language server and syntax
+ • Updated translations
+
+============
+Version 41.1
+============
+
+ • Make system/user fonts available when running application
+ • Project template updates
+ • Snippet updates
+ • Updated translations
+
+============
+Version 41.0
+============
+
+ • Fixes to markdown presentation with Pango
+ • Template fixes
+ • Allow installation of KDE and elementary Flatpak runtimes through
+   private flatpak installation
+ • Updated translations
+
+================
+Version 41.beta1
+================
+
+ • Builder now uses a private Flatpak installation for SDKs to avoid
+   modifying the user's flatpak installation. It automatically uses
+   Flathub, Flathub-beta, and GNOME Nightly Flatpak repositories with
+   appropriate filters to get access to nightly and beta SDKs. This is
+   necessary to support development against "master" once the SDKs
+   branch for beta.
+ • Style scheme improvements
+ • Improvements in the foundry to build pipelines
+ • Allow loading buffers without addins to speed up text replacements
+ • Use jedi-language-server instead of loading Jedi in process
+ • Enable rust global search if the project is known to contain rust
+ • Improvements to Flatpak SDK extension integration
+ • A new markdown renderer
+ • Improvements to LSP autocompletion features
+ • Accessibility improvements
+ • Improved devhelp integration
+ • Session support for additional page types other than editors
+ • Improvements to grep integration including project search and replace
+
+=================
+Version 41.alpha1
+=================
+
+ • New and improved templates
+ • Toolbox improvements from Flatpak
+ • A new gnome-builder-flatpak helper, removing libflatpak from
+   the gnome-builder UI process.
+ • Improvements to gnome-builder-git to use default branch name.
+ • Improved session management
+ • A11y improvements
+ • Translation updates
+
 ==============
 Version 3.40.2
 ==============

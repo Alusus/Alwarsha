@@ -37,7 +37,7 @@ struct _IdeLspCompletionItem
   guint kind;
 };
 
-G_DEFINE_TYPE_WITH_CODE (IdeLspCompletionItem, ide_lsp_completion_item, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (IdeLspCompletionItem, ide_lsp_completion_item, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_COMPLETION_PROPOSAL, NULL))
 
 static void
@@ -181,4 +181,49 @@ ide_lsp_completion_item_get_snippet (IdeLspCompletionItem *self)
   ide_snippet_add_chunk (snippet, plainchunk);
 
   return g_steal_pointer (&snippet);
+}
+
+
+/**
+ * ide_lsp_completion_item_get_additional_text_edits:
+ * @self: a #IdeLspCompletionItem
+ * @file: The file the completion is applied to
+ *
+ * Obtain an array of all additional text edits to be applied to the project.
+ *
+ * Returns: (transfer full) (element-type IdeTextEdit) (nullable): a #GPtrArray of #IdeTextEdit
+ *
+ * Since: 41.0
+ */
+GPtrArray *
+ide_lsp_completion_item_get_additional_text_edits (IdeLspCompletionItem *self,
+                                                   GFile                *file)
+{
+  g_autoptr(GPtrArray) result = NULL;
+  g_autoptr(GVariantIter) text_edit_iter = NULL;
+  GVariant *text_edit;
+
+  g_return_val_if_fail (IDE_IS_LSP_COMPLETION_ITEM (self), NULL);
+
+  if (!JSONRPC_MESSAGE_PARSE (self->variant, "additionalTextEdits" , JSONRPC_MESSAGE_GET_ITER (&text_edit_iter)))
+    return NULL;
+
+  result = g_ptr_array_new_with_free_func (g_object_unref);
+
+  while (g_variant_iter_loop (text_edit_iter, "v", &text_edit))
+    {
+      IdeTextEdit *edit = ide_lsp_decode_text_edit (text_edit, file);
+
+      if (edit != NULL)
+        g_ptr_array_add (result, edit);
+#ifdef IDE_ENABLE_TRACE
+      else
+        {
+          g_autofree char *msg = g_variant_print (text_edit, TRUE);
+          IDE_TRACE_MSG ("Additional text edit could not be parsed: %s", msg);
+        }
+#endif
+    }
+
+  return IDE_PTR_ARRAY_STEAL_FULL (&result);
 }

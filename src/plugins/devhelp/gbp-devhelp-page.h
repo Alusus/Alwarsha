@@ -30,5 +30,6 @@ G_DECLARE_FINAL_TYPE (GbpDevhelpPage, gbp_devhelp_page, GBP, DEVHELP_PAGE, IdePa
 
 void gbp_devhelp_page_set_uri (GbpDevhelpPage *self,
                                const gchar    *uri);
+const char *gbp_devhelp_page_get_uri (GbpDevhelpPage *self);
 
 G_END_DECLS

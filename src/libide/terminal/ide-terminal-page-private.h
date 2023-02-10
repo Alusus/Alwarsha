@@ -39,7 +39,6 @@ struct _IdeTerminalPage
   GtkOverlay          *terminal_overlay_top;
   GtkRevealer         *search_revealer_top;
   IdeTerminal         *terminal_top;
-  GtkScrollbar        *top_scrollbar;
   IdeTerminalSearch   *tsearch;
 
   gint64               last_respawn;
@@ -50,6 +49,7 @@ struct _IdeTerminalPage
   guint                close_on_exit : 1;
   guint                needs_attention : 1;
   guint                exited : 1;
+  guint                destroyed : 1;
 };
 
 G_END_DECLS

@@ -23,6 +23,9 @@
 #include "config.h"
 
 #include <libide-gui.h>
+#include <libide-core.h>
+#include <libide-io.h>
+#include <libide-terminal.h>
 
 #include "rust-analyzer-pipeline-addin.h"
 
@@ -32,15 +35,17 @@
 
 struct _RustAnalyzerPipelineAddin
 {
-  IdeObject    parent_instance;
-  IdePipeline *pipeline;
-  gchar       *path;
-  gchar       *cargo_home;
+  IdeObject        parent_instance;
+  IdeNotification *notif;
+  IdePipeline     *pipeline;
+  gchar           *path;
+  gchar           *cargo_home;
+  guint            run_on_host : 1;
 };
 
 static void pipeline_addin_iface_init (IdePipelineAddinInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (RustAnalyzerPipelineAddin, rust_analyzer_pipeline_addin, IDE_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (RustAnalyzerPipelineAddin, rust_analyzer_pipeline_addin, IDE_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_PIPELINE_ADDIN, pipeline_addin_iface_init))
 
 static void
@@ -209,15 +214,34 @@ rust_analyzer_pipeline_addin_create_launcher (RustAnalyzerPipelineAddin *self)
   flags &= ~G_SUBPROCESS_FLAGS_STDERR_SILENCE;
 #endif
 
-  /* If cargo_home is set, then we are executing on the host */
-  if (self->cargo_home != NULL)
+  if (self->run_on_host)
     {
-      g_debug ("Using rust-analyzer from home directory");
+      const char *user_shell = ide_get_user_shell ();
+
+      g_debug ("Using rust-analyzer from host");
 
       launcher = ide_subprocess_launcher_new (flags);
-      ide_subprocess_launcher_set_run_on_host (launcher, TRUE);
+      ide_subprocess_launcher_set_run_on_host (launcher, self->run_on_host);
       ide_subprocess_launcher_set_clear_env (launcher, TRUE);
-      ide_subprocess_launcher_setenv (launcher, "CARGO_HOME", self->cargo_home, TRUE);
+
+      if (self->cargo_home != NULL)
+        ide_subprocess_launcher_setenv (launcher, "CARGO_HOME", self->cargo_home, TRUE);
+
+      /* Try to use the user's shell to increase chances we get the right
+       * $PATH for the user session.
+       */
+      if (ide_shell_supports_dash_c (user_shell) &&
+          ide_shell_supports_dash_login (user_shell))
+        {
+          ide_subprocess_launcher_push_argv (launcher, user_shell);
+          ide_subprocess_launcher_push_argv (launcher, "--login");
+          ide_subprocess_launcher_push_argv (launcher, "-c");
+          ide_subprocess_launcher_push_argv (launcher, self->path);
+        }
+      else
+        {
+          ide_subprocess_launcher_push_argv (launcher, self->path);
+        }
     }
   else
     {
@@ -229,6 +253,7 @@ rust_analyzer_pipeline_addin_create_launcher (RustAnalyzerPipelineAddin *self)
       /* Unset CARGO_HOME if it's set by the runtime */
       ide_subprocess_launcher_set_flags (launcher, flags);
       ide_subprocess_launcher_set_clear_env (launcher, TRUE);
+      ide_subprocess_launcher_push_argv (launcher, self->path);
     }
 
   /* In Builder meson projects that use Cargo, we use target/cargo-home as
@@ -254,7 +279,6 @@ rust_analyzer_pipeline_addin_create_launcher (RustAnalyzerPipelineAddin *self)
   ide_subprocess_launcher_setenv (launcher, "RA_LOG", "rust_analyzer=info", TRUE);
 #endif
 
-  ide_subprocess_launcher_push_argv (launcher, self->path);
   ide_subprocess_launcher_set_cwd (launcher, src_workdir);
 
   return g_steal_pointer (&launcher);
@@ -263,7 +287,8 @@ rust_analyzer_pipeline_addin_create_launcher (RustAnalyzerPipelineAddin *self)
 static void
 set_path (RustAnalyzerPipelineAddin *self,
           const gchar               *path,
-          const gchar               *cargo_home)
+          const gchar               *cargo_home,
+          gboolean                   run_on_host)
 {
   if (g_strcmp0 (path, self->path) != 0)
     {
@@ -276,26 +301,39 @@ set_path (RustAnalyzerPipelineAddin *self,
       g_free (self->cargo_home);
       self->cargo_home = g_strdup (cargo_home);
     }
+
+  self->run_on_host = !!run_on_host;
 }
 
 static void
-rust_analyzer_pipeline_addin_prepare (IdePipelineAddin *addin,
-                                      IdePipeline      *pipeline)
+rust_analyzer_pipeline_addin_load (IdePipelineAddin *addin,
+                                   IdePipeline      *pipeline)
 {
   RustAnalyzerPipelineAddin *self = (RustAnalyzerPipelineAddin *)addin;
+  IdeRuntimeManager *runtime_manager;
+  IdeBuildSystem *buildsystem = NULL;
+  IdeContext *context = NULL;
+  IdeRuntime *host;
   g_autoptr(GFile) cargo_home = NULL;
   g_autoptr(GFile) file = NULL;
+  g_autofree char *local_path = NULL;
 
   IDE_ENTRY;
 
   g_assert (RUST_IS_ANALYZER_PIPELINE_ADDIN (self));
   g_assert (IDE_IS_PIPELINE (pipeline));
 
+  context = ide_object_get_context (IDE_OBJECT (pipeline));
+  buildsystem = ide_build_system_from_context (context);
+
+  if (!ide_build_system_supports_language (buildsystem, "rust"))
+    IDE_EXIT;
+
   self->pipeline = pipeline;
 
   if (ide_pipeline_contains_program_in_path (pipeline, "rust-analyzer", NULL))
     {
-      set_path (self, "rust-analyzer", NULL);
+      set_path (self, "rust-analyzer", NULL, FALSE);
       IDE_EXIT;
     }
 
@@ -304,11 +342,54 @@ rust_analyzer_pipeline_addin_prepare (IdePipelineAddin *addin,
 
   if (g_file_query_exists (file, NULL))
     {
-      set_path (self, g_file_peek_path (file), g_file_peek_path (cargo_home));
+      set_path (self, g_file_peek_path (file), g_file_peek_path (cargo_home), TRUE);
       IDE_EXIT;
     }
 
-  set_path (self, NULL, NULL);
+  /* Try ~/.local/bin/ where rust-analyzer suggests installation */
+  local_path = g_build_filename (g_get_home_dir (), ".local", "bin", "rust-analyzer", NULL);
+  if (g_file_test (local_path, G_FILE_TEST_IS_EXECUTABLE))
+    {
+      set_path (self, local_path, NULL, TRUE);
+      IDE_EXIT;
+    }
+
+  /* Check on host, hoping to inherit PATH */
+  runtime_manager = ide_runtime_manager_from_context (context);
+  host = ide_runtime_manager_get_runtime (runtime_manager, "host");
+  if (ide_runtime_contains_program_in_path (host, "rust-analyzer", NULL))
+    {
+      set_path (self, "rust-analyzer", NULL, TRUE);
+      IDE_EXIT;
+    }
+
+  self->notif = ide_notification_new ();
+  ide_notification_set_title (self->notif, "Rust-analyzer is missing");
+  ide_notification_set_body (self->notif, "Install rust-analyzer in your PATH, or use the Rust flatpak extension in your manifest.");
+  ide_notification_set_urgent (self->notif, TRUE);
+  ide_notification_attach (self->notif, IDE_OBJECT (pipeline));
+
+  set_path (self, NULL, NULL, FALSE);
+
+  IDE_EXIT;
+}
+
+static void
+rust_analyzer_pipeline_addin_unload (IdePipelineAddin *addin,
+                                     IdePipeline      *pipeline)
+{
+  RustAnalyzerPipelineAddin *self = (RustAnalyzerPipelineAddin *)addin;
+
+  IDE_ENTRY;
+
+  g_assert (RUST_IS_ANALYZER_PIPELINE_ADDIN (self));
+  g_assert (IDE_IS_PIPELINE (pipeline));
+
+  if (self->notif)
+    {
+      ide_notification_withdraw (self->notif);
+      g_clear_object (&self->notif);
+    }
 
   IDE_EXIT;
 }
@@ -316,6 +397,7 @@ rust_analyzer_pipeline_addin_prepare (IdePipelineAddin *addin,
 static void
 pipeline_addin_iface_init (IdePipelineAddinInterface *iface)
 {
-  iface->prepare = rust_analyzer_pipeline_addin_prepare;
+  iface->load = rust_analyzer_pipeline_addin_load;
+  iface->unload = rust_analyzer_pipeline_addin_unload;
 }
 

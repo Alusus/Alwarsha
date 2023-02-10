@@ -22,7 +22,7 @@
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="visible">true</property>
-                <property name="title" translatable="yes" context="shortcut window">Toogle primary menu</property>
+                <property name="title" translatable="yes" context="shortcut window">Toggle primary menu</property>
                 <property name="accelerator">F10</property>
               </object>
             </child>
@@ -95,6 +95,13 @@
                 <property name="accelerator">&lt;ctrl&gt;F9</property>
               </object>
             </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">true</property>
+                <property name="title" translatable="yes" context="shortcut window">Show Find in Project panel</property>
+                <property name="accelerator">&lt;ctrl&gt;&lt;shift&gt;f</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>
@@ -120,6 +127,13 @@
                 <property name="visible">true</property>
                 <property name="accelerator">&lt;ctrl&gt;s</property>
                 <property name="title" translatable="yes" context="shortcut window">Save the document</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">true</property>
+                <property name="accelerator">&lt;ctrl&gt;&lt;shift&gt;s</property>
+                <property name="title" translatable="yes" context="shortcut window">Save a copy of the document</property>
               </object>
             </child>
             <child>
@@ -169,6 +183,13 @@
                 <property name="visible">true</property>
                 <property name="accelerator">&lt;ctrl&gt;k</property>
                 <property name="title" translatable="yes" context="shortcut window">Show list of open documents</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">true</property>
+                <property name="accelerator">&lt;ctrl&gt;&lt;shift&gt;k</property>
+                <property name="title" translatable="yes" context="shortcut window">Show document outline or symbol tree</property>
               </object>
             </child>
           </object>
@@ -337,6 +358,27 @@
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="visible">true</property>
+                <property name="accelerator">&lt;ctrl&gt;u</property>
+                <property name="title" translatable="yes" context="shortcut window">Make selection upper case</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">true</property>
+                <property name="accelerator">&lt;ctrl&gt;l</property>
+                <property name="title" translatable="yes" context="shortcut window">Make selection lower case</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">true</property>
+                <property name="accelerator">&lt;ctrl&gt;asciitilde</property>
+                <property name="title" translatable="yes" context="shortcut window">Invert selection case</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">true</property>
                 <property name="accelerator">&lt;ctrl&gt;space</property>
                 <property name="title" translatable="yes" context="shortcut window">Show completion window</property>
               </object>
@@ -398,6 +440,13 @@
                 <property name="title" translatable="yes" context="shortcut window">Beautify selected code</property>
               </object>
             </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">true</property>
+                <property name="accelerator">&lt;shift&gt;&lt;alt&gt;f</property>
+                <property name="title" translatable="yes" comments="Translators: LSP stands for Language Server Protocol" context="shortcut window">(LSP only) Format selected code or whole document</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>
@@ -437,6 +486,14 @@
                 <property name="visible">true</property>
                 <property name="accelerator">&lt;alt&gt;period</property>
                 <property name="title" translatable="yes" context="shortcut window">Jump to definition of symbol</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="visible">true</property>
+                <property name="accelerator">&lt;ctrl&gt;&lt;shift&gt;space</property>
+                <!-- FIXME: find references of what? it doesn't seem to work here, there's always no results. -->
+                <property name="title" translatable="yes" context="shortcut window">Find references</property>
               </object>
             </child>
             <child>

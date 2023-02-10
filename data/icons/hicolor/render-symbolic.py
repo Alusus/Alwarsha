@@ -8,7 +8,9 @@ _resources = {}
 _aliases = {}
 _ignore = (
   'org.alusus.Alwarsha.svg',
+  'org.alusus.Alwarsha.Devel.svg',
   'org.alusus.Alwarsha-symbolic.svg',
+  'org.alusus.Alwarsha.Devel-symbolic.svg',
 )
 
 def addResource(directory, name):

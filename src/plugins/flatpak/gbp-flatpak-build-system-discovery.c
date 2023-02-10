@@ -205,7 +205,25 @@ gbp_flatpak_build_system_discovery_discover (IdeBuildSystemDiscovery  *discovery
           if (dzl_str_equal0 (buildsystem, "cmake-ninja"))
             buildsystem = "cmake";
           else if (dzl_str_equal0 (buildsystem, "simple"))
-            buildsystem = "directory";
+            {
+              JsonNode *sdk_extensions;
+              JsonArray *sdk_extensions_array;
+
+              buildsystem = "directory";
+
+              /* Check for a cargo project */
+              sdk_extensions = json_object_get_member (root_object, "sdk-extensions");
+              sdk_extensions_array = json_node_get_array (sdk_extensions);
+              len = json_array_get_length (sdk_extensions_array);
+              for (guint j = 0; j < len; j++)
+                {
+                  const gchar *extension;
+                  extension = json_array_get_string_element (sdk_extensions_array, j);
+                  if (ide_str_equal0 (extension, "org.freedesktop.Sdk.Extension.rust-stable") ||
+                      ide_str_equal0 (extension, "org.freedesktop.Sdk.Extension.rust-nightly"))
+                      buildsystem = "cargo_plugin";
+                }
+            }
 
           /* Set priority higher than normal discoveries */
           if (priority != NULL)
@@ -226,7 +244,7 @@ build_system_discovery_iface_init (IdeBuildSystemDiscoveryInterface *iface)
   iface->discover = gbp_flatpak_build_system_discovery_discover;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GbpFlatpakBuildSystemDiscovery,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpFlatpakBuildSystemDiscovery,
                          gbp_flatpak_build_system_discovery,
                          G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_BUILD_SYSTEM_DISCOVERY, build_system_discovery_iface_init))

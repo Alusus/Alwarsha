@@ -21,13 +21,15 @@
 
 #define G_LOG_DOMAIN "gbp-flatpak-manifest"
 
-#include <flatpak/flatpak.h>
 #include <json-glib/json-glib.h>
 
-#include "gbp-flatpak-application-addin.h"
+#include "gbp-flatpak-client.h"
 #include "gbp-flatpak-manifest.h"
 #include "gbp-flatpak-runtime.h"
 #include "gbp-flatpak-util.h"
+
+#include "daemon/ipc-flatpak-service.h"
+#include "daemon/ipc-flatpak-util.h"
 
 struct _GbpFlatpakManifest
 {
@@ -46,6 +48,8 @@ struct _GbpFlatpakManifest
   gchar           **finish_args;
   gchar            *runtime;
   gchar            *runtime_version;
+  gchar            *base;
+  gchar            *base_version;
   gchar            *sdk;
   gchar           **sdk_extensions;
 
@@ -60,7 +64,7 @@ struct _GbpFlatpakManifest
 
 static void initable_iface_init (GInitableIface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GbpFlatpakManifest, gbp_flatpak_manifest, IDE_TYPE_CONFIG,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpFlatpakManifest, gbp_flatpak_manifest, IDE_TYPE_CONFIG,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init))
 
 enum {
@@ -97,10 +101,15 @@ validate_properties (GbpFlatpakManifest  *self,
     }
 
   name = self->runtime;
-  arch = flatpak_get_default_arch ();
+  arch = gbp_flatpak_get_default_arch (IDE_OBJECT (self));
   branch = "master";
   if (self->runtime_version != NULL)
     branch = self->runtime_version;
+  if (self->base != NULL && self->base_version != NULL)
+    {
+      name = self->base;
+      branch = self->base_version;
+    }
 
   runtime_id = g_strdup_printf ("flatpak:%s/%s/%s", name, arch, branch);
   ide_config_set_runtime_id (IDE_CONFIG (self), runtime_id);
@@ -244,6 +253,10 @@ discover_environ (GbpFlatpakManifest *self,
       (str = json_object_get_string_member (build_options, "cxxflags")))
     ide_environment_setenv (env, "CXXFLAGS", str);
 
+  if (json_object_has_member (build_options, "prepend-path") &&
+      (str = json_object_get_string_member (build_options, "prepend-path")))
+    ide_config_set_prepend_path (IDE_CONFIG (self), str);
+
   if (json_object_has_member (build_options, "append-path") &&
       (str = json_object_get_string_member (build_options, "append-path")))
     ide_config_set_append_path (IDE_CONFIG (self), str);
@@ -338,6 +351,8 @@ gbp_flatpak_manifest_initable_init (GInitable     *initable,
   g_autofree gchar *run_args = NULL;
   g_autoptr(JsonParser) parser = NULL;
   g_auto(GStrv) build_commands = NULL;
+  g_auto(GStrv) make_args = NULL;
+  g_auto(GStrv) make_install_args = NULL;
   g_auto(GStrv) post_install = NULL;
   const gchar *app_id_field = "app-id";
   g_autoptr(IdeContext) context = NULL;
@@ -403,6 +418,8 @@ gbp_flatpak_manifest_initable_init (GInitable     *initable,
 
   discover_string_field (root_obj, "runtime", &self->runtime);
   discover_string_field (root_obj, "runtime-version", &self->runtime_version);
+  discover_string_field (root_obj, "base", &self->base);
+  discover_string_field (root_obj, "base-version", &self->base_version);
   discover_string_field (root_obj, "sdk", &self->sdk);
   discover_string_field (root_obj, "command", &self->command);
   discover_strv_field (root_obj, "build-args", &self->build_args);
@@ -448,6 +465,16 @@ gbp_flatpak_manifest_initable_init (GInitable     *initable,
     ide_config_set_locality (IDE_CONFIG (self), IDE_BUILD_LOCALITY_OUT_OF_TREE);
   else
     ide_config_set_locality (IDE_CONFIG (self), IDE_BUILD_LOCALITY_IN_TREE);
+
+  if (discover_strv_field (primary, "make-args", &make_args))
+    ide_config_set_args_for_phase (IDE_CONFIG (self),
+                                   IDE_PIPELINE_PHASE_BUILD,
+                                   (const gchar * const *)make_args);
+
+  if (discover_strv_field (primary, "make-install-args", &make_install_args))
+    ide_config_set_args_for_phase (IDE_CONFIG (self),
+                                   IDE_PIPELINE_PHASE_INSTALL,
+                                   (const gchar * const *)make_install_args);
 
   discover_environ (self, root_obj);
 
@@ -548,26 +575,55 @@ gbp_flatpak_manifest_set_file (GbpFlatpakManifest *self,
 
 static IdeRuntime *
 find_extension (GbpFlatpakManifest *self,
-                const gchar        *name)
+                const gchar        *runtime_id)
 {
-  g_autoptr(FlatpakInstalledRef) ref = NULL;
-  GbpFlatpakApplicationAddin *addin;
-  GbpFlatpakRuntime *ret = NULL;
+  g_autoptr(IpcFlatpakService) service = NULL;
+  g_autoptr(GVariant) info = NULL;
+  g_autoptr(GError) error = NULL;
+  GbpFlatpakClient *client;
+
+  IDE_ENTRY;
 
   g_assert (GBP_IS_FLATPAK_MANIFEST (self));
-  g_assert (name != NULL);
+  g_assert (runtime_id != NULL);
 
-  /* TODO: This doesn't allow pinning to the right version
-   * of extension because we need to know the right parent
-   * version of the extension.
-   */
-  addin = gbp_flatpak_application_addin_get_default ();
-  ref = gbp_flatpak_application_addin_find_extension (addin, self->sdk, name);
+  if ((client = gbp_flatpak_client_get_default ()) &&
+      (service = gbp_flatpak_client_get_service (client, NULL, &error)) &&
+      ipc_flatpak_service_call_get_runtime_sync (service, runtime_id, &info, NULL, &error))
+    {
+      GbpFlatpakRuntime *ret = NULL;
+      const gchar *name;
+      const gchar *arch;
+      const gchar *branch;
+      const gchar *sdk_name;
+      const gchar *sdk_branch;
+      const gchar *deploy_dir;
+      const gchar *metadata;
+      gboolean is_extension;
 
-  if (ref != NULL)
-    ret = gbp_flatpak_runtime_new (ref, TRUE, NULL, NULL);
+      if (runtime_variant_parse (info,
+                                 &name, &arch, &branch,
+                                 &sdk_name, &sdk_branch,
+                                 &deploy_dir,
+                                 &metadata,
+                                 &is_extension))
+        ret = gbp_flatpak_runtime_new (name,
+                                       arch,
+                                       branch,
+                                       sdk_name,
+                                       sdk_branch,
+                                       deploy_dir,
+                                       metadata,
+                                       is_extension);
 
-  return IDE_RUNTIME (g_steal_pointer (&ret));
+      IDE_RETURN (IDE_RUNTIME (g_steal_pointer (&ret)));
+    }
+
+  if (error != NULL)
+    g_debug ("find_extension() could not resolve runtime %s: %s",
+             runtime_id, error->message);
+
+  IDE_RETURN (NULL);
 }
 
 static GPtrArray *
@@ -609,6 +665,8 @@ gbp_flatpak_manifest_finalize (GObject *object)
   g_clear_pointer (&self->finish_args, g_strfreev);
   g_clear_pointer (&self->runtime, g_free);
   g_clear_pointer (&self->runtime_version, g_free);
+  g_clear_pointer (&self->base, g_free);
+  g_clear_pointer (&self->base_version, g_free);
   g_clear_pointer (&self->sdk, g_free);
   g_clear_pointer (&self->sdk_extensions, g_strfreev);
 
@@ -908,7 +966,6 @@ apply_changes_to_tree (GbpFlatpakManifest *self)
         }
 
     }
-
 }
 
 static void
@@ -1052,7 +1109,7 @@ gbp_flatpak_manifest_get_runtimes (GbpFlatpakManifest *self,
   ar = g_ptr_array_new ();
 
   if (for_arch == NULL)
-    for_arch = flatpak_get_default_arch ();
+    for_arch = gbp_flatpak_get_default_arch (IDE_OBJECT (self));
 
   if (self->runtime_version != NULL)
     runtime_version = self->runtime_version;
@@ -1074,11 +1131,19 @@ gbp_flatpak_manifest_get_runtimes (GbpFlatpakManifest *self,
   /* Now discover the runtime needed for running */
   g_ptr_array_add (ar, g_strdup_printf ("%s/%s/%s", self->runtime, for_arch, runtime_version));
 
+  if (self->base != NULL && self->base_version != NULL)
+    g_ptr_array_add (ar, g_strdup_printf ("%s/%s/%s", self->base, for_arch, self->base_version));
+
   /* Now discover any necessary SDK extensions */
   if (self->sdk_extensions != NULL)
     {
       for (guint i = 0; self->sdk_extensions[i]; i++)
-        g_ptr_array_add (ar, g_strdup_printf ("%s/%s/", self->sdk_extensions[i], for_arch));
+        {
+          if (strchr (self->sdk_extensions[i], '/') != NULL)
+            g_ptr_array_add (ar, g_strdup (self->sdk_extensions[i]));
+          else
+            g_ptr_array_add (ar, g_strdup_printf ("%s/%s/", self->sdk_extensions[i], for_arch));
+        }
     }
 
   g_ptr_array_add (ar, NULL);
@@ -1092,4 +1157,59 @@ gbp_flatpak_manifest_get_platform (GbpFlatpakManifest *self)
   g_return_val_if_fail (GBP_IS_FLATPAK_MANIFEST (self), NULL);
 
   return self->runtime;
+}
+
+void
+gbp_flatpak_manifest_resolve_extensions (GbpFlatpakManifest *self,
+                                         IpcFlatpakService  *service)
+{
+  g_autofree char *sdk = NULL;
+
+  g_return_if_fail (GBP_IS_FLATPAK_MANIFEST (self));
+  g_return_if_fail (!service || IPC_IS_FLATPAK_SERVICE (service));
+
+  if (self->sdk_extensions == NULL || service == NULL)
+    return;
+
+  /* Technically we could have a situation where the host system
+   * does not have the SDK extension but the development platform
+   * does. We do not currently support that though. Embedded systems
+   * may very well mean we need to do that someday.
+   */
+
+  sdk = g_strdup_printf ("%s/%s/%s",
+                         self->sdk,
+                         gbp_flatpak_get_default_arch (IDE_OBJECT (self)),
+                         self->runtime_version);
+
+  for (guint i = 0; self->sdk_extensions[i]; i++)
+    {
+      g_autoptr(GError) error = NULL;
+      g_autofree char *resolved = NULL;
+
+      ipc_flatpak_service_call_resolve_extension_sync (service,
+                                                       sdk,
+                                                       self->sdk_extensions[i],
+                                                       &resolved,
+                                                       NULL,
+                                                       &error);
+
+      if (error != NULL)
+        g_debug ("Failed to resolve extension %s for SDK %s: %s",
+                 self->sdk_extensions[i], sdk, error->message);
+
+      if (!ide_str_empty0 (resolved))
+        {
+          g_free (self->sdk_extensions[i]);
+          self->sdk_extensions[i] = g_steal_pointer (&resolved);
+        }
+    }
+}
+
+const char *
+gbp_flatpak_manifest_get_branch (GbpFlatpakManifest *self)
+{
+  g_return_val_if_fail (GBP_IS_FLATPAK_MANIFEST (self), NULL);
+
+  return self->runtime_version;
 }

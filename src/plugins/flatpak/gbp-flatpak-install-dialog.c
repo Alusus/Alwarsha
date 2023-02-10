@@ -26,22 +26,19 @@
 
 #include <libide-gui.h>
 #include <libide-threading.h>
-#include <flatpak/flatpak.h>
 
 #include "gbp-flatpak-install-dialog.h"
 #include "gbp-flatpak-util.h"
 
 struct _GbpFlatpakInstallDialog
 {
-  GtkDialog      parent_instance;
-  GtkListStore  *liststore1;
-  IdeTask       *close_task;
-  gchar        **saved_runtimes;
-  gchar         *sdk;
-  gint           response_id;
+  GtkDialog     parent_instance;
+  GtkListStore *liststore1;
+  IdeTask      *close_task;
+  gint          response_id;
 };
 
-G_DEFINE_TYPE (GbpFlatpakInstallDialog, gbp_flatpak_install_dialog, GTK_TYPE_DIALOG)
+G_DEFINE_FINAL_TYPE (GbpFlatpakInstallDialog, gbp_flatpak_install_dialog, GTK_TYPE_DIALOG)
 
 GbpFlatpakInstallDialog *
 gbp_flatpak_install_dialog_new (GtkWindow *transient_for)
@@ -55,46 +52,6 @@ gbp_flatpak_install_dialog_new (GtkWindow *transient_for)
                        NULL);
 }
 
-static gchar **
-get_runtimes (GbpFlatpakInstallDialog *self)
-{
-  GPtrArray *ar = NULL;
-  GtkTreeIter iter;
-
-  g_assert (GBP_IS_FLATPAK_INSTALL_DIALOG (self));
-
-  ar = g_ptr_array_new ();
-
-  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (self->liststore1), &iter))
-    {
-      do
-        {
-          g_autofree gchar *name = NULL;
-          g_autofree gchar *arch = NULL;
-          g_autofree gchar *branch = NULL;
-
-          gtk_tree_model_get (GTK_TREE_MODEL (self->liststore1), &iter,
-                              0, &name,
-                              1, &arch,
-                              2, &branch,
-                              -1);
-
-          if (arch == NULL)
-            arch = g_strdup (flatpak_get_default_arch ());
-
-          if (branch == NULL)
-            branch = g_strdup ("");
-
-          g_ptr_array_add (ar, g_strdup_printf ("%s/%s/%s", name, arch, branch));
-        }
-      while (gtk_tree_model_iter_next (GTK_TREE_MODEL (self->liststore1), &iter));
-    }
-
-  g_ptr_array_add (ar, NULL);
-
-  return (gchar **)g_ptr_array_free (ar, FALSE);
-}
-
 static void
 gbp_flatpak_install_dialog_response (GtkDialog *dialog,
                                      gint       response_id)
@@ -105,11 +62,13 @@ gbp_flatpak_install_dialog_response (GtkDialog *dialog,
 
   self->response_id = response_id;
 
-  g_clear_pointer (&self->saved_runtimes, g_strfreev);
-  self->saved_runtimes = get_runtimes (self);
-
   if (self->close_task && response_id == GTK_RESPONSE_OK)
     ide_task_return_boolean (self->close_task, TRUE);
+  else
+    ide_task_return_new_error (self->close_task,
+                               G_IO_ERROR,
+                               G_IO_ERROR_CANCELLED,
+                               "User cancelled the request");
 
   if (GTK_DIALOG_CLASS (gbp_flatpak_install_dialog_parent_class)->response)
     GTK_DIALOG_CLASS (gbp_flatpak_install_dialog_parent_class)->response (dialog, response_id);
@@ -123,8 +82,6 @@ gbp_flatpak_install_dialog_finalize (GObject *object)
   GbpFlatpakInstallDialog *self = (GbpFlatpakInstallDialog *)object;
 
   g_clear_object (&self->close_task);
-  g_clear_pointer (&self->saved_runtimes, g_strfreev);
-  g_clear_pointer (&self->sdk, g_free);
 
   G_OBJECT_CLASS (gbp_flatpak_install_dialog_parent_class)->finalize (object);
 }
@@ -153,7 +110,7 @@ gbp_flatpak_install_dialog_init (GbpFlatpakInstallDialog *self)
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  gtk_window_set_title (GTK_WINDOW (self), _("Install Missing SDK?"));
+  gtk_window_set_title (GTK_WINDOW (self), _("Install or Update SDK?"));
   gtk_window_set_application (GTK_WINDOW (self), GTK_APPLICATION (IDE_APPLICATION_DEFAULT));
 
   gtk_dialog_add_buttons (GTK_DIALOG (self),
@@ -164,24 +121,6 @@ gbp_flatpak_install_dialog_init (GbpFlatpakInstallDialog *self)
 
   button = gtk_dialog_get_widget_for_response (GTK_DIALOG (self), GTK_RESPONSE_OK);
   dzl_gtk_widget_add_style_class (button, "suggested-action");
-}
-
-static void
-gbp_flatpak_install_dialog_on_close_cb (GbpFlatpakInstallDialog *self,
-                                        IdeTask                 *task)
-{
-  g_assert (GBP_IS_FLATPAK_INSTALL_DIALOG (self));
-  g_assert (IDE_IS_TASK (task));
-
-  g_signal_handlers_disconnect_by_func (self,
-                                        G_CALLBACK (gbp_flatpak_install_dialog_on_close_cb),
-                                        task);
-
-  if (self->response_id != GTK_RESPONSE_OK)
-    ide_task_return_new_error (task,
-                               G_IO_ERROR,
-                               G_IO_ERROR_CANCELLED,
-                               "User cancelled the request");
 }
 
 void
@@ -213,12 +152,6 @@ gbp_flatpak_install_dialog_run_async (GbpFlatpakInstallDialog *self,
                              G_CALLBACK (gtk_window_close),
                              self,
                              G_CONNECT_SWAPPED);
-
-  g_signal_connect_object (self,
-                           "close",
-                           G_CALLBACK (gbp_flatpak_install_dialog_on_close_cb),
-                           self->close_task,
-                           G_CONNECT_AFTER);
 
   ide_gtk_window_present (GTK_WINDOW (self));
 }
@@ -298,52 +231,10 @@ gbp_flatpak_install_dialog_add_runtime (GbpFlatpakInstallDialog *self,
     }
 }
 
-gchar **
-gbp_flatpak_install_dialog_get_runtimes (GbpFlatpakInstallDialog *self)
+gboolean
+gbp_flatpak_install_dialog_is_empty (GbpFlatpakInstallDialog *self)
 {
-  g_assert (GBP_IS_FLATPAK_INSTALL_DIALOG (self));
+  g_return_val_if_fail (GBP_IS_FLATPAK_INSTALL_DIALOG (self), FALSE);
 
-  if (self->saved_runtimes != NULL)
-    return g_strdupv (self->saved_runtimes);
-
-  return get_runtimes (self);
-}
-
-void
-gbp_flatpak_install_dialog_add_runtime_full (GbpFlatpakInstallDialog *self,
-                                             const gchar *name,
-                                             const gchar *arch,
-                                             const gchar *branch)
-{
-  g_autofree gchar *runtime_id = NULL;
-
-  g_return_if_fail (GBP_IS_FLATPAK_INSTALL_DIALOG (self));
-  g_return_if_fail (name != NULL);
-
-  if (arch == NULL)
-    arch = flatpak_get_default_arch ();
-
-  runtime_id = g_strdup_printf ("%s/%s/%s", name, arch, branch ?: "");
-  gbp_flatpak_install_dialog_add_runtime (self, runtime_id);
-}
-
-void
-gbp_flatpak_install_dialog_set_sdk (GbpFlatpakInstallDialog *self,
-                                    const gchar             *sdk)
-{
-  g_return_if_fail (GBP_IS_FLATPAK_INSTALL_DIALOG (self));
-
-  if (g_strcmp0 (sdk, self->sdk) != 0)
-    {
-      g_free (self->sdk);
-      self->sdk = g_strdup (sdk);
-    }
-}
-
-const gchar *
-gbp_flatpak_install_dialog_get_sdk (GbpFlatpakInstallDialog *self)
-{
-  g_return_val_if_fail (GBP_IS_FLATPAK_INSTALL_DIALOG (self), NULL);
-
-  return self->sdk;
+  return gtk_tree_model_iter_n_children (GTK_TREE_MODEL (self->liststore1), NULL) == 0;
 }

@@ -152,6 +152,7 @@ src/plugins/beautifier/gb-beautifier-helper.c
 src/plugins/beautifier/gb-beautifier-process.c
 src/plugins/beautifier/gtk/menus.ui
 src/plugins/buildconfig/ide-buildconfig-config-provider.c
+src/plugins/buildstream/buildstream_plugin.py
 src/plugins/buildui/gbp-buildui-config-surface.c
 src/plugins/buildui/gbp-buildui-config-view-addin.c
 src/plugins/buildui/gbp-buildui-log-pane.c
@@ -223,6 +224,7 @@ src/plugins/devhelp/gbp-devhelp-menu-button.c
 src/plugins/devhelp/gbp-devhelp-menu-button.ui
 src/plugins/devhelp/gbp-devhelp-page.c
 src/plugins/devhelp/gbp-devhelp-search.c
+src/plugins/devhelp/gbp-devhelp-search.ui
 src/plugins/devhelp/gtk/menus.ui
 src/plugins/dspy/gbp-dspy-application-addin.c
 src/plugins/dspy/gbp-dspy-surface.c
@@ -254,7 +256,8 @@ src/plugins/eslint/eslint_plugin.py
 src/plugins/eslint/org.alusus.alwarsha.plugins.eslint.gschema.xml
 src/plugins/file-search/gbp-file-search-index.c
 src/plugins/file-search/gbp-file-search-provider.c
-src/plugins/flatpak/gbp-flatpak-application-addin.c
+src/plugins/flatpak/daemon/ipc-flatpak-service-impl.c
+src/plugins/flatpak/gbp-flatpak-client.c
 src/plugins/flatpak/gbp-flatpak-clone-widget.c
 src/plugins/flatpak/gbp-flatpak-clone-widget.ui
 src/plugins/flatpak/gbp-flatpak-config-provider.c
@@ -262,11 +265,10 @@ src/plugins/flatpak/gbp-flatpak-download-stage.c
 src/plugins/flatpak/gbp-flatpak-install-dialog.c
 src/plugins/flatpak/gbp-flatpak-install-dialog.ui
 src/plugins/flatpak/gbp-flatpak-pipeline-addin.c
-src/plugins/flatpak/gbp-flatpak-preferences-addin.c
 src/plugins/flatpak/gbp-flatpak-runner.c
 src/plugins/flatpak/gbp-flatpak-runtime.c
-src/plugins/flatpak/gbp-flatpak-transfer.c
-src/plugins/flatpak/gbp-flatpak-workbench-addin.c
+src/plugins/flatpak/gbp-flatpak-runtime-provider.c
+src/plugins/flatpak/gbp-flatpak-sdk-stage.c
 src/plugins/gcc/gbp-gcc-toolchain-provider.c
 src/plugins/gettext/ide-gettext-diagnostic-provider.c
 src/plugins/git/daemon/ipc-git-change-monitor-impl.c
@@ -295,13 +297,14 @@ src/plugins/gnome-code-assistance/org.alusus.alwarsha.gnome-code-assistance.gsch
 src/plugins/gradle/gradle_plugin.py
 src/plugins/greeter/gbp-greeter-application-addin.c
 src/plugins/greeter/gtk/menus.ui
+src/plugins/grep/gbp-grep-editor-addin.c
 src/plugins/grep/gbp-grep-panel.c
 src/plugins/grep/gbp-grep-panel.ui
 src/plugins/grep/gbp-grep-popover.ui
 src/plugins/grep/gtk/menus.ui
 src/plugins/html-preview/gtk/menus.ui
 src/plugins/html-preview/html_preview.py
-src/plugins/jedi/jedi_plugin.py
+src/plugins/intelephense/intelephense.py
 src/plugins/jhbuild/jhbuild_plugin.py
 src/plugins/ls/gbp-ls-page.c
 src/plugins/ls/gbp-ls-page.ui
@@ -325,6 +328,7 @@ src/plugins/newcomers/gbp-newcomers-section.ui
 src/plugins/notification/ide-notification-addin.c
 src/plugins/npm/npm_plugin.py
 src/plugins/omni-gutter/gbp-omni-gutter-renderer.c
+src/plugins/open-with-external/gtk/menus.ui
 src/plugins/phpize/phpize_plugin.py
 src/plugins/podman/gbp-podman-runtime.c
 src/plugins/project-tree/gbp-new-file-popover.c

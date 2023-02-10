@@ -30,9 +30,10 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (GbpGrepPanel, gbp_grep_panel, GBP, GREP_PANEL, DzlDockWidget)
 
-GtkWidget    *gbp_grep_panel_new       (void);
-GbpGrepModel *gbp_grep_panel_get_model (GbpGrepPanel *self);
-void          gbp_grep_panel_set_model (GbpGrepPanel *self,
-                                        GbpGrepModel *model);
+GtkWidget    *gbp_grep_panel_new           (void);
+GbpGrepModel *gbp_grep_panel_get_model     (GbpGrepPanel *self);
+void          gbp_grep_panel_set_model     (GbpGrepPanel *self,
+                                            GbpGrepModel *model);
+void          gbp_grep_panel_launch_search (GbpGrepPanel *self);
 
 G_END_DECLS

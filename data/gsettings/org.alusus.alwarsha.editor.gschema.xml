@@ -12,12 +12,6 @@
 
   <schema id="org.alusus.alwarsha.editor" path="/org/alusus/alwarsha/editor/" gettext-domain="alwarsha">
     <key name="keybindings" type="s">
-      <choices>
-        <choice value="default"/>
-        <choice value="emacs"/>
-        <choice value="vim"/>
-        <choice value="sublime"/>
-      </choices>
       <default>'default'</default>
     </key>
     <key name="restore-insert-mark" type="b">
@@ -101,10 +95,15 @@
       <summary>Overscroll</summary>
       <description>The number of lines to scroll beyond the end of the buffer.</description>
     </key>
-    <key name="wrap-text" type="b">
-      <default>false</default>
+    <key name="wrap-text" type="s">
+      <choices>
+        <choice value="never"/>
+        <choice value="whitespace"/>
+        <choice value="always"/>
+      </choices>
+      <default>'never'</default>
       <summary>Wrap Text</summary>
-      <description>If enabled, Alwarsha will automatically wrap text so all of the line text is visible.</description>
+      <description>The way to wrap a long line of text for a better visibility.</description>
     </key>
     <key name="auto-save" type="b">
       <default>true</default>
@@ -133,6 +132,12 @@
       <default>true</default>
       <summary>Interactive Completion</summary>
       <description>If enabled, Alwarsha will automatically display completion proposals as you type.</description>
+    </key>
+    <key name="min-char-selected" type="i">
+      <default>2</default>
+      <range min="1" max="32"/>
+      <summary>Minimum characters for matching selection.</summary>
+      <description>Specify the minimum number of characters for selection matching.</description>
     </key>
   </schema>
 </schemalist>

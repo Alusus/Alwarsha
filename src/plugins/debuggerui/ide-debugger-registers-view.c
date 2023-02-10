@@ -51,7 +51,7 @@ enum {
   N_PROPS
 };
 
-G_DEFINE_TYPE (IdeDebuggerRegistersView, ide_debugger_registers_view, GTK_TYPE_BIN)
+G_DEFINE_FINAL_TYPE (IdeDebuggerRegistersView, ide_debugger_registers_view, GTK_TYPE_BIN)
 
 static GParamSpec *properties [N_PROPS];
 
@@ -109,7 +109,8 @@ ide_debugger_registers_view_list_registers_cb (GObject      *object,
 
   if (error != NULL)
     {
-      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED))
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED) &&
+          !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         g_warning ("%s", error->message);
       return;
     }

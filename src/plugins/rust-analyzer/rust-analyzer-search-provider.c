@@ -1,6 +1,6 @@
 /* rust-analyzer-search-provider.c
  *
- * Copyright 2020 Günther Wagner <info@gunibert.de>
+ * Copyright 2020-2021 Günther Wagner <info@gunibert.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#define G_LOG_DOMAIN "rust-analyzer-search-provider"
+
 #include <libide-search.h>
 
 #include "rust-analyzer-search-provider.h"
@@ -30,7 +32,7 @@ struct _RustAnalyzerSearchProvider
 
 static void provider_iface_init (IdeSearchProviderInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (RustAnalyzerSearchProvider,
+G_DEFINE_FINAL_TYPE_WITH_CODE (RustAnalyzerSearchProvider,
                          rust_analyzer_search_provider,
                          IDE_TYPE_LSP_SEARCH_PROVIDER,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_SEARCH_PROVIDER, provider_iface_init))
@@ -59,7 +61,6 @@ rust_analyzer_search_provider_load (IdeSearchProvider *self,
 
   service = rust_analyzer_service_from_context (context);
   g_object_bind_property (service, "client", self, "client", G_BINDING_SYNC_CREATE);
-  rust_analyzer_service_ensure_started (service);
 
   IDE_EXIT;
 }

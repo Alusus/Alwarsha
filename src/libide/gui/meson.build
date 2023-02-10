@@ -58,7 +58,6 @@ install_headers(libide_gui_public_headers, subdir: libide_gui_header_subdir)
 #
 
 libide_gui_private_headers = [
-  'gs-markdown-private.h',
   'ide-application-private.h',
   'ide-environment-editor-row.h',
   'ide-frame-wrapper.h',
@@ -80,7 +79,6 @@ libide_gui_private_headers = [
 ]
 
 libide_gui_private_sources = [
-  'gs-markdown.c',
   'ide-application-actions.c',
   'ide-application-color.c',
   'ide-application-shortcuts.c',
@@ -179,8 +177,10 @@ libide_gui_deps = [
   libgtk_dep,
   libgtksource_dep,
   libdazzle_dep,
+  libhandy_dep,
   libpeas_dep,
-  libwebkit_dep,
+
+  dependency('libcmark', version: '>= 0.29.0'),
 
   libide_core_dep,
   libide_io_dep,
@@ -191,6 +191,10 @@ libide_gui_deps = [
   libide_search_dep,
   libide_themes_dep,
 ]
+
+if get_option('webkit').enabled()
+  libide_gui_deps += [libwebkit_dep]
+endif
 
 #
 # Library Definitions

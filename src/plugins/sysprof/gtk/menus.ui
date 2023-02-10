@@ -5,7 +5,7 @@
       <item>
         <attribute name="id">open-sysprof-capture</attribute>
         <attribute name="after">open-file</attribute>
-        <attribute name="label" translatable="yes" context="menu label">Open Sysprof Capture…</attribute>
+        <attribute name="label" translatable="yes" context="menu label">Open _Sysprof Capture…</attribute>
         <attribute name="action">profiler.open-profile</attribute>
       </item>
     </section>
@@ -39,7 +39,7 @@
     <section id="project-tree-menu-run-with-section">
       <item>
         <attribute name="id">project-tree-menu-profiler</attribute>
-        <attribute name="label" translatable="yes">Run with Profiler</attribute>
+        <attribute name="label" translatable="yes">Run with _Profiler</attribute>
         <attribute name="action">buildui.run-with-handler</attribute>
         <attribute name="target" type="s">'profiler'</attribute>
       </item>

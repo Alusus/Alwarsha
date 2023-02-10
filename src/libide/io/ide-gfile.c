@@ -113,7 +113,7 @@ ide_path_is_ignored (const gchar *path)
     {
       GPatternSpec *pattern_spec = g_ptr_array_index (ignored, i);
 
-      if (g_pattern_match (pattern_spec, len, name, reversed))
+      if (g_pattern_spec_match (pattern_spec, len, name, reversed))
         {
           ret = TRUE;
           break;
@@ -165,7 +165,7 @@ ide_g_file_is_ignored (GFile *file)
     {
       GPatternSpec *pattern_spec = g_ptr_array_index (ignored, i);
 
-      if (g_pattern_match (pattern_spec, len, name, reversed))
+      if (g_pattern_spec_match (pattern_spec, len, name, reversed))
         {
           ret = TRUE;
           break;
@@ -474,7 +474,7 @@ populate_descendants_matching (GFile        *file,
       name = g_file_info_get_name (info);
       file_type = g_file_info_get_file_type (info);
 
-      if (g_pattern_match_string (spec, name))
+      if (g_pattern_spec_match_string (spec, name))
         g_ptr_array_add (results, g_file_enumerator_get_child (enumerator, info));
 
       if (!g_file_info_get_is_symlink (info) && file_type == G_FILE_TYPE_DIRECTORY)
@@ -940,14 +940,19 @@ _ide_g_file_readlink (GFile *file)
 
       if (is_symlink (iter, &target))
         {
-          g_autoptr(GFile) parent = g_file_get_parent (iter);
-          g_autoptr(GFile) base = g_file_get_child (parent, target);
-          g_autofree gchar *relative = g_file_get_relative_path (iter, file);
+          if (!g_path_is_absolute (target))
+            {
+              g_autoptr(GFile) parent = g_file_get_parent (iter);
+              g_autoptr(GFile) base = g_file_get_child (parent, target);
+              g_autofree gchar *relative = g_file_get_relative_path (iter, file);
 
-          if (relative == NULL)
-            return g_steal_pointer (&base);
-          else
-            return g_file_get_child (base, relative);
+              if (relative == NULL)
+                return g_steal_pointer (&base);
+              else
+                return g_file_get_child (base, relative);
+            }
+
+          return g_file_new_for_path (target);
         }
     }
   while (iter_parents (&iter));
@@ -1031,4 +1036,53 @@ ide_g_file_find_in_ancestors_finish (GAsyncResult  *result,
   g_return_val_if_fail (IDE_IS_TASK (result), NULL);
 
   return ide_task_propagate_pointer (IDE_TASK (result), error);
+}
+
+gboolean
+_ide_g_file_query_exists_on_host (GFile        *file,
+                                  GCancellable *cancellable)
+{
+  g_autoptr(IdeSubprocessLauncher) launcher = NULL;
+  g_autoptr(IdeSubprocess) subprocess = NULL;
+
+  g_return_val_if_fail (G_IS_FILE (file), FALSE);
+  g_return_val_if_fail (!cancellable || G_IS_CANCELLABLE (cancellable), FALSE);
+
+  if (!g_file_is_native (file))
+    return FALSE;
+
+  if (!ide_is_flatpak ())
+    return g_file_query_exists (file, cancellable);
+
+  launcher = ide_subprocess_launcher_new (G_SUBPROCESS_FLAGS_STDOUT_SILENCE | G_SUBPROCESS_FLAGS_STDERR_SILENCE);
+  ide_subprocess_launcher_set_run_on_host (launcher, TRUE);
+  ide_subprocess_launcher_push_argv (launcher, "ls");
+  ide_subprocess_launcher_push_argv (launcher, "-d");
+  ide_subprocess_launcher_push_argv (launcher, g_file_peek_path (file));
+
+  if (!(subprocess = ide_subprocess_launcher_spawn (launcher, cancellable, NULL)))
+    return FALSE;
+
+  return ide_subprocess_wait_check (subprocess, cancellable, NULL);
+}
+
+gboolean
+_ide_path_query_exists_on_host (const char *path)
+{
+  g_autofree char *locally = NULL;
+  g_autoptr(GFile) file = NULL;
+
+  g_return_val_if_fail (path != NULL, FALSE);
+
+  if (!ide_is_flatpak ())
+    return g_file_test (path, G_FILE_TEST_EXISTS);
+
+  /* First try via /var/run/host */
+  locally = g_build_filename ("/var/run/host", path, NULL);
+  if (g_file_test (locally, G_FILE_TEST_EXISTS))
+    return TRUE;
+
+  /* Fallback to using GFile functionality */
+  file = g_file_new_for_path (path);
+  return _ide_g_file_query_exists_on_host (file, NULL);
 }

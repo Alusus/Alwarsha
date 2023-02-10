@@ -21,6 +21,7 @@
 #define G_LOG_DOMAIN "gbp-flatpak-subprocess-launcher"
 
 #include "gbp-flatpak-subprocess-launcher.h"
+#include "gbp-flatpak-util.h"
 
 struct _GbpFlatpakSubprocessLauncher
 {
@@ -29,7 +30,16 @@ struct _GbpFlatpakSubprocessLauncher
   guint use_run : 1;
 };
 
-G_DEFINE_TYPE (GbpFlatpakSubprocessLauncher, gbp_flatpak_subprocess_launcher, IDE_TYPE_SUBPROCESS_LAUNCHER)
+G_DEFINE_FINAL_TYPE (GbpFlatpakSubprocessLauncher, gbp_flatpak_subprocess_launcher, IDE_TYPE_SUBPROCESS_LAUNCHER)
+
+static const char * const *
+insert_argv (IdeSubprocessLauncher *launcher,
+             int                    argpos,
+             const char            *xdg_runtime_dir)
+{
+  ide_subprocess_launcher_insert_argv (launcher, argpos, xdg_runtime_dir);
+  return ide_subprocess_launcher_get_argv (launcher);
+}
 
 static const char * const *
 insert_argv (IdeSubprocessLauncher *launcher,

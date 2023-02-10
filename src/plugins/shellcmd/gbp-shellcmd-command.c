@@ -73,7 +73,7 @@ enum {
 
 static void command_iface_init (IdeCommandInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GbpShellcmdCommand, gbp_shellcmd_command, IDE_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpShellcmdCommand, gbp_shellcmd_command, IDE_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_COMMAND, command_iface_init))
 
 static GParamSpec *properties [N_PROPS];
@@ -786,7 +786,7 @@ gbp_shellcmd_command_get_icon (IdeCommand *command)
   g_assert (GBP_IS_SHELLCMD_COMMAND (command));
 
   if (icon == NULL)
-    icon = g_themed_icon_new ("utilities-terminal-symbolic");
+    icon = g_themed_icon_new ("builder-terminal-symbolic");
 
   return g_object_ref (icon);
 }

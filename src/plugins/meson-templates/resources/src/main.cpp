@@ -10,10 +10,8 @@ on_activate (Glib::RefPtr<Gtk::Application> app)
 	static std::unique_ptr<Gtk::Window> window;
 
 	if (!window) {
-		window = std::make_unique<{{Prefix}}Window>();
+		window = {{Prefix}}Window::create();
 		window->property_application() = app;
-		window->property_default_width() = 600;
-		window->property_default_height() = 300;
 		app->add_window(*window);
 	}
 
@@ -33,14 +31,14 @@ main (int argc, char *argv[])
 		Gtk::Application::create("{{appid}}", Gio::APPLICATION_FLAGS_NONE);
 
 	// We connect to the activate signal to create a window when the application
-	// has been lauched. Additionally, this signal notifies us when the user
+	// has been launched. Additionally, this signal notifies us when the user
 	// tries to launch a "second instance" of the application. When they try
 	// to do that, we'll just present any existing window.
 	//
 	// Bind the app object to be passed to the callback "on_activate"
 	app->signal_activate().connect(sigc::bind(&on_activate, app));
 
-	// Run the application. This function will block until the applicaiton
+	// Run the application. This function will block until the application
 	// exits. Upon return, we have our exit code to return to the shell. (This
 	// is the code you see when you do `echo $?` after running a command in a
 	// terminal.

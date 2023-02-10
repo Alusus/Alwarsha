@@ -135,6 +135,7 @@ new_terminal_activate (GSimpleAction *action,
   IdeTerminalPage *page;
   IdeSurface *surface;
   IdeRuntime *runtime = NULL;
+  IdeContext *context;
   const gchar *name;
   GtkWidget *current_frame = NULL;
   IdePage *current_page;
@@ -154,9 +155,23 @@ new_terminal_activate (GSimpleAction *action,
       current_frame = gtk_widget_get_ancestor (GTK_WIDGET (current_page), IDE_TYPE_FRAME);
     }
 
+  context = ide_workspace_get_context (self->workspace);
   name = g_action_get_name (G_ACTION (action));
 
-  if (ide_str_equal0 (name, "new-terminal-in-runtime"))
+  /* Only allow plain terminals unless this is a project */
+  if (!ide_context_has_project (context) &&
+      !ide_str_equal0 (name, "debug-terminal"))
+    name = "new-terminal";
+
+  if (ide_str_equal0 (name, "new-terminal-in-config"))
+    {
+      IdeConfigManager *config_manager = ide_config_manager_from_context (context);
+      IdeConfig *config = ide_config_manager_get_current (config_manager);
+
+      cwd = find_builddir (self->workspace);
+      launcher = ide_terminal_launcher_new_for_config (config);
+    }
+  else if (ide_str_equal0 (name, "new-terminal-in-runtime"))
     {
       runtime = find_runtime (self->workspace);
       cwd = find_builddir (self->workspace);
@@ -180,7 +195,6 @@ new_terminal_activate (GSimpleAction *action,
         }
       else
         {
-          IdeContext *context = ide_widget_get_context (GTK_WIDGET (self->workspace));
           launcher = ide_terminal_launcher_new (context);
         }
     }
@@ -285,7 +299,7 @@ on_run_manager_run (GbpTerminalWorkspaceAddin *self,
       self->run_panel = g_object_new (DZL_TYPE_DOCK_WIDGET,
                                       "child", self->run_terminal,
                                       "expand", TRUE,
-                                      "icon-name", "media-playback-start-symbolic",
+                                      "icon-name", "builder-run-start-symbolic",
                                       "title", _("Application Output"),
                                       "visible", TRUE,
                                       NULL);
@@ -343,6 +357,7 @@ on_run_manager_stopped (GbpTerminalWorkspaceAddin *self,
 static const GActionEntry terminal_actions[] = {
   { "new-terminal-workspace", new_terminal_workspace },
   { "new-terminal", new_terminal_activate },
+  { "new-terminal-in-config", new_terminal_activate },
   { "new-terminal-in-runner", new_terminal_activate },
   { "new-terminal-in-runtime", new_terminal_activate },
   { "new-terminal-in-dir", new_terminal_activate },
@@ -358,7 +373,7 @@ static const DzlShortcutEntry gbp_terminal_shortcut_entries[] = {
     N_("General"),
     N_("Terminal") },
 
-  { "org.alusus.alwarsha.workspace.new-terminal-in-runtime",
+  { "org.alusus.alwarsha.workspace.new-terminal-in-config",
     0, NULL,
     N_("Workspace shortcuts"),
     N_("General"),
@@ -389,10 +404,10 @@ gbp_terminal_workspace_addin_setup_shortcuts (GbpTerminalWorkspaceAddin *self,
                                               "win.new-terminal");
 
   dzl_shortcut_controller_add_command_action (controller,
-                                              "org.alusus.alwarsha.workspace.new-terminal-in-runtime",
+                                              "org.alusus.alwarsha.workspace.new-terminal-in-config",
                                               I_("<primary><alt><shift>t"),
                                               DZL_SHORTCUT_PHASE_DISPATCH,
-                                              "win.new-terminal-in-runtime");
+                                              "win.new-terminal-in-config");
 
   dzl_shortcut_controller_add_command_action (controller,
                                               "org.alusus.alwarsha.workspace.new-terminal-in-runner",
@@ -437,7 +452,7 @@ gbp_terminal_workspace_addin_load (IdeWorkspaceAddin *addin,
 
       self->bottom_dock = g_object_new (DZL_TYPE_DOCK_WIDGET,
                                         "title", _("Terminal"),
-                                        "icon-name", "utilities-terminal-symbolic",
+                                        "icon-name", "builder-terminal-symbolic",
                                         "visible", TRUE,
                                         NULL);
       g_signal_connect (self->bottom_dock,
@@ -456,10 +471,11 @@ gbp_terminal_workspace_addin_load (IdeWorkspaceAddin *addin,
                         G_CALLBACK (gtk_widget_destroyed),
                         &self->bottom);
       gtk_container_add (GTK_CONTAINER (self->bottom_dock), GTK_WIDGET (self->bottom));
+      dzl_dock_item_present (DZL_DOCK_ITEM (self->bottom_dock));
 
       workbench = ide_widget_get_workbench (GTK_WIDGET (workspace));
 
-      if (ide_workbench_has_project (workbench))
+      if (ide_workbench_has_project (workbench) && IDE_IS_PRIMARY_WORKSPACE (workspace))
         {
           /* Setup terminals when a project is run */
           context = ide_widget_get_context (GTK_WIDGET (workspace));
@@ -585,7 +601,7 @@ workspace_addin_iface_init (IdeWorkspaceAddinInterface *iface)
   iface->unload = gbp_terminal_workspace_addin_unload;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GbpTerminalWorkspaceAddin, gbp_terminal_workspace_addin, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpTerminalWorkspaceAddin, gbp_terminal_workspace_addin, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_WORKSPACE_ADDIN, workspace_addin_iface_init))
 
 static void

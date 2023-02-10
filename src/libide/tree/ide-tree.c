@@ -117,6 +117,7 @@ ide_tree_select (IdeTree     *self,
   selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (self));
   path = ide_tree_node_get_path (node);
   gtk_tree_selection_select_path (selection, path);
+  gtk_tree_view_set_cursor (GTK_TREE_VIEW (self), path, NULL, FALSE);
 }
 
 static void
@@ -397,28 +398,12 @@ ide_tree_popup (IdeTree        *self,
 {
   IdeTreePrivate *priv = ide_tree_get_instance_private (self);
   const GdkRectangle area = { target_x, target_y, 0, 0 };
-  GtkTextDirection dir;
 
   g_assert (IDE_IS_TREE (self));
   g_assert (IDE_IS_TREE_NODE (node));
-
-  if (priv->context_menu == NULL)
-    return;
-
-  dir = gtk_widget_get_direction (GTK_WIDGET (self));
-
-  if (priv->popover == NULL)
-    {
-      priv->popover = GTK_POPOVER (gtk_popover_new_from_model (GTK_WIDGET (self),
-                                                               G_MENU_MODEL (priv->context_menu)));
-      g_signal_connect (priv->popover,
-                        "destroy",
-                        G_CALLBACK (gtk_widget_destroyed),
-                        &priv->popover);
-    }
+  g_assert (priv->popover != NULL);
 
   gtk_popover_set_pointing_to (priv->popover, &area);
-  gtk_popover_set_position (priv->popover, dir == GTK_TEXT_DIR_LTR ? GTK_POS_RIGHT : GTK_POS_LEFT);
 
   ide_tree_show_popover_at_node (self, node, priv->popover);
 }
@@ -545,6 +530,25 @@ ide_tree_query_tooltip (GtkWidget  *widget,
   return FALSE;
 }
 
+static gboolean
+ide_tree_popup_menu_cb (IdeTree *tree,
+                        gpointer user_data)
+{
+  IdeTreePrivate *priv = ide_tree_get_instance_private (tree);
+  IdeTreeNode *selected_node = NULL;
+
+  g_assert (priv != NULL);
+
+  selected_node = ide_tree_get_selected_node (tree);
+
+  if (selected_node)
+    {
+      ide_tree_show_popover_at_node (tree, selected_node, priv->popover);
+      return TRUE;
+    }
+  return FALSE;
+}
+
 static void
 ide_tree_destroy (GtkWidget *widget)
 {
@@ -606,6 +610,11 @@ ide_tree_init (IdeTree *self)
                            G_CALLBACK (ide_tree_selection_changed_cb),
                            self,
                            G_CONNECT_SWAPPED);
+  g_signal_connect_object (self,
+                           "popup-menu",
+                           G_CALLBACK (ide_tree_popup_menu_cb),
+                           NULL,
+                           0);
 
   gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (self), FALSE);
   gtk_tree_view_set_activate_on_single_click (GTK_TREE_VIEW (self), TRUE);
@@ -656,11 +665,20 @@ ide_tree_set_context_menu (IdeTree *self,
 
   if (g_set_object (&priv->context_menu, menu))
     {
+      GtkTextDirection dir;
+
       if (priv->popover != NULL)
         gtk_widget_destroy (GTK_WIDGET (priv->popover));
-    }
 
-  g_return_if_fail (priv->popover == NULL);
+      priv->popover = GTK_POPOVER (gtk_popover_new_from_model (GTK_WIDGET (self),
+                                                               G_MENU_MODEL (priv->context_menu)));
+      dir = gtk_widget_get_direction (GTK_WIDGET (self));
+      gtk_popover_set_position (priv->popover, dir == GTK_TEXT_DIR_LTR ? GTK_POS_RIGHT : GTK_POS_LEFT);
+      g_signal_connect (priv->popover,
+                        "destroy",
+                        G_CALLBACK (gtk_widget_destroyed),
+                        &priv->popover);
+    }
 }
 
 void

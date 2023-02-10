@@ -20,11 +20,11 @@
 
 #define G_LOG_DOMAIN "gbp-flatpak-util"
 
-#include <flatpak.h>
 #include <string.h>
 #include <libide-foundry.h>
 #include <libide-vcs.h>
 
+#include "gbp-flatpak-client.h"
 #include "gbp-flatpak-util.h"
 
 gchar *
@@ -79,11 +79,11 @@ gbp_flatpak_is_ignored (const gchar *name)
          strstr (name, ".PlatformTheme") != NULL;
 }
 
-gboolean
-gbp_flatpak_split_id (const gchar  *str,
-                      gchar       **id,
-                      gchar       **arch,
-                      gchar       **branch)
+static gboolean
+_gbp_flatpak_split_id (const gchar  *str,
+                       gchar       **id,
+                       gchar       **arch,
+                       gchar       **branch)
 {
   g_auto(GStrv) parts = g_strsplit (str, "/", 0);
   guint i = 0;
@@ -127,4 +127,69 @@ gbp_flatpak_split_id (const gchar  *str,
     }
 
   return TRUE;
+}
+
+gboolean
+gbp_flatpak_split_id (const gchar  *str,
+                      gchar       **id,
+                      gchar       **arch,
+                      gchar       **branch)
+{
+  if (g_str_has_prefix (str, "runtime/"))
+    str += strlen ("runtime/");
+  else if (g_str_has_prefix (str, "app/"))
+    str += strlen ("app/");
+
+  return _gbp_flatpak_split_id (str, id, arch, branch);
+}
+
+static const char *
+_gbp_flatpak_get_default_arch (IdeObject *object)
+{
+  const char *ret = NULL;
+
+  if (object != NULL)
+    {
+      g_autoptr(IdeContext) context = ide_object_ref_context (object);
+
+      if (context != NULL)
+        {
+          GbpFlatpakClient *client = gbp_flatpak_client_get_default ();
+          IpcFlatpakService *service = gbp_flatpak_client_get_service (client, NULL, NULL);
+
+          if (service != NULL)
+            ret = ipc_flatpak_service_get_default_arch (service);
+        }
+    }
+
+  if (ret == NULL)
+    ret = ide_get_system_arch ();
+
+  return ret;
+}
+
+const char *
+gbp_flatpak_get_default_arch (IdeObject *object)
+{
+  static char *default_arch;
+
+  if (default_arch == NULL)
+    default_arch = g_strdup (_gbp_flatpak_get_default_arch (object));
+
+  return default_arch;
+}
+
+const char *
+gbp_flatpak_get_config_dir (void)
+{
+  static char *config_dir;
+
+  if (!config_dir)
+    config_dir = g_build_filename (g_get_user_data_dir (),
+                                   "gnome-builder",
+                                   "flatpak",
+                                   "etc",
+                                   NULL);
+
+  return config_dir;
 }

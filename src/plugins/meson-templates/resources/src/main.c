@@ -21,8 +21,6 @@ on_activate (GtkApplication *app)
 	if (window == NULL)
 		window = g_object_new ({{PREFIX}}_TYPE_WINDOW,
 		                       "application", app,
-		                       "default-width", 600,
-		                       "default-height", 300,
 		                       NULL);
 
 	/* Ask the window manager/compositor to present the window. */
@@ -50,7 +48,7 @@ main (int   argc,
 
 	/*
 	 * We connect to the activate signal to create a window when the application
-	 * has been lauched. Additionally, this signal notifies us when the user
+	 * has been launched. Additionally, this signal notifies us when the user
 	 * tries to launch a "second instance" of the application. When they try
 	 * to do that, we'll just present any existing window.
 	 *
@@ -60,7 +58,7 @@ main (int   argc,
 	g_signal_connect (app, "activate", G_CALLBACK (on_activate), NULL);
 
 	/*
-	 * Run the application. This function will block until the applicaiton
+	 * Run the application. This function will block until the application
 	 * exits. Upon return, we have our exit code to return to the shell. (This
 	 * is the code you see when you do `echo $?` after running a command in a
 	 * terminal.

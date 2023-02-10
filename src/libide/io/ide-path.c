@@ -46,13 +46,32 @@ gchar *
 ide_path_expand (const gchar *path)
 {
   wordexp_t state = { 0 };
-  gchar *ret = NULL;
+  char *replace_home = NULL;
+  char *ret = NULL;
+  char *escaped;
   int r;
 
   if (path == NULL)
     return NULL;
 
-  r = wordexp (path, &state, WRDE_NOCMD);
+  /* Special case some path prefixes */
+  if (path[0] == '~')
+    {
+      if (path[1] == 0)
+        path = g_get_home_dir ();
+      else if (path[1] == G_DIR_SEPARATOR)
+        path = replace_home = g_strdup_printf ("%s%s", g_get_home_dir (), &path[1]);
+    }
+  else if (strncmp (path, "$HOME", 5) == 0)
+    {
+      if (path[5] == 0)
+        path = g_get_home_dir ();
+      else if (path[5] == G_DIR_SEPARATOR)
+        path = replace_home = g_strdup_printf ("%s%s", g_get_home_dir (), &path[5]);
+    }
+
+  escaped = g_shell_quote (path);
+  r = wordexp (escaped, &state, WRDE_NOCMD);
   if (r == 0 && state.we_wordc > 0)
     ret = g_strdup (state.we_wordv [0]);
   wordfree (&state);
@@ -63,6 +82,9 @@ ide_path_expand (const gchar *path)
 
       ret = g_build_filename (g_get_home_dir (), freeme, NULL);
     }
+
+  g_free (replace_home);
+  g_free (escaped);
 
   return ret;
 }

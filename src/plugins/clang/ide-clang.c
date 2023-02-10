@@ -30,7 +30,7 @@
 #define IDE_CLANG_HIGHLIGHTER_TYPE          "c:type"
 #define IDE_CLANG_HIGHLIGHTER_FUNCTION_NAME "def:function"
 #define IDE_CLANG_HIGHLIGHTER_ENUM_NAME     "def:constant"
-#define IDE_CLANG_HIGHLIGHTER_MACRO_NAME    "c:macro-name"
+#define IDE_CLANG_HIGHLIGHTER_MACRO_NAME    "c:preprocessor"
 
 #define PRIORITY_DIAGNOSE     (-200)
 #define PRIORITY_COMPLETE     (-100)
@@ -62,7 +62,7 @@ typedef struct
   guint                 len;
 } UnsavedFiles;
 
-G_DEFINE_TYPE (IdeClang, ide_clang, G_TYPE_OBJECT)
+G_DEFINE_FINAL_TYPE (IdeClang, ide_clang, G_TYPE_OBJECT)
 
 static void
 unsaved_files_free (UnsavedFiles *uf)
@@ -974,6 +974,9 @@ get_path (GFile       *workdir,
 
   if (path == NULL)
     return path_or_uri (workdir);
+
+  if (g_path_is_absolute (path))
+    return g_strdup (path);
 
   file = g_file_new_for_path (path);
   if (g_file_has_prefix (file, workdir))

@@ -33,7 +33,9 @@
 #include <unistd.h>
 
 #include "ide-lsp-client.h"
+#include "ide-lsp-diagnostic.h"
 #include "ide-lsp-enums.h"
+#include "ide-lsp-workspace-edit.h"
 
 typedef struct
 {
@@ -59,10 +61,12 @@ typedef struct
   GHashTable     *diagnostics_by_file;
   GPtrArray      *languages;
   GVariant       *server_capabilities;
+  GVariant       *initialization_options;
   IdeLspTrace     trace;
   gchar          *root_uri;
   gboolean        initialized;
   GQueue          pending_messages;
+  guint           use_markdown_in_diagnostics : 1;
 } IdeLspClientPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (IdeLspClient, ide_lsp_client, IDE_TYPE_OBJECT)
@@ -81,6 +85,11 @@ enum {
 };
 
 enum {
+  TAG_UNNECESSARY      = 1,
+  TAG_DEPRECATED       = 2,
+};
+
+enum {
   TEXT_DOCUMENT_SYNC_NONE,
   TEXT_DOCUMENT_SYNC_FULL,
   TEXT_DOCUMENT_SYNC_INCREMENTAL,
@@ -88,10 +97,12 @@ enum {
 
 enum {
   PROP_0,
+  PROP_INITIALIZATION_OPTIONS,
   PROP_IO_STREAM,
   PROP_SERVER_CAPABILITIES,
   PROP_TRACE,
   PROP_ROOT_URI,
+  PROP_USE_MARKDOWN_IN_DIAGNOSTICS,
   N_PROPS
 };
 
@@ -662,6 +673,7 @@ ide_lsp_client_translate_diagnostics (IdeLspClient *self,
                                       GFile        *file,
                                       GVariantIter *diagnostics)
 {
+  IdeLspClientPrivate *priv = ide_lsp_client_get_instance_private (self);
   g_autoptr(GPtrArray) ar = NULL;
   g_autoptr(IdeDiagnostics) ret = NULL;
   GVariant *value;
@@ -676,10 +688,12 @@ ide_lsp_client_translate_diagnostics (IdeLspClient *self,
     {
       g_autoptr(IdeLocation) begin_loc = NULL;
       g_autoptr(IdeLocation) end_loc = NULL;
-      g_autoptr(IdeDiagnostic) diag = NULL;
+      g_autoptr(IdeLspDiagnostic) diag = NULL;
       g_autoptr(GVariant) range = NULL;
       const gchar *message = NULL;
       const gchar *source = NULL;
+      g_autoptr(GVariantIter) tags = NULL;
+      GVariant *current_tag;
       gint64 severity = 0;
       gboolean success;
       struct {
@@ -696,6 +710,7 @@ ide_lsp_client_translate_diagnostics (IdeLspClient *self,
       /* Optional Fields */
       JSONRPC_MESSAGE_PARSE (value, "severity", JSONRPC_MESSAGE_GET_INT64 (&severity));
       JSONRPC_MESSAGE_PARSE (value, "source", JSONRPC_MESSAGE_GET_STRING (&source));
+      JSONRPC_MESSAGE_PARSE (value, "tags", JSONRPC_MESSAGE_GET_ITER (&tags));
 
       /* Extract location information */
       success = JSONRPC_MESSAGE_PARSE (range,
@@ -732,8 +747,28 @@ ide_lsp_client_translate_diagnostics (IdeLspClient *self,
           break;
         }
 
-      diag = ide_diagnostic_new (severity, message, begin_loc);
-      ide_diagnostic_take_range (diag, ide_range_new (begin_loc, end_loc));
+      while (tags != NULL && g_variant_iter_loop (tags, "v", &current_tag))
+        {
+          if (!g_variant_is_of_type (current_tag, G_VARIANT_TYPE_INT64))
+            continue;
+
+          switch (g_variant_get_int64 (current_tag))
+            {
+            case TAG_DEPRECATED:
+              severity = IDE_DIAGNOSTIC_DEPRECATED;
+              break;
+            case TAG_UNNECESSARY:
+              severity = IDE_DIAGNOSTIC_UNUSED;
+              break;
+            default:
+              break;
+            }
+        }
+
+      diag = ide_lsp_diagnostic_new (severity, message, begin_loc, value);
+      if (priv->use_markdown_in_diagnostics)
+        ide_diagnostic_set_marked_kind (IDE_DIAGNOSTIC (diag), IDE_MARKED_KIND_MARKDOWN);
+      ide_diagnostic_take_range (IDE_DIAGNOSTIC (diag), ide_range_new (begin_loc, end_loc));
 
       g_ptr_array_add (ar, g_steal_pointer (&diag));
     }
@@ -821,6 +856,7 @@ ide_lsp_client_real_notification (IdeLspClient *self,
           const gchar *message = NULL;
           const gchar *title = NULL;
           const gchar *kind = NULL;
+          gint64 percentage = -1;
           IdeContext *context;
           IdeNotifications *notifications;
           IdeNotification *notification = NULL;
@@ -834,6 +870,9 @@ ide_lsp_client_real_notification (IdeLspClient *self,
                                          "}");
           JSONRPC_MESSAGE_PARSE (params, "value", "{",
                                            "message", JSONRPC_MESSAGE_GET_STRING (&message),
+                                         "}");
+          JSONRPC_MESSAGE_PARSE (params, "value", "{",
+                                           "percentage", JSONRPC_MESSAGE_GET_INT64 (&percentage),
                                          "}");
           context = ide_object_get_context (IDE_OBJECT (self));
           notifications = ide_object_get_child_typed (IDE_OBJECT (context), IDE_TYPE_NOTIFICATIONS);
@@ -850,23 +889,33 @@ ide_lsp_client_real_notification (IdeLspClient *self,
                   notification = ide_notification_new ();
                   ide_notification_set_id (notification, token);
                   ide_notification_set_has_progress (notification, TRUE);
-                  ide_notification_set_progress_is_imprecise (notification, TRUE);
+                  ide_notification_set_progress_is_imprecise (notification, percentage == -1);
                 }
 
               ide_notification_set_title (notification, title);
               ide_notification_set_body (notification, message != NULL ? message : title);
-
+              if (percentage != -1)
+                ide_notification_set_progress (notification, percentage / 100.0);
               if (!notification_exists)
                 ide_notification_attach (notification, IDE_OBJECT (context));
             }
-          else
+          else if (notification != NULL)
             {
-              if (message != NULL && notification != NULL)
+              if (message != NULL)
                 ide_notification_set_body (notification, message);
+              if (percentage != -1)
+                ide_notification_set_progress (notification, percentage / 100.0);
             }
 
           if (ide_str_equal0 (kind, "end") && notification != NULL)
             ide_notification_withdraw (notification);
+        }
+      else if (g_str_equal (method, "window/showMessage"))
+        {
+          const gchar *message = NULL;
+          JSONRPC_MESSAGE_PARSE (params, "message", JSONRPC_MESSAGE_GET_STRING (&message));
+          if (!ide_str_empty0 (message))
+            ide_object_warning (self, "%s", message);
         }
     }
 
@@ -942,7 +991,7 @@ ide_lsp_client_handle_apply_edit (IdeLspClient  *self,
                                   GVariant      *params)
 {
   g_autoptr(GVariant) parent = NULL;
-  g_autoptr(GVariant) changes = NULL;
+  g_autoptr(IdeLspWorkspaceEdit) workspace_edit = NULL;
   g_autoptr(GPtrArray) edits = NULL;
 
   IDE_ENTRY;
@@ -957,69 +1006,8 @@ ide_lsp_client_handle_apply_edit (IdeLspClient  *self,
 
   edits = g_ptr_array_new_with_free_func (g_object_unref);
 
-#if 0
-  /* We'd prefer to support this, but do not currently */
-  if (JSONRPC_MESSAGE_PARSE (edit, "documentChanges", JSONRPC_MESSAGE_GET_VARIANT (&changes)))
-    {
-    }
-#endif
-
-  if (JSONRPC_MESSAGE_PARSE (parent, "changes", JSONRPC_MESSAGE_GET_VARIANT (&changes)))
-    {
-      if (g_variant_is_of_type (changes, G_VARIANT_TYPE_VARDICT))
-        {
-          GVariantIter iter;
-          GVariant *value;
-          gchar *uri;
-
-          g_variant_iter_init (&iter, changes);
-          while (g_variant_iter_loop (&iter, "{sv}", &uri, &value))
-            {
-              GVariantIter edit_iter;
-              GVariant *item;
-              struct {
-                gint64 line;
-                gint64 column;
-              } begin, end;
-
-              g_variant_iter_init (&edit_iter, value);
-              while (g_variant_iter_loop (&edit_iter, "v", &item))
-                {
-                  const gchar *new_text = NULL;
-                  gboolean r;
-
-                  r = JSONRPC_MESSAGE_PARSE (item,
-                    "range", "{",
-                      "start", "{",
-                        "line", JSONRPC_MESSAGE_GET_INT64 (&begin.line),
-                        "character", JSONRPC_MESSAGE_GET_INT64 (&begin.column),
-                      "}",
-                      "end", "{",
-                        "line", JSONRPC_MESSAGE_GET_INT64 (&end.line),
-                        "character", JSONRPC_MESSAGE_GET_INT64 (&end.column),
-                      "}",
-                    "}",
-                    "newText", JSONRPC_MESSAGE_GET_STRING (&new_text)
-                  );
-
-                  if (r)
-                    {
-                      g_autoptr(IdeLocation) begin_loc = NULL;
-                      g_autoptr(IdeLocation) end_loc = NULL;
-                      g_autoptr(IdeRange) range = NULL;
-                      g_autoptr(GFile) file = NULL;
-
-                      file = g_file_new_for_uri (uri);
-                      begin_loc = ide_location_new (file, begin.line, begin.column);
-                      end_loc = ide_location_new (file, end.line, end.column);
-                      range = ide_range_new (begin_loc, end_loc);
-
-                      g_ptr_array_add (edits, ide_text_edit_new (range, new_text));
-                    }
-                }
-            }
-        }
-    }
+  workspace_edit = ide_lsp_workspace_edit_new(parent);
+  edits = ide_lsp_workspace_edit_get_edits(workspace_edit);
 
   if (edits->len > 0)
     {
@@ -1174,6 +1162,11 @@ ide_lsp_client_get_property (GObject    *object,
     case PROP_ROOT_URI:
       g_value_set_string (value, priv->root_uri);
       break;
+
+    case PROP_USE_MARKDOWN_IN_DIAGNOSTICS:
+      g_value_set_boolean (value, priv->use_markdown_in_diagnostics);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -1190,6 +1183,10 @@ ide_lsp_client_set_property (GObject      *object,
 
   switch (prop_id)
     {
+    case PROP_USE_MARKDOWN_IN_DIAGNOSTICS:
+      priv->use_markdown_in_diagnostics = g_value_get_boolean (value);
+      break;
+
     case PROP_IO_STREAM:
       priv->io_stream = g_value_dup_object (value);
       break;
@@ -1219,6 +1216,21 @@ ide_lsp_client_class_init (IdeLspClientClass *klass)
 
   klass->notification = ide_lsp_client_real_notification;
   klass->supports_language = ide_lsp_client_real_supports_language;
+
+  properties [PROP_INITIALIZATION_OPTIONS] =
+    g_param_spec_variant ("initialization-options",
+                          "Initialization Options",
+                          "Initialization Options",
+                          G_VARIANT_TYPE_ANY,
+                          NULL,
+                          (G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS));
+
+  properties [PROP_USE_MARKDOWN_IN_DIAGNOSTICS] =
+    g_param_spec_boolean ("use-markdown-in-diagnostics",
+                          "Use Markdown in Diagnostics",
+                          "If Diagnostics can contain markdown",
+                          FALSE,
+                          (G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   properties [PROP_SERVER_CAPABILITIES] =
     g_param_spec_variant ("server-capabilities",
@@ -1646,10 +1658,45 @@ ide_lsp_client_start (IdeLspClient *self)
             "]",
           "}",
         "}",
+        "hover", "{",
+          "contentFormat", "[",
+            "markdown",
+            "plaintext",
+          "]",
+        "}",
+        "publishDiagnostics", "{",
+          "tagSupport", "{",
+            "valueSet", "[",
+              JSONRPC_MESSAGE_PUT_INT64 (1),
+              JSONRPC_MESSAGE_PUT_INT64 (2),
+            "]",
+          "}",
+        "}",
+        "codeAction", "{",
+          "dynamicRegistration", JSONRPC_MESSAGE_PUT_BOOLEAN (TRUE),
+          "isPreferredSupport", JSONRPC_MESSAGE_PUT_BOOLEAN (TRUE),
+          "codeActionLiteralSupport", "{",
+            "codeActionKind", "{",
+              "valueSet", "[",
+                "",
+                "quickfix",
+                "refactor",
+                "refactor.extract",
+                "refactor.inline",
+                "refactor.rewrite",
+                "source",
+                "source.organizeImports",
+              "]",
+            "}",
+          "}",
+        "}",
       "}",
       "window", "{",
         "workDoneProgress", JSONRPC_MESSAGE_PUT_BOOLEAN (TRUE),
       "}",
+    "}",
+    "initializationOptions", "{",
+      JSONRPC_MESSAGE_PUT_VARIANT (priv->initialization_options),
     "}"
   );
 
@@ -2132,4 +2179,54 @@ ide_lsp_client_get_server_capabilities (IdeLspClient *self)
   g_return_val_if_fail (IDE_IS_LSP_CLIENT (self), NULL);
 
   return priv->server_capabilities;
+}
+
+/**
+ * ide_lsp_client_set_initialization_options:
+ * @self: a [class@LspClient]
+ * @options: (nullable): a #GVariant or %NULL
+ *
+ * Sets the `initilizationOptions` to send to the language server
+ * when the server is initialized.
+ *
+ * if @options is floating, the floating reference will be taken
+ * when calling this function otherwise the reference count of
+ * @options will be incremented by one.
+ *
+ * Since: 42.0
+ */
+void
+ide_lsp_client_set_initialization_options (IdeLspClient *self,
+                                           GVariant     *options)
+{
+  IdeLspClientPrivate *priv = ide_lsp_client_get_instance_private (self);
+
+  g_return_if_fail (IDE_IS_LSP_CLIENT (self));
+
+  if (options == priv->initialization_options)
+    return;
+
+  g_clear_pointer (&priv->initialization_options, g_variant_unref);
+  if (options)
+    priv->initialization_options = g_variant_ref_sink (options);
+
+  g_object_notify_by_pspec (G_OBJECT (self), properties [PROP_INITIALIZATION_OPTIONS]);
+}
+
+/**
+ * ide_lsp_client_get_initialization_options:
+ * @self: a [class@LspClient]
+ *
+ * Gets the initialization options for the client.
+ *
+ * Returns: (transfer none) (nullable): a [struct@GLib.Variant] or %NULL
+ */
+GVariant *
+ide_lsp_client_get_initialization_options (IdeLspClient *self)
+{
+  IdeLspClientPrivate *priv = ide_lsp_client_get_instance_private (self);
+
+  g_return_val_if_fail (IDE_IS_LSP_CLIENT (self), NULL);
+
+  return priv->initialization_options;
 }

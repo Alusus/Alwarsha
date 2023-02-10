@@ -46,7 +46,9 @@ typedef struct
   gchar          *run_opts;
   gchar          *runtime_id;
   gchar          *toolchain_id;
+  gchar          *prepend_path;
   gchar          *append_path;
+  GHashTable     *pipeline_args;
 
   GFile          *build_commands_dir;
 
@@ -79,6 +81,7 @@ G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (IdeConfig, ide_config, IDE_TYPE_OBJECT)
 
 enum {
   PROP_0,
+  PROP_PREPEND_PATH,
   PROP_APPEND_PATH,
   PROP_APP_ID,
   PROP_BUILD_COMMANDS,
@@ -314,14 +317,18 @@ ide_config_finalize (GObject *object)
 
   g_clear_pointer (&priv->build_commands, g_strfreev);
   g_clear_pointer (&priv->internal, g_hash_table_unref);
+  g_clear_pointer (&priv->pipeline_args, g_hash_table_unref);
   g_clear_pointer (&priv->config_opts, g_free);
   g_clear_pointer (&priv->display_name, g_free);
   g_clear_pointer (&priv->id, g_free);
   g_clear_pointer (&priv->post_install_commands, g_strfreev);
   g_clear_pointer (&priv->prefix, g_free);
+  g_clear_pointer (&priv->run_opts, g_free);
   g_clear_pointer (&priv->runtime_id, g_free);
   g_clear_pointer (&priv->app_id, g_free);
   g_clear_pointer (&priv->toolchain_id, g_free);
+  g_clear_pointer (&priv->prepend_path, g_free);
+  g_clear_pointer (&priv->append_path, g_free);
 
   G_OBJECT_CLASS (ide_config_parent_class)->finalize (object);
 }
@@ -406,6 +413,10 @@ ide_config_get_property (GObject    *object,
 
     case PROP_APP_ID:
       g_value_set_string (value, ide_config_get_app_id (self));
+      break;
+
+    case PROP_PREPEND_PATH:
+      g_value_set_string (value, ide_config_get_prepend_path (self));
       break;
 
     case PROP_APPEND_PATH:
@@ -495,6 +506,10 @@ ide_config_set_property (GObject      *object,
       ide_config_set_app_id (self, g_value_get_string (value));
       break;
 
+    case PROP_PREPEND_PATH:
+      ide_config_set_prepend_path (self, g_value_get_string (value));
+      break;
+
     case PROP_APPEND_PATH:
       ide_config_set_append_path (self, g_value_get_string (value));
       break;
@@ -522,6 +537,13 @@ ide_config_class_init (IdeConfigClass *klass)
 
   klass->get_runtime = ide_config_real_get_runtime;
   klass->set_runtime = ide_config_real_set_runtime;
+
+  properties [PROP_PREPEND_PATH] =
+    g_param_spec_string ("prepend-path",
+                         "Prepend Path",
+                         "Prepend to PATH environment variable",
+                         NULL,
+                         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   properties [PROP_APPEND_PATH] =
     g_param_spec_string ("append-path",
@@ -695,6 +717,7 @@ ide_config_init (IdeConfig *self)
   priv->parallelism = -1;
   priv->locality = IDE_BUILD_LOCALITY_DEFAULT;
   priv->internal = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, _value_free);
+  priv->pipeline_args = g_hash_table_new_full (g_direct_hash, g_direct_equal, NULL, (GDestroyNotify) g_strfreev);
 
   ide_config_set_environment (self, env);
   ide_config_set_runtime_environment (self, rt_env);
@@ -1670,6 +1693,33 @@ ide_config_set_run_opts (IdeConfig   *self,
       g_free (priv->run_opts);
       priv->run_opts = g_strdup (run_opts);
       g_object_notify_by_pspec (G_OBJECT (self), properties [PROP_RUN_OPTS]);
+      ide_config_set_dirty (self, TRUE);
+    }
+}
+
+const gchar *
+ide_config_get_prepend_path (IdeConfig *self)
+{
+  IdeConfigPrivate *priv = ide_config_get_instance_private (self);
+
+  g_return_val_if_fail (IDE_IS_CONFIG (self), NULL);
+
+  return priv->prepend_path;
+}
+
+void
+ide_config_set_prepend_path (IdeConfig   *self,
+                             const gchar *prepend_path)
+{
+  IdeConfigPrivate *priv = ide_config_get_instance_private (self);
+
+  g_return_if_fail (IDE_IS_CONFIG (self));
+
+  if (g_strcmp0 (priv->prepend_path, prepend_path) != 0)
+    {
+      g_free (priv->prepend_path);
+      priv->prepend_path = g_strdup (prepend_path);
+      g_object_notify_by_pspec (G_OBJECT (self), properties [PROP_PREPEND_PATH]);
     }
 }
 
@@ -1691,7 +1741,7 @@ ide_config_set_append_path (IdeConfig   *self,
 
   g_return_if_fail (IDE_IS_CONFIG (self));
 
-  if (priv->append_path != append_path)
+  if (g_strcmp0 (priv->append_path, append_path) != 0)
     {
       g_free (priv->append_path);
       priv->append_path = g_strdup (append_path);
@@ -1707,6 +1757,9 @@ ide_config_apply_path (IdeConfig             *self,
 
   g_return_if_fail (IDE_IS_CONFIG (self));
   g_return_if_fail (IDE_IS_SUBPROCESS_LAUNCHER (launcher));
+
+  if (priv->prepend_path != NULL)
+    ide_subprocess_launcher_prepend_path (launcher, priv->prepend_path);
 
   if (priv->append_path != NULL)
     ide_subprocess_launcher_append_path (launcher, priv->append_path);
@@ -1786,7 +1839,7 @@ _ide_config_attach (IdeConfig *self)
   /*
    * We don't start monitoring changed events until we've gotten back
    * to the main loop (in case of threaded loaders) which happens from
-   * the point where the configuration is added ot the config manager.
+   * the point where the configuration is added to the config manager.
    */
 
   if (!(context = ide_object_get_context (IDE_OBJECT (self))))
@@ -1863,4 +1916,29 @@ ide_config_get_extensions (IdeConfig *self)
     ret = g_ptr_array_new ();
 
   return g_steal_pointer (&ret);
+}
+
+const gchar * const *
+ide_config_get_args_for_phase (IdeConfig        *self,
+                               IdePipelinePhase  phase)
+{
+  IdeConfigPrivate *priv = ide_config_get_instance_private (self);
+  const gchar * const *args;
+
+  g_return_val_if_fail (IDE_IS_CONFIG (self), NULL);
+
+  args = g_hash_table_lookup (priv->pipeline_args, GINT_TO_POINTER (phase));
+  return args;
+}
+
+void
+ide_config_set_args_for_phase (IdeConfig           *self,
+                               IdePipelinePhase     phase,
+                               const gchar * const *args)
+{
+  IdeConfigPrivate *priv = ide_config_get_instance_private (self);
+
+  g_return_if_fail (IDE_IS_CONFIG (self));
+
+  g_hash_table_insert (priv->pipeline_args, GINT_TO_POINTER (phase), g_strdupv ((gchar **)args));
 }

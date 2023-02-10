@@ -24,8 +24,14 @@
 
 #include <dazzle.h>
 #include <glib/gi18n.h>
-#include <libide-threading.h>
 #include <string.h>
+
+#include <libide-io.h>
+#include <libide-threading.h>
+
+#define IDE_TERMINAL_INSIDE
+# include "../terminal/ide-terminal-util.h"
+#undef IDE_TERMINAL_INSIDE
 
 #include "ide-build-target.h"
 #include "ide-config.h"
@@ -38,6 +44,7 @@
 typedef struct
 {
   gchar *id;
+  gchar *short_id;
   gchar *category;
   gchar *name;
   gchar *display_name;
@@ -48,6 +55,7 @@ G_DEFINE_TYPE_WITH_PRIVATE (IdeRuntime, ide_runtime, IDE_TYPE_OBJECT)
 enum {
   PROP_0,
   PROP_ID,
+  PROP_SHORT_ID,
   PROP_CATEGORY,
   PROP_DISPLAY_NAME,
   PROP_NAME,
@@ -112,10 +120,24 @@ ide_runtime_real_contains_program_in_path (IdeRuntime   *self,
       if (NULL != (launcher = ide_runtime_create_launcher (self, NULL)))
         {
           g_autoptr(IdeSubprocess) subprocess = NULL;
+          g_autofree char *escaped = g_shell_quote (program);
+          g_autofree char *command = g_strdup_printf ("which %s", escaped);
+          const char *user_shell = ide_get_user_shell ();
 
           ide_subprocess_launcher_set_run_on_host (launcher, TRUE);
-          ide_subprocess_launcher_push_argv (launcher, "which");
-          ide_subprocess_launcher_push_argv (launcher, program);
+
+          /* Try to get a real PATH by using the preferred shell */
+          if (ide_shell_supports_dash_c (user_shell))
+            ide_subprocess_launcher_push_argv (launcher, user_shell);
+          else
+            ide_subprocess_launcher_push_argv (launcher, "sh");
+
+          /* Try a login shell as well to improve reliability */
+          if (ide_shell_supports_dash_login (user_shell))
+            ide_subprocess_launcher_push_argv (launcher, "--login");
+
+          ide_subprocess_launcher_push_argv (launcher, "-c");
+          ide_subprocess_launcher_push_argv (launcher, command);
 
           if (NULL != (subprocess = ide_subprocess_launcher_spawn (launcher, cancellable, NULL)))
             return ide_subprocess_wait_check (subprocess, NULL, NULL);
@@ -152,16 +174,24 @@ ide_runtime_real_prepare_configuration (IdeRuntime *self,
     {
       g_autofree gchar *install_path = NULL;
       g_autofree gchar *project_id = NULL;
+      g_autofree gchar *id = NULL;
       IdeContext *context;
 
       context = ide_object_get_context (IDE_OBJECT (self));
       project_id = ide_context_dup_project_id (context);
+      id = g_strdup (priv->id);
+
+      /* Make sure we don't have things that can muck up PATH type
+       * environment variables like ":".
+       */
+      g_strdelimit (project_id, "@:/", '-');
+      g_strdelimit (id, "@:/", '-');
 
       install_path = g_build_filename (g_get_user_cache_dir (),
                                        "alwarsha",
                                        "install",
                                        project_id,
-                                       priv->id,
+                                       id,
                                        NULL);
 
       ide_config_set_prefix (config, install_path);
@@ -217,17 +247,21 @@ ide_runtime_real_create_runner (IdeRuntime     *self,
   if (argv && argv[0] && !g_path_is_absolute (argv[0]))
     {
       const gchar *slash = strchr (argv[0], '/');
-      g_autofree gchar *copy = g_strdup (slash ? (slash + 1) : argv[0]);
 
-      g_free (argv[0]);
-
-      if (installdir != NULL)
+      if (slash != NULL)
         {
-          g_autoptr(GFile) dest = g_file_get_child (installdir, copy);
-          argv[0] = g_file_get_path (dest);
+          g_autofree gchar *copy = g_strdup (slash ? (slash + 1) : argv[0]);
+
+          g_free (argv[0]);
+
+          if (installdir != NULL)
+            {
+              g_autoptr(GFile) dest = g_file_get_child (installdir, copy);
+              argv[0] = g_file_get_path (dest);
+            }
+          else
+            argv[0] = g_steal_pointer (&copy);
         }
-      else
-        argv[0] = g_steal_pointer (&copy);
     }
 
   if (installdir != NULL)
@@ -326,6 +360,7 @@ ide_runtime_finalize (GObject *object)
   IdeRuntimePrivate *priv = ide_runtime_get_instance_private (self);
 
   g_clear_pointer (&priv->id, g_free);
+  g_clear_pointer (&priv->short_id, g_free);
   g_clear_pointer (&priv->display_name, g_free);
   g_clear_pointer (&priv->name, g_free);
 
@@ -344,6 +379,10 @@ ide_runtime_get_property (GObject    *object,
     {
     case PROP_ID:
       g_value_set_string (value, ide_runtime_get_id (self));
+      break;
+
+    case PROP_SHORT_ID:
+      g_value_set_string (value, ide_runtime_get_short_id (self));
       break;
 
     case PROP_CATEGORY:
@@ -375,6 +414,10 @@ ide_runtime_set_property (GObject      *object,
     {
     case PROP_ID:
       ide_runtime_set_id (self, g_value_get_string (value));
+      break;
+
+    case PROP_SHORT_ID:
+      ide_runtime_set_short_id (self, g_value_get_string (value));
       break;
 
     case PROP_CATEGORY:
@@ -418,6 +461,13 @@ ide_runtime_class_init (IdeRuntimeClass *klass)
                          "The runtime identifier",
                          NULL,
                          (G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
+
+  properties [PROP_SHORT_ID] =
+    g_param_spec_string ("short-id",
+                         "Short Id",
+                         "The short runtime identifier",
+                         NULL,
+                         (G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   properties [PROP_CATEGORY] =
     g_param_spec_string ("category",
@@ -472,6 +522,33 @@ ide_runtime_set_id (IdeRuntime  *self,
       g_free (priv->id);
       priv->id = g_strdup (id);
       g_object_notify_by_pspec (G_OBJECT (self), properties [PROP_ID]);
+    }
+}
+
+const gchar *
+ide_runtime_get_short_id (IdeRuntime  *self)
+{
+  IdeRuntimePrivate *priv = ide_runtime_get_instance_private (self);
+
+  g_return_val_if_fail (IDE_IS_RUNTIME (self), NULL);
+
+  return priv->short_id ? priv->short_id : priv->id;
+}
+
+void
+ide_runtime_set_short_id (IdeRuntime  *self,
+                          const gchar *short_id)
+{
+  IdeRuntimePrivate *priv = ide_runtime_get_instance_private (self);
+
+  g_return_if_fail (IDE_IS_RUNTIME (self));
+  g_return_if_fail (short_id != NULL);
+
+  if (!ide_str_equal0 (short_id, priv->short_id))
+    {
+      g_free (priv->short_id);
+      priv->short_id = g_strdup (short_id);
+      g_object_notify_by_pspec (G_OBJECT (self), properties [PROP_SHORT_ID]);
     }
 }
 

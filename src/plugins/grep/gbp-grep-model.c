@@ -82,7 +82,7 @@ struct _GbpGrepModel
 
 static void tree_model_iface_init (GtkTreeModelIface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GbpGrepModel, gbp_grep_model, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpGrepModel, gbp_grep_model, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (GTK_TYPE_TREE_MODEL, tree_model_iface_init))
 
 enum {
@@ -1241,13 +1241,17 @@ GFile *
 gbp_grep_model_get_file (GbpGrepModel *self,
                          const gchar  *path)
 {
+  g_autoptr(GFile) directory = NULL;
+
   g_return_val_if_fail (GBP_IS_GREP_MODEL (self), NULL);
 
+  directory = self->directory ? g_object_ref (self->directory) : ide_context_ref_workdir (self->context);
+
   if (!path || !*path || g_strcmp0 (path, ".") == 0)
-    return g_file_dup (self->directory);
+    return g_file_dup (directory);
 
   if (self->was_directory)
-    return g_file_get_child (self->directory, path);
+    return g_file_get_child (directory, path);
   else
-    return g_file_dup (self->directory);
+    return g_file_dup (directory);
 }

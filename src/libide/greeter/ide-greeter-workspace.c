@@ -74,7 +74,7 @@ struct _IdeGreeterWorkspace
   guint                     selection_mode : 1;
 };
 
-G_DEFINE_TYPE (IdeGreeterWorkspace, ide_greeter_workspace, IDE_TYPE_WORKSPACE)
+G_DEFINE_FINAL_TYPE (IdeGreeterWorkspace, ide_greeter_workspace, IDE_TYPE_WORKSPACE)
 
 enum {
   PROP_0,
@@ -705,7 +705,7 @@ ide_greeter_workspace_new (IdeApplication *app)
   return g_object_new (IDE_TYPE_GREETER_WORKSPACE,
                        "application", app,
                        "default-width", 1000,
-                       "default-height", 600,
+                       "default-height", 800,
                        NULL);
 }
 

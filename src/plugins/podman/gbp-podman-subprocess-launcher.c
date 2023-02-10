@@ -36,7 +36,7 @@ enum {
   N_PROPS
 };
 
-G_DEFINE_TYPE (GbpPodmanSubprocessLauncher, gbp_podman_subprocess_launcher, IDE_TYPE_SUBPROCESS_LAUNCHER)
+G_DEFINE_FINAL_TYPE (GbpPodmanSubprocessLauncher, gbp_podman_subprocess_launcher, IDE_TYPE_SUBPROCESS_LAUNCHER)
 
 static GParamSpec *properties [N_PROPS];
 
@@ -128,11 +128,28 @@ gbp_podman_subprocess_launcher_spawn (IdeSubprocessLauncher  *launcher,
           copy_envvar (launcher, &i, "SSH_AUTH_SOCK");
           copy_envvar (launcher, &i, "WAYLAND_DISPLAY");
           copy_envvar (launcher, &i, "XDG_CURRENT_DESKTOP");
+          copy_envvar (launcher, &i, "XDG_DATA_DIRS");
+          copy_envvar (launcher, &i, "XDG_RUNTIME_DIR");
           copy_envvar (launcher, &i, "XDG_SEAT");
           copy_envvar (launcher, &i, "XDG_SESSION_DESKTOP");
           copy_envvar (launcher, &i, "XDG_SESSION_ID");
           copy_envvar (launcher, &i, "XDG_SESSION_TYPE");
           copy_envvar (launcher, &i, "XDG_VTNR");
+        }
+
+      /* we have to replicate the user path environment because we potentially start podman from
+       * within a flatpak */
+      if (ide_is_flatpak ())
+        {
+          g_autoptr(GSubprocess) process = NULL;
+          g_autofree char *user_path = NULL;
+          g_autofree char *env_path = NULL;
+
+          process = g_subprocess_new (G_SUBPROCESS_FLAGS_STDOUT_PIPE, NULL, "/bin/sh", "--login", "-c", "echo -n $PATH", NULL);
+          g_subprocess_communicate_utf8 (process, NULL, NULL, &user_path, NULL, NULL);
+          ide_subprocess_launcher_insert_argv (launcher, i++, "--env");
+          env_path = g_strdup_printf("PATH=%s", user_path);
+          ide_subprocess_launcher_insert_argv (launcher, i++, g_steal_pointer (&env_path));
         }
 
       if ((environ_ = ide_subprocess_launcher_get_environ (launcher)))

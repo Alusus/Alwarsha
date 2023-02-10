@@ -69,7 +69,7 @@ enum {
   N_SIGNALS
 };
 
-G_DEFINE_TYPE (IdeEditorSearchBar, ide_editor_search_bar, DZL_TYPE_BIN)
+G_DEFINE_FINAL_TYPE (IdeEditorSearchBar, ide_editor_search_bar, DZL_TYPE_BIN)
 
 static GParamSpec *properties [N_PROPS];
 static guint signals [N_SIGNALS];
@@ -233,7 +233,7 @@ search_entry_previous_match (IdeEditorSearchBar *self,
     {
       ide_editor_search_set_extend_selection (self->search, IDE_EDITOR_SEARCH_SELECT_NONE);
       ide_editor_search_set_repeat (self->search, 0);
-      ide_editor_search_move (self->search, IDE_EDITOR_SEARCH_BACKWARD);
+      ide_editor_search_move (self->search, IDE_EDITOR_SEARCH_PREVIOUS);
     }
 }
 
@@ -248,7 +248,7 @@ search_entry_next_match (IdeEditorSearchBar *self,
     {
       ide_editor_search_set_extend_selection (self->search, IDE_EDITOR_SEARCH_SELECT_NONE);
       ide_editor_search_set_repeat (self->search, 0);
-      ide_editor_search_move (self->search, IDE_EDITOR_SEARCH_FORWARD);
+      ide_editor_search_move (self->search, IDE_EDITOR_SEARCH_NEXT);
     }
 }
 

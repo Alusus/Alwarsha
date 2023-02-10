@@ -43,10 +43,10 @@ plugin_clang_resources = gnome.compile_resources(
 
 plugins_sources += plugin_clang_resources
 
-add_languages('cpp') # Needed for llvm dep
+add_languages('cpp', native: false) # Needed for llvm dep
 llvm_dep = dependency('llvm', version: '>= 3.5', method: 'config-tool')
-clang_include = llvm_dep.get_configtool_variable('includedir')
-clang_libdir = llvm_dep.get_configtool_variable('libdir').split(' ')
+clang_include = llvm_dep.get_variable('includedir')
+clang_libdir = llvm_dep.get_variable('libdir').split(' ')
 
 if not cc.has_header('clang-c/Index.h', args: '-I' + clang_include)
   error('clang: Failed to find headers')
@@ -72,7 +72,6 @@ gnome_builder_clang_deps = [
 
 executable('gnome-builder-clang', gnome_builder_clang_sources,
       dependencies: gnome_builder_clang_deps,
-           gui_app: false,
            install: true,
        install_dir: get_option('libexecdir'),
             c_args: exe_c_args,
@@ -82,7 +81,6 @@ executable('gnome-builder-clang', gnome_builder_clang_sources,
 
 executable('test-daemon', ['test-daemon.c'],
       dependencies: [libjsonrpc_glib_dep],
-           gui_app: false,
            install: false,
             c_args: exe_c_args,
                pie: true,

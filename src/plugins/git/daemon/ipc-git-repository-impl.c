@@ -66,6 +66,7 @@ ipc_git_repository_impl_monitor_changed_cb (IpcGitRepositoryImpl *self,
 {
   GHashTableIter iter;
   gpointer key;
+  g_autoptr(GgitRef) head_ref = NULL;
 
   g_assert (IPC_IS_GIT_REPOSITORY_IMPL (self));
   g_assert (IPC_IS_GIT_INDEX_MONITOR (monitor));
@@ -78,6 +79,9 @@ ipc_git_repository_impl_monitor_changed_cb (IpcGitRepositoryImpl *self,
       ipc_git_change_monitor_impl_reset (change_monitor);
     }
 
+  head_ref = ggit_repository_get_head (self->repository, NULL);
+  g_assert (GGIT_IS_REF (head_ref));
+  ipc_git_repository_set_branch ((IpcGitRepository *)self, ggit_ref_get_shorthand (head_ref));
   ipc_git_repository_emit_changed (IPC_GIT_REPOSITORY (self));
 }
 
@@ -1074,7 +1078,7 @@ git_repository_iface_init (IpcGitRepositoryIface *iface)
   iface->handle_update_submodules = ipc_git_repository_impl_handle_update_submodules;
 }
 
-G_DEFINE_TYPE_WITH_CODE (IpcGitRepositoryImpl, ipc_git_repository_impl, IPC_TYPE_GIT_REPOSITORY_SKELETON,
+G_DEFINE_FINAL_TYPE_WITH_CODE (IpcGitRepositoryImpl, ipc_git_repository_impl, IPC_TYPE_GIT_REPOSITORY_SKELETON,
                          G_IMPLEMENT_INTERFACE (IPC_TYPE_GIT_REPOSITORY, git_repository_iface_init))
 
 static void

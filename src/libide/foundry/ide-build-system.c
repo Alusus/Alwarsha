@@ -449,6 +449,20 @@ ide_build_system_get_build_flags_finish (IdeBuildSystem  *self,
   if (ret != NULL)
     ide_build_system_post_process_build_flags (self, ret);
 
+#ifdef IDE_ENABLE_TRACE
+  if (ret != NULL)
+    {
+      g_autoptr(GString) str = g_string_new (NULL);
+      for (guint i = 0; ret[i]; i++)
+        {
+          g_autofree char *escaped = g_shell_quote (ret[i]);
+          g_string_append (str, escaped);
+          g_string_append_c (str, ' ');
+        }
+      IDE_TRACE_MSG ("build_flags = %s", str->str);
+    }
+#endif
+
   IDE_RETURN (ret);
 }
 
@@ -544,6 +558,7 @@ ide_build_system_get_builddir (IdeBuildSystem   *self,
       IdeConfig *config;
       const gchar *config_id;
       const gchar *runtime_id;
+      const gchar *arch;
       IdeRuntime *runtime;
       IdeContext *context;
       IdeVcs *vcs;
@@ -553,13 +568,14 @@ ide_build_system_get_builddir (IdeBuildSystem   *self,
       config = ide_pipeline_get_config (pipeline);
       config_id = ide_config_get_id (config);
       runtime = ide_pipeline_get_runtime (pipeline);
-      runtime_id = ide_runtime_get_id (runtime);
+      runtime_id = ide_runtime_get_short_id (runtime);
       branch = ide_vcs_get_branch_name (vcs);
+      arch = ide_pipeline_get_arch (pipeline);
 
       if (branch != NULL)
-        name = g_strdup_printf ("%s-%s-%s", config_id, runtime_id, branch);
+        name = g_strdup_printf ("%s-%s-%s-%s", config_id, runtime_id, arch, branch);
       else
-        name = g_strdup_printf ("%s-%s", config_id, runtime_id);
+        name = g_strdup_printf ("%s-%s-%s", config_id, runtime_id, arch);
 
       g_strdelimit (name, "@:/ ", '-');
 
@@ -776,4 +792,28 @@ ide_build_system_get_project_version (IdeBuildSystem *self)
     return IDE_BUILD_SYSTEM_GET_IFACE (self)->get_project_version (self);
 
   return NULL;
+}
+
+/**
+ * ide_build_system_supports_language:
+ * @self: a #IdeBuildSystem
+ * @language: the language identifier
+ *
+ * Returns %TRUE if @self in it's current configuration is known to support @language.
+ *
+ * Returns: %TRUE if @language is supported, otherwise %FALSE.
+ *
+ * Since: 41.0
+ */
+gboolean
+ide_build_system_supports_language (IdeBuildSystem *self,
+                                    const char     *language)
+{
+  g_return_val_if_fail (IDE_IS_BUILD_SYSTEM (self), FALSE);
+  g_return_val_if_fail (language != NULL, FALSE);
+
+  if (IDE_BUILD_SYSTEM_GET_IFACE (self)->supports_language)
+    return IDE_BUILD_SYSTEM_GET_IFACE (self)->supports_language (self, language);
+
+  return FALSE;
 }

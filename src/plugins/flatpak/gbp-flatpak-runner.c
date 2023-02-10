@@ -19,13 +19,15 @@
  */
 
 #define G_LOG_DOMAIN "gbp-flatpak-runner"
+#define G_SETTINGS_ENABLE_BACKEND
 
 #include <errno.h>
-#include <flatpak.h>
-#include <stdlib.h>
+#include <gio/gsettingsbackend.h>
 #include <glib/gi18n.h>
+#include <stdlib.h>
 #include <unistd.h>
 
+#include "gbp-flatpak-aux.h"
 #include "gbp-flatpak-manifest.h"
 #include "gbp-flatpak-runner.h"
 #include "gbp-flatpak-util.h"
@@ -38,7 +40,7 @@ struct _GbpFlatpakRunner
   gchar *manifest_command;
 };
 
-G_DEFINE_TYPE (GbpFlatpakRunner, gbp_flatpak_runner, IDE_TYPE_RUNNER)
+G_DEFINE_FINAL_TYPE (GbpFlatpakRunner, gbp_flatpak_runner, IDE_TYPE_RUNNER)
 
 static IdeSubprocessLauncher *
 gbp_flatpak_runner_create_launcher (IdeRunner *runner)
@@ -81,6 +83,7 @@ static void
 gbp_flatpak_runner_fixup_launcher (IdeRunner             *runner,
                                    IdeSubprocessLauncher *launcher)
 {
+  const gchar *config_dir = gbp_flatpak_get_config_dir ();
   GbpFlatpakRunner *self = (GbpFlatpakRunner *)runner;
   g_autofree gchar *doc_portal = NULL;
   g_autofree gchar *project_build_dir = NULL;
@@ -104,11 +107,16 @@ gbp_flatpak_runner_fixup_launcher (IdeRunner             *runner,
   doc_portal = g_strdup_printf ("--bind-mount=/run/user/%u/doc=/run/user/%u/doc/by-app/%s",
                                 getuid (), getuid (), app_id);
 
+  /* Get access to override installations */
+  ide_subprocess_launcher_setenv (launcher, "FLATPAK_CONFIG_DIR", config_dir, TRUE);
+
   ide_subprocess_launcher_insert_argv (launcher, i++, "flatpak");
   ide_subprocess_launcher_insert_argv (launcher, i++, "build");
   ide_subprocess_launcher_insert_argv (launcher, i++, "--with-appdir");
   ide_subprocess_launcher_insert_argv (launcher, i++, "--allow=devel");
   ide_subprocess_launcher_insert_argv (launcher, i++, doc_portal);
+
+  i += gbp_flatpak_aux_apply (launcher, i);
 
   if (GBP_IS_FLATPAK_MANIFEST (config))
     {
@@ -218,6 +226,50 @@ gbp_flatpak_runner_new (IdeContext     *context,
 }
 
 static void
+override_settings (GbpFlatpakRunner *self)
+{
+  g_autoptr(GSettingsBackend) backend = NULL;
+  g_autoptr(GSettings) settings = NULL;
+  g_autofree char *filename = NULL;
+  IdeConfigManager *config_manager;
+  IdeContext *context;
+  const char *app_id;
+  IdeConfig *config;
+
+  g_assert (GBP_IS_FLATPAK_RUNNER (self));
+
+  if (!(context = ide_object_get_context (IDE_OBJECT (self))) ||
+      !(config_manager = ide_config_manager_from_context (context)) ||
+      !(config = ide_config_manager_get_current (config_manager)) ||
+      !(app_id = ide_config_get_app_id (config)))
+    return;
+
+  filename = g_build_filename (g_get_home_dir (), ".var", "app", app_id,
+                               "config", "glib-2.0", "settings", "keyfile",
+                               NULL);
+  backend = g_keyfile_settings_backend_new (filename, "/", NULL);
+  settings = g_settings_new_with_backend ("org.gtk.Settings.Debug", backend);
+
+  g_settings_set_boolean (settings, "enable-inspector-keybinding", TRUE);
+}
+
+static void
+gbp_flatpak_runner_run_async (IdeRunner           *runner,
+                              GCancellable        *cancellable,
+                              GAsyncReadyCallback  callback,
+                              gpointer             user_data)
+{
+  GbpFlatpakRunner *self = (GbpFlatpakRunner *)runner;
+
+  g_assert (GBP_IS_FLATPAK_RUNNER (self));
+  g_assert (!cancellable || G_IS_CANCELLABLE (cancellable));
+
+  override_settings (self);
+
+  IDE_RUNNER_CLASS (gbp_flatpak_runner_parent_class)->run_async (runner, cancellable, callback, user_data);
+}
+
+static void
 gbp_flatpak_runner_finalize (GObject *object)
 {
   GbpFlatpakRunner *self = (GbpFlatpakRunner *)object;
@@ -238,6 +290,7 @@ gbp_flatpak_runner_class_init (GbpFlatpakRunnerClass *klass)
 
   runner_class->create_launcher = gbp_flatpak_runner_create_launcher;
   runner_class->fixup_launcher = gbp_flatpak_runner_fixup_launcher;
+  runner_class->run_async = gbp_flatpak_runner_run_async;
 }
 
 static void

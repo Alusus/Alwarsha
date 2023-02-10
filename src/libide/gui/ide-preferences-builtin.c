@@ -25,6 +25,7 @@
 #include <dazzle.h>
 #include <glib/gi18n.h>
 #include <gtksourceview/gtksource.h>
+#include <handy.h>
 #include <libpeas/peas.h>
 
 #include "ide-preferences-builtin-private.h"
@@ -93,14 +94,17 @@ ide_preferences_builtin_register_appearance (DzlPreferences *preferences)
   const gchar * const *scheme_ids;
   GtkWidget *bin;
   gint i;
-  gint dark_mode;
+  gint follow_style;
 
   dzl_preferences_add_page (preferences, "appearance", _("Appearance"), 0);
 
-  dzl_preferences_add_list_group (preferences, "appearance", "basic", _("Themes"), GTK_SELECTION_NONE, 0);
-  dark_mode = dzl_preferences_add_switch (preferences, "appearance", "basic", "org.alusus.alwarsha", "night-mode", NULL, NULL, _("Dark Mode"), _("Whether Alwarsha should use a dark theme"), _("dark theme"), 0);
-  dzl_preferences_add_switch (preferences, "appearance", "basic", "org.alusus.alwarsha", "follow-night-light", NULL, NULL, _("Night Light"), _("Automatically enable dark mode at night"), _("follow night light"), 5);
-  dzl_preferences_add_switch (preferences, "appearance", "basic", "org.alusus.alwarsha.editor", "show-grid-lines", NULL, NULL, _("Grid Pattern"), _("Display a grid pattern underneath source code"), NULL, 10);
+  dzl_preferences_add_list_group (preferences, "appearance", "style", _("Style"), GTK_SELECTION_NONE, 0);
+  follow_style = dzl_preferences_add_radio (preferences, "appearance", "style", "org.alusus.alwarsha", "style-variant", NULL, "\"follow\"", _("System"), NULL, _("follow"), 0);
+  dzl_preferences_add_radio (preferences, "appearance", "style", "org.alusus.alwarsha", "style-variant", NULL, "\"light\"", _("Light"), NULL, NULL, 0);
+  dzl_preferences_add_radio (preferences, "appearance", "style", "org.alusus.alwarsha", "style-variant", NULL, "\"dark\"", _("Dark"), NULL, NULL, 0);
+
+  dzl_preferences_add_list_group (preferences, "appearance", "editor", _("Editor"), GTK_SELECTION_NONE, 0);
+  dzl_preferences_add_switch (preferences, "appearance", "editor", "org.alusus.alwarsha.editor", "show-grid-lines", NULL, NULL, _("Grid Pattern"), _("Display a grid pattern underneath source code"), NULL, 0);
 
   dzl_preferences_add_list_group (preferences, "appearance", "font", _("Font"), GTK_SELECTION_NONE, 10);
   dzl_preferences_add_font_button (preferences, "appearance", "font", "org.alusus.alwarsha.editor", "font-name", _("Editor"), C_("Keywords", "editor font AlususMono"), 0);
@@ -124,9 +128,9 @@ ide_preferences_builtin_register_appearance (DzlPreferences *preferences)
       dzl_preferences_add_radio (preferences, "appearance", "schemes", "org.alusus.alwarsha.editor", "style-scheme-name", NULL, variant_str, title, NULL, title, i);
     }
 
-  if (g_getenv ("GTK_THEME") != NULL)
+  if (!hdy_style_manager_get_system_supports_color_schemes (hdy_style_manager_get_default ()))
     {
-      bin = dzl_preferences_get_widget (preferences, dark_mode);
+      bin = dzl_preferences_get_widget (preferences, follow_style);
       gtk_widget_set_sensitive (bin, FALSE);
     }
 }
@@ -151,12 +155,17 @@ ide_preferences_builtin_register_editor (DzlPreferences *preferences)
 
   dzl_preferences_add_list_group (preferences, "editor", "general", _("General"), GTK_SELECTION_NONE, -5);
   dzl_preferences_add_switch (preferences, "editor", "general", "org.alusus.alwarsha", "show-open-files", NULL, NULL, _("Display list of open files"), _("Display the list of all open files in the project sidebar"), NULL, 0);
+  dzl_preferences_add_switch (preferences, "editor", "general", "org.alusus.alwarsha", "format-on-save", NULL, NULL, _("Reformat code on save"), _("Reformat current file on save"), NULL, 5);
 
   dzl_preferences_add_list_group (preferences, "editor", "position", _("Cursor"), GTK_SELECTION_NONE, 0);
   dzl_preferences_add_switch (preferences, "editor", "position", "org.alusus.alwarsha.editor", "restore-insert-mark", NULL, NULL, _("Restore cursor position"), _("Restore cursor position when a file is reopened"), NULL, 0);
-  dzl_preferences_add_switch (preferences, "editor", "position", "org.alusus.alwarsha.editor", "wrap-text", NULL, NULL, _("Enable text wrapping"), _("Wrap text that is too wide to display"), NULL, 5);
   dzl_preferences_add_spin_button (preferences, "editor", "position", "org.alusus.alwarsha.editor", "scroll-offset", NULL, _("Scroll Offset"), _("Minimum number of lines to keep above and below the cursor"), NULL, 10);
   dzl_preferences_add_spin_button (preferences, "editor", "position", "org.alusus.alwarsha.editor", "overscroll", NULL, _("Overscroll"), _("Allow the editor to scroll past the end of the buffer"), NULL, 20);
+
+  dzl_preferences_add_list_group (preferences, "editor", "text-wrapping", _("Text Wrapping"), GTK_SELECTION_NONE, 0);
+  dzl_preferences_add_radio (preferences, "editor", "text-wrapping", "org.alusus.alwarsha.editor", "wrap-text", NULL, "\"never\"", _("Never"), NULL, NULL, 0);
+  dzl_preferences_add_radio (preferences, "editor", "text-wrapping", "org.alusus.alwarsha.editor", "wrap-text", NULL, "\"whitespace\"", _("In Between Words"), NULL, NULL, 0);
+  dzl_preferences_add_radio (preferences, "editor", "text-wrapping", "org.alusus.alwarsha.editor", "wrap-text", NULL, "\"always\"", _("Always"), NULL, NULL, 0);
 
   dzl_preferences_add_list_group (preferences, "editor", "line", _("Line Information"), GTK_SELECTION_NONE, 50);
   dzl_preferences_add_switch (preferences, "editor", "line", "org.alusus.alwarsha.editor", "show-line-numbers", NULL, NULL, _("Line numbers"), _("Show line number at beginning of each line"), NULL, 0);
@@ -282,10 +291,10 @@ ide_preferences_builtin_register_languages (DzlPreferences *preferences)
       const gchar *name;
       const gchar *section;
 
-      if (dzl_str_equal0 (language_ids [i], "def"))
+      language = gtk_source_language_manager_get_language (manager, language_ids [i]);
+      if (gtk_source_language_get_hidden (language))
         continue;
 
-      language = gtk_source_language_manager_get_language (manager, language_ids [i]);
       name = gtk_source_language_get_name (language);
       section = gtk_source_language_get_section (language);
 
@@ -406,10 +415,15 @@ ide_preferences_builtin_register_build (DzlPreferences *preferences)
   g_signal_connect (widget, "input", G_CALLBACK (workers_input), NULL);
   g_signal_connect (widget, "output", G_CALLBACK (workers_output), NULL);
 
-  dzl_preferences_add_switch (preferences, "build", "basic", "org.alusus.alwarsha", "clear-cache-at-startup", NULL, NULL, _("Clear build cache at startup"), _("Expired caches will be purged when Alwarsha is started"), NULL, 10);
+  dzl_preferences_add_switch (preferences, "build", "basic", "org.alusus.alwarsha.build", "clear-build-log-pane", NULL, NULL, _("Clear build logs"), _("Clear build log pane on rebuild"), NULL, 10);
+  dzl_preferences_add_switch (preferences, "build", "basic", "org.alusus.alwarsha", "clear-cache-at-startup", NULL, NULL, _("Clear build cache at startup"), _("Expired caches will be purged when Builder is started"), NULL, 10);
 
   dzl_preferences_add_list_group (preferences, "build", "network", _("Network"), GTK_SELECTION_NONE, 100);
   dzl_preferences_add_switch (preferences, "build", "network", "org.alusus.alwarsha.build", "allow-network-when-metered", NULL, NULL, _("Allow downloads over metered connections"), _("Allow the use of metered network connections when automatically downloading dependencies"), NULL, 10);
+
+  dzl_preferences_add_page (preferences, "debugger", _("Debugger"), 550);
+  dzl_preferences_add_list_group (preferences, "debugger", "general", _("Breakpoints"), GTK_SELECTION_NONE, 0);
+  dzl_preferences_add_switch (preferences, "debugger", "general", "org.alusus.alwarsha.build", "debugger-breakpoint-on-main", NULL, NULL, _("Insert Breakpoint at Start of Application"), _("Automatically stop execution at the start of the applications main function"), NULL, 0);
 }
 
 static void

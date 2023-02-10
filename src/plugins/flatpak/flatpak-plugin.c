@@ -27,15 +27,14 @@
 #include <libide-foundry.h>
 #include <libide-gui.h>
 
-#include "gbp-flatpak-application-addin.h"
+#include "gbp-flatpak-aux.h"
 #include "gbp-flatpak-build-system-discovery.h"
 #include "gbp-flatpak-build-target-provider.h"
+#include "gbp-flatpak-client.h"
 #include "gbp-flatpak-config-provider.h"
 #include "gbp-flatpak-dependency-updater.h"
 #include "gbp-flatpak-pipeline-addin.h"
-#include "gbp-flatpak-preferences-addin.h"
 #include "gbp-flatpak-runtime-provider.h"
-#include "gbp-flatpak-workbench-addin.h"
 
 _IDE_EXTERN void
 _gbp_flatpak_register_types (PeasObjectModule *module)
@@ -58,15 +57,11 @@ _gbp_flatpak_register_types (PeasObjectModule *module)
                                               IDE_TYPE_RUNTIME_PROVIDER,
                                               GBP_TYPE_FLATPAK_RUNTIME_PROVIDER);
   peas_object_module_register_extension_type (module,
-                                              IDE_TYPE_APPLICATION_ADDIN,
-                                              GBP_TYPE_FLATPAK_APPLICATION_ADDIN);
-  peas_object_module_register_extension_type (module,
                                               IDE_TYPE_PIPELINE_ADDIN,
                                               GBP_TYPE_FLATPAK_PIPELINE_ADDIN);
-  peas_object_module_register_extension_type (module,
-                                              IDE_TYPE_PREFERENCES_ADDIN,
-                                              GBP_TYPE_FLATPAK_PREFERENCES_ADDIN);
-  peas_object_module_register_extension_type (module,
-                                              IDE_TYPE_WORKBENCH_ADDIN,
-                                              GBP_TYPE_FLATPAK_WORKBENCH_ADDIN);
+
+  gbp_flatpak_aux_init ();
+
+  /* Load the flatpak client early */
+  (void)gbp_flatpak_client_get_default ();
 }

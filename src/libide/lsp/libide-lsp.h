@@ -27,9 +27,12 @@
 #include "ide-lsp-types.h"
 
 #include "ide-lsp-client.h"
+#include "ide-lsp-code-action.h"
+#include "ide-lsp-code-action-provider.h"
 #include "ide-lsp-completion-item.h"
 #include "ide-lsp-completion-provider.h"
 #include "ide-lsp-completion-results.h"
+#include "ide-lsp-diagnostic.h"
 #include "ide-lsp-diagnostic-provider.h"
 #include "ide-lsp-enums.h"
 #include "ide-lsp-formatter.h"
@@ -37,9 +40,11 @@
 #include "ide-lsp-hover-provider.h"
 #include "ide-lsp-rename-provider.h"
 #include "ide-lsp-search-provider.h"
+#include "ide-lsp-service.h"
 #include "ide-lsp-symbol-node.h"
 #include "ide-lsp-symbol-resolver.h"
 #include "ide-lsp-symbol-tree.h"
 #include "ide-lsp-util.h"
+#include "ide-lsp-workspace-edit.h"
 
 #undef IDE_LSP_INSIDE

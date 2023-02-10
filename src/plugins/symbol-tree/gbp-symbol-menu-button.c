@@ -48,7 +48,7 @@ enum {
   N_PROPS
 };
 
-G_DEFINE_TYPE (GbpSymbolMenuButton, gbp_symbol_menu_button, GTK_TYPE_MENU_BUTTON)
+G_DEFINE_FINAL_TYPE (GbpSymbolMenuButton, gbp_symbol_menu_button, GTK_TYPE_MENU_BUTTON)
 
 static GParamSpec *properties [N_PROPS];
 
@@ -296,6 +296,7 @@ gbp_symbol_menu_button_set_symbol (GbpSymbolMenuButton *self,
 {
   const gchar *title = NULL;
   const gchar *icon_name = NULL;
+  gboolean use_underline = FALSE;
 
   IDE_ENTRY;
 
@@ -311,7 +312,8 @@ gbp_symbol_menu_button_set_symbol (GbpSymbolMenuButton *self,
 
   if (dzl_str_empty0 (title))
     {
-      title = _("Select Symbol…");
+      title = _("_Select Symbol…");
+      use_underline = TRUE;
       icon_name = NULL;
       symbol = NULL;
     }
@@ -322,6 +324,7 @@ gbp_symbol_menu_button_set_symbol (GbpSymbolMenuButton *self,
                 NULL);
 
   gtk_label_set_label (self->symbol_title, title);
+  gtk_label_set_use_underline (self->symbol_title, use_underline);
 
   IDE_EXIT;
 }

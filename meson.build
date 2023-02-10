@@ -1,7 +1,7 @@
 project('alwarsha', 'c',
           license: 'GPL3+',
-          version: '3.40.2',
-    meson_version: '>= 0.54.0',
+          version: '42.1',
+    meson_version: '>= 0.59.1',
   default_options: [ 'c_std=gnu11',
                      'cpp_std=gnu++2a',
                      'warning_level=2',
@@ -9,14 +9,10 @@ project('alwarsha', 'c',
                    ],
 )
 
-symbolic_release = '40.1'
-
 version_split = meson.project_version().split('.')
 MAJOR_VERSION = version_split[0]
-MINOR_VERSION = version_split[1]
-MICRO_VERSION = version_split[2]
 
-libide_api_version = '@0@.@1@'.format(MAJOR_VERSION, MINOR_VERSION)
+libide_api_version = '@0@.0'.format(MAJOR_VERSION)
 
 pkgdocdir_abs = join_paths(get_option('prefix'), get_option('datadir'), 'doc', 'alwarsha')
 pkglibdir_abs = join_paths(get_option('prefix'), get_option('libdir'), 'alwarsha')
@@ -25,9 +21,26 @@ pkgincludedir = join_paths(get_option('includedir'), 'alwarsha')
 pkggirdir = join_paths(get_option('datadir'),'alwarsha', 'gir-1.0')
 pkgtypelibdir = join_paths(get_option('libdir'), 'alwarsha', 'girepository-1.0')
 
-safe_path = get_option('with_safe_path')
+# Check dependencies
+glib_req_version = '2.69.1'
+gtk_req_version = '3.24'
+
+glib_req = '>= @0@'.format(glib_req_version)
+gtk_req = '>= @0@'.format(gtk_req_version)
+glib_major = glib_req_version.split('.')[0].to_int()
+glib_minor = glib_req_version.split('.')[1].to_int()
+gtk_major = gtk_req_version.split('.')[0].to_int()
+gtk_minor = gtk_req_version.split('.')[1].to_int()
+
+if glib_minor % 2 == 1
+  glib_minor = glib_minor + 1
+endif
+if gtk_minor % 2 == 1
+  gtk_minor = gtk_minor + 1
+endif
 
 # These default values are obtained by running /bin/sh without setting PATH
+safe_path = get_option('with_safe_path')
 if safe_path == ''
   if host_machine.system() == 'freebsd'
     safe_path = '/bin:/usr/bin:/usr/local/bin'
@@ -48,14 +61,20 @@ status = [
   '', '',
 ]
 
+config_h = configuration_data()
+
 # Message of doom
-if (version_split[1].to_int() % 2 == 1)
+if version_split[1][0] in ['a', 'b', 'r']
+  config_h.set10('DEVELOPMENT_BUILD', 1)
+  MINOR_VERSION = 0
   status += [
-    'You are building a debug version of GNOME builder. There may be more',
-    'bugs in this version that you are comfortable with. Addtionally, there',
+    'You are building a development version of GNOME Builder. There may be more',
+    'bugs in this version than you are comfortable with. Addtionally, there',
     'is a chance it will eat all of your work and leave you sad and alone.',
     '', ''
   ]
+else
+  MINOR_VERSION = version_split[1].to_int()
 endif
 
 status += [
@@ -76,8 +95,6 @@ status += [
   '', ''
 ]
 
-config_h = configuration_data()
-config_h.set_quoted('SYMBOLIC_RELEASE', symbolic_release)
 config_h.set_quoted('PACKAGE_NAME', 'alwarsha')
 config_h.set_quoted('PACKAGE_ABI_S', libide_api_version)
 config_h.set('PACKAGE_ABI', libide_api_version)
@@ -96,16 +113,13 @@ config_h.set('LOCALEDIR', 'PACKAGE_LOCALE_DIR')
 
 config_h.set10('ENABLE_NLS', true) # Always enabled
 
-# Development build setup
-config_h.set('DEVELOPMENT_BUILD', version_split[1].to_int().is_odd())
-
 # We should probably avoid using these
-config_h.set_quoted('SRCDIR', meson.source_root())
-config_h.set_quoted('BUILDDIR', meson.build_root())
+config_h.set_quoted('SRCDIR', meson.project_source_root())
+config_h.set_quoted('BUILDDIR', meson.project_build_root())
 
 add_global_arguments([
   '-DHAVE_CONFIG_H',
-  '-I' + meson.build_root(), # config.h
+  '-I' + meson.project_build_root(), # config.h
   '-D_GNU_SOURCE',
   '-DIDE_COMPILATION',
 ], language: 'c')
@@ -113,7 +127,12 @@ add_global_arguments([
 libide_args = []
 
 cc = meson.get_compiler('c')
-global_c_args = []
+global_c_args = [
+  '-DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_@0@_@1@'.format(glib_major, glib_minor),
+  '-DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_@0@_@1@'.format(glib_major, glib_minor),
+  '-DGDK_VERSION_MIN_REQUIRED=GDK_VERSION_@0@_@1@'.format(gtk_major, gtk_minor),
+  '-DGDK_VERSION_MAX_ALLOWED=GDK_VERSION_@0@_@1@'.format(gtk_major, gtk_minor),
+]
 test_c_args = [
   '-Wcast-align',
   '-Wdeclaration-after-statement',
@@ -155,6 +174,7 @@ test_c_args = [
   '-Wmissing-noreturn',
   '-Wnested-externs',
   '-Wno-cast-function-type',
+  '-Wno-dangling-pointer',
   '-Wno-missing-field-initializers',
   '-Wno-sign-compare',
   '-Wno-unused-parameter',
@@ -250,28 +270,29 @@ endif
 # Check if we can use version scripts for ABI exports
 ld_supports_version_script = cc.links('''
   int main (void) { return 0; }
-''', args: '-Wl,--version-script,' + join_paths(meson.source_root(), 'libide/ide.map'))
+''', args: '-Wl,--version-script,' + join_paths(meson.project_source_root(), 'libide/ide.map'))
 message('Linker supports --version-script: @0@'.format(ld_supports_version_script))
 
 # Commonly used deps
 libdazzle_dep = dependency('libdazzle-1.0', version: '>= 3.37.0')
-libglib_dep = dependency('glib-2.0', version: '>= 2.65.0')
-libgio_dep = dependency('gio-2.0', version: '>= 2.61.2')
-libgiounix_dep = dependency('gio-unix-2.0')
-libgtk_dep = dependency('gtk+-3.0', version: '>= 3.22.26')
+libglib_dep = dependency('glib-2.0', version: glib_req)
+libgio_dep = dependency('gio-2.0', version: glib_req)
+libgiounix_dep = dependency('gio-unix-2.0', version: glib_req)
+libgtk_dep = dependency('gtk+-3.0', version: gtk_req)
 libgtksource_dep = dependency('gtksourceview-4', version: '>= 4.0.0')
+libhandy_dep = dependency('libhandy-1', version: '>= 1.5.0')
 libjson_glib_dep = dependency('json-glib-1.0', version: '>= 1.2.0')
-libjsonrpc_glib_dep = dependency('jsonrpc-glib-1.0', version: '>= 3.29.91')
+libjsonrpc_glib_dep = dependency('jsonrpc-glib-1.0', version: '>= 3.41.0')
 libm_dep = cc.find_library('m', required: false)
 libpangoft2_dep = dependency('pangoft2', version: '>= 1.38.0')
 libpeas_dep = dependency('libpeas-1.0', version: '>= 1.22.0')
-libportal_dep = dependency('libportal', version: '>= 0.3', required: false)
+libportal_dep = dependency('libportal-gtk3', required: false)
 libtemplate_glib_dep = dependency('template-glib-1.0', version: '>= 3.28.0')
-libvte_dep = dependency('vte-2.91', version: '>= 0.40.2')
-libwebkit_dep = dependency('webkit2gtk-4.0', version: '>= 2.26', required: false)
+libvte_dep = dependency('vte-2.91', version: '>= 0.65.0')
 libxml2_dep = dependency('libxml-2.0', version: '>= 2.9.0')
 
-if libwebkit_dep.found()
+if get_option('webkit').enabled()
+  libwebkit_dep = dependency('webkit2gtk-4.0', version: '>= 2.26')
   config_h.set10('HAVE_WEBKIT', 1)
 endif
 

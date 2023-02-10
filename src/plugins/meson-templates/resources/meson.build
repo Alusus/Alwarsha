@@ -1,8 +1,9 @@
-project('{{name}}',{{if language == "c"}} 'c',{{else if language == "c++"}} ['cpp', 'c'],{{else if language == "vala"}} ['c', 'vala'],{{else if language == "c♯"}} 'cs',{{end}}
+project('{{name}}',{{if language == "c"}} 'c',{{else if language == "c++"}} ['cpp', 'c'],{{else if language == "vala"}} ['c', 'vala'],{{else if language == "c♯"}} 'cs',{{else if language == "rust"}} 'rust', {{end}}
 
           version: '{{project_version}}',
-    meson_version: '>= 0.50.0',
+    meson_version: '>= 0.59.0',
   default_options: [ 'warning_level=2',
+                     'werror=false',
 {{if language == "c"}}
                      'c_std=gnu11',
 {{end}}
@@ -14,6 +15,10 @@ project('{{name}}',{{if language == "c"}} 'c',{{else if language == "c++"}} ['cp
 
 {{if enable_i18n}}
 i18n = import('i18n')
+{{end}}
+
+{{if enable_gnome}}
+gnome = import('gnome')
 {{end}}
 
 {{if language == "c"}}
@@ -28,7 +33,7 @@ configure_file(
   configuration: config_h,
 )
 add_project_arguments([
-  '-I' + meson.build_root(),
+  '-I' + meson.project_build_root(),
 ], language: 'c')
 {{end}}
 
@@ -48,5 +53,9 @@ subdir('po')
 {{end}}
 
 {{if enable_gnome}}
-meson.add_install_script('build-aux/meson/postinstall.py')
+gnome.post_install(
+  glib_compile_schemas: true,
+  gtk_update_icon_cache: true,
+  update_desktop_database: true,
+)
 {{end}}

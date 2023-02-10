@@ -6,16 +6,23 @@
         <property name="orientation">horizontal</property>
         <property name="visible">true</property>
         <child>
-          <object class="IdeTerminal" id="terminal">
-            <property name="audible-bell">false</property>
-            <property name="expand">true</property>
+          <object class="GtkScrolledWindow">
             <property name="visible">true</property>
+            <child>
+              <object class="IdeTerminal" id="terminal">
+                <property name="audible-bell">false</property>
+                <property name="expand">true</property>
+                <property name="visible">true</property>
+              </object>
+            </child>
           </object>
         </child>
         <child>
-          <object class="GtkScrollbar" id="scrollbar">
-            <property name="orientation">vertical</property>
+          <object class="GtkSeparator">
             <property name="visible">true</property>
+            <style>
+              <class name="sidebar"/>
+            </style>
           </object>
         </child>
         <child>
@@ -54,7 +61,7 @@
                 </style>
                 <child>
                   <object class="GtkImage">
-                    <property name="icon-name">process-stop-symbolic</property>
+                    <property name="icon-name">builder-build-stop-symbolic</property>
                     <property name="visible">true</property>
                   </object>
                 </child>

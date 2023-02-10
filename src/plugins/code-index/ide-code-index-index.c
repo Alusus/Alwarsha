@@ -69,7 +69,7 @@ typedef struct
   guint               match_num;
 } FuzzyMatch;
 
-G_DEFINE_TYPE (IdeCodeIndexIndex, ide_code_index_index, IDE_TYPE_OBJECT)
+G_DEFINE_FINAL_TYPE (IdeCodeIndexIndex, ide_code_index_index, IDE_TYPE_OBJECT)
 
 static void directory_index_free (DirectoryIndex *data);
 
@@ -389,7 +389,7 @@ ide_code_index_index_query_cb (GObject      *object,
           dzl_heap_insert_val (data->fuzzy_matches, fuzzy_match);
         }
     }
-  else
+  else if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
     {
       g_message ("%s", error->message);
     }

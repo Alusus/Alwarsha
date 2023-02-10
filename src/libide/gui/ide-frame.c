@@ -101,7 +101,7 @@ enum {
 };
 
 enum {
-  CHNAGE_CURRENT_PAGE,
+  CHANGE_CURRENT_PAGE,
   N_SIGNALS
 };
 
@@ -273,6 +273,11 @@ ide_frame_change_current_page (IdeFrame *self,
 
   g_assert (IDE_IS_FRAME (self));
 
+  if (direction < -1)
+    direction = -1;
+  else if (direction > 1)
+    direction = 1;
+
   visible_child = gtk_stack_get_visible_child (priv->stack);
 
   if (visible_child == NULL)
@@ -287,7 +292,9 @@ ide_frame_change_current_page (IdeFrame *self,
   if (ar->len == 0)
     g_return_if_reached ();
 
-  visible_child = g_ptr_array_index (ar, (position + direction) % ar->len);
+  position = (position + (int)ar->len - direction) % (int)ar->len;
+
+  visible_child = g_ptr_array_index (ar, position);
   gtk_stack_set_visible_child (priv->stack, visible_child);
 }
 
@@ -869,7 +876,7 @@ ide_frame_class_init (IdeFrameClass *klass)
 
   g_object_class_install_properties (object_class, N_PROPS, properties);
 
-  signals [CHNAGE_CURRENT_PAGE] =
+  signals [CHANGE_CURRENT_PAGE] =
     g_signal_new_class_handler ("change-current-page",
                                 G_TYPE_FROM_CLASS (klass),
                                 G_SIGNAL_RUN_LAST | G_SIGNAL_ACTION,

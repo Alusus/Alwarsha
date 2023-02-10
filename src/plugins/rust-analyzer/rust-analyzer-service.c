@@ -41,7 +41,7 @@ struct _RustAnalyzerService
 
 static void workbench_addin_iface_init (IdeWorkbenchAddinInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (RustAnalyzerService, rust_analyzer_service, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (RustAnalyzerService, rust_analyzer_service, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_WORKBENCH_ADDIN, workbench_addin_iface_init))
 
 enum {
@@ -152,6 +152,7 @@ rust_analyzer_service_supervisor_spawned_cb (RustAnalyzerService     *self,
   GInputStream *input;
   const gchar *workdir;
   IdeContext *context;
+  g_autoptr(GVariant) params = NULL;
 
   IDE_ENTRY;
 
@@ -171,6 +172,23 @@ rust_analyzer_service_supervisor_spawned_cb (RustAnalyzerService     *self,
     }
 
   self->client = ide_lsp_client_new (io_stream);
+
+  /* Opt-in for experimental proc-macro feature to make gtk-rs more
+   * useful for GNOME developers.
+   *
+   * See: https://rust-analyzer.github.io/manual.html#configuration
+   */
+  params = JSONRPC_MESSAGE_NEW (
+    "procMacro", "{",
+      "enable", JSONRPC_MESSAGE_PUT_BOOLEAN(TRUE),
+    "}"
+  );
+
+  ide_lsp_client_set_initialization_options (self->client, params);
+
+  g_object_set (self->client,
+                "use-markdown-in-diagnostics", TRUE,
+                NULL);
 
   g_signal_connect_object (self->client,
                            "load-configuration",

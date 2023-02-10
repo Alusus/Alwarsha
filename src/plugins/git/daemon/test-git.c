@@ -76,7 +76,12 @@ do_test_config (IpcGitConfig *config)
     {
       g_autofree gchar *value = NULL;
 
+      g_message ("  Looking up key: %s", keys[i]);
       ret = ipc_git_config_call_read_key_sync (config, keys[i], &value, NULL, &error);
+
+      if (error && strcmp (keys[i], "user.signingkey") == 0)
+        g_error ("This test requires that you set user.signingkey for the user account");
+
       g_assert_no_error (error);
       g_assert_true (ret);
 
@@ -121,6 +126,7 @@ test_push (IpcGitService    *service,
 {
   g_autofree gchar *location = NULL;
   g_autofree gchar *url = NULL;
+  g_autofree gchar *dir = NULL;
   g_autoptr(GError) error = NULL;
   static const gchar *ref_names[] = { "refs/heads/master:refs/heads/master", NULL };
   IpcGitPushFlags flags = IPC_GIT_PUSH_FLAGS_NONE;
@@ -132,7 +138,8 @@ test_push (IpcGitService    *service,
   g_assert_true (ret);
   g_message ("Bare repository created at %s", location);
 
-  url = g_strdup_printf ("file://%s/%s", g_get_current_dir (), tmpdir_push);
+  dir = g_get_current_dir ();
+  url = g_strdup_printf ("file://%s/%s", dir, tmpdir_push);
 
   g_message ("Pushing to %s", url);
   ret = ipc_git_repository_call_push_sync (repository, url, ref_names, flags, PROGRESS_PATH, NULL, &error);
@@ -153,7 +160,7 @@ create_commit_details (const gchar *commit_msg)
   g_variant_dict_insert (&dict, "COMMITTER_EMAIL", "s", "me@localhost");
   g_variant_dict_insert (&dict, "COMMIT_MSG", "s", commit_msg ?: "");
 
-  return g_variant_take_ref (g_variant_dict_end (&dict));
+  return g_variant_dict_end (&dict);
 }
 
 static void
@@ -165,7 +172,6 @@ test_clone (IpcGitService *service)
   g_autoptr(IpcGitConfig) config = NULL;
   g_autoptr(GError) error = NULL;
   g_autoptr(GVariant) files = NULL;
-  g_autoptr(GVariant) details = NULL;
   g_autofree gchar *testfile = NULL;
   g_autofree gchar *location = NULL;
   g_autofree gchar *obj_path = NULL;
@@ -175,6 +181,7 @@ test_clone (IpcGitService *service)
   g_autoptr(GVariant) changes = NULL;
   g_autofree gchar *monitor_path = NULL;
   GVariantDict opts;
+  GVariant *details;
   GDBusConnection *conn;
   GVariantIter iter;
   gboolean ret;
@@ -198,7 +205,7 @@ test_clone (IpcGitService *service)
 
   g_message ("Cloning hello");
   ret = ipc_git_service_call_clone_sync (service,
-                                         "https://gitlab.gnome.org/chergert/hello",
+                                         "https://gitlab.gnome.org/chergert/hello.git",
                                          tmpdir,
                                          "master",
                                          g_variant_dict_end (&opts),
@@ -470,7 +477,7 @@ main (gint argc,
   g_autoptr(GSubprocessLauncher) launcher = NULL;
   g_autoptr(IpcGitService) service = NULL;
 
-  launcher = g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_STDIN_PIPE | G_SUBPROCESS_FLAGS_STDOUT_PIPE | G_SUBPROCESS_FLAGS_STDERR_SILENCE);
+  launcher = g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_STDIN_PIPE | G_SUBPROCESS_FLAGS_STDOUT_PIPE);
   subprocess = g_subprocess_launcher_spawn (launcher, &error, "./gnome-builder-git", NULL);
 
   if (subprocess == NULL)
@@ -509,6 +516,9 @@ main (gint argc,
                                NULL);
 
   g_main_loop_run (main_loop);
+
+  while (g_main_context_pending (NULL))
+    g_main_context_iteration (NULL, FALSE);
 
   return EXIT_SUCCESS;
 }

@@ -23,6 +23,8 @@
 
 #include <libide-foundry.h>
 
+#include "ipc-flatpak-service.h"
+
 G_BEGIN_DECLS
 
 #define GBP_TYPE_FLATPAK_MANIFEST (gbp_flatpak_manifest_get_type())
@@ -42,6 +44,7 @@ const gchar         *gbp_flatpak_manifest_get_sdk            (GbpFlatpakManifest
 const gchar         *gbp_flatpak_manifest_get_platform       (GbpFlatpakManifest   *self);
 gchar              **gbp_flatpak_manifest_get_runtimes       (GbpFlatpakManifest   *self,
                                                               const gchar          *for_arch);
+const char          *gbp_flatpak_manifest_get_branch         (GbpFlatpakManifest   *self);
 void                 gbp_flatpak_manifest_save_async         (GbpFlatpakManifest   *self,
                                                               GCancellable         *cancellable,
                                                               GAsyncReadyCallback   callback,
@@ -49,6 +52,8 @@ void                 gbp_flatpak_manifest_save_async         (GbpFlatpakManifest
 gboolean             gbp_flatpak_manifest_save_finish        (GbpFlatpakManifest   *self,
                                                               GAsyncResult         *result,
                                                               GError              **error);
+void                 gbp_flatpak_manifest_resolve_extensions (GbpFlatpakManifest   *self,
+                                                              IpcFlatpakService    *service);
 
 
 G_END_DECLS

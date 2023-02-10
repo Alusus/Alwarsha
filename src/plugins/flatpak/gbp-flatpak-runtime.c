@@ -20,11 +20,10 @@
 
 #define G_LOG_DOMAIN "gbp-flatpak-runtime"
 
-#include <flatpak.h>
 #include <glib/gi18n.h>
 #include <json-glib/json-glib.h>
+#include <libide-vcs.h>
 
-#include "gbp-flatpak-application-addin.h"
 #include "gbp-flatpak-manifest.h"
 #include "gbp-flatpak-runner.h"
 #include "gbp-flatpak-runtime.h"
@@ -46,7 +45,7 @@ struct _GbpFlatpakRuntime
   GFile *deploy_dir_files;
 };
 
-G_DEFINE_TYPE (GbpFlatpakRuntime, gbp_flatpak_runtime, IDE_TYPE_RUNTIME)
+G_DEFINE_FINAL_TYPE (GbpFlatpakRuntime, gbp_flatpak_runtime, IDE_TYPE_RUNTIME)
 
 enum {
   PROP_0,
@@ -120,6 +119,25 @@ gbp_flatpak_runtime_contains_program_in_path (IdeRuntime   *runtime,
         }
     }
 
+  /* If we have an SDK, we might need to check that runtime */
+  if (ret == FALSE &&
+      self->sdk != NULL &&
+      !ide_str_equal0 (self->platform, self->sdk))
+    {
+      IdeContext* context = ide_object_get_context (IDE_OBJECT (self));
+      if (context)
+        {
+          g_autoptr(IdeRuntimeManager) manager = ide_object_ensure_child_typed (IDE_OBJECT (context), IDE_TYPE_RUNTIME_MANAGER);
+          g_autofree char *arch = ide_runtime_get_arch (runtime);
+          g_autofree char *sdk_id = g_strdup_printf ("flatpak:%s/%s/%s", self->sdk, arch, self->branch);
+          IdeRuntime *sdk = ide_runtime_manager_get_runtime (manager, sdk_id);
+
+          if (sdk != NULL && sdk != runtime)
+            ret = ide_runtime_contains_program_in_path (sdk, program, cancellable);
+        }
+    }
+
+  /* Cache both positive and negative lookups */
   g_hash_table_insert (self->program_paths_cache,
                        (gchar *)g_intern_string (program),
                        GUINT_TO_POINTER (ret));
@@ -161,6 +179,7 @@ gbp_flatpak_runtime_create_launcher (IdeRuntime  *runtime,
       const gchar *builddir = NULL;
       const gchar *project_path = NULL;
       const gchar * const *build_args = NULL;
+      const gchar *config_dir = gbp_flatpak_get_config_dir ();
       g_autoptr(IdeConfigManager) config_manager = NULL;
       IdeConfig *configuration;
       IdeVcs *vcs;
@@ -178,6 +197,9 @@ gbp_flatpak_runtime_create_launcher (IdeRuntime  *runtime,
       /* Add 'flatpak build' and the specified arguments to the launcher */
       ide_subprocess_launcher_push_argv (ret, "flatpak");
       ide_subprocess_launcher_push_argv (ret, "build");
+
+      /* Get access to override installations */
+      ide_subprocess_launcher_setenv (ret, "FLATPAK_CONFIG_DIR", config_dir, TRUE);
 
       if (GBP_IS_FLATPAK_MANIFEST (configuration))
         build_args = gbp_flatpak_manifest_get_build_args (GBP_FLATPAK_MANIFEST (configuration));
@@ -714,49 +736,39 @@ gbp_flatpak_runtime_init (GbpFlatpakRuntime *self)
   self->program_paths_cache = g_hash_table_new (g_str_hash, g_str_equal);
 }
 
-static gchar *
-locate_deploy_dir (const gchar *sdk_id)
-{
-  g_auto(GStrv) parts = g_strsplit (sdk_id, "/", 3);
-
-  if (g_strv_length (parts) == 3)
-    return gbp_flatpak_application_addin_get_deploy_dir (gbp_flatpak_application_addin_get_default (),
-                                                         parts[0], parts[1], parts[2]);
-  return NULL;
-}
-
 GbpFlatpakRuntime *
-gbp_flatpak_runtime_new (FlatpakInstalledRef  *ref,
-                         gboolean              is_extension,
-                         GCancellable         *cancellable,
-                         GError              **error)
+gbp_flatpak_runtime_new (const char *name,
+                         const char *arch,
+                         const char *branch,
+                         const char *sdk_name,
+                         const char *sdk_branch,
+                         const char *deploy_dir,
+                         const char *metadata,
+                         gboolean    is_extension)
 {
-  g_autofree gchar *sdk_deploy_dir = NULL;
-  g_autoptr(GBytes) metadata = NULL;
-  g_autoptr(GKeyFile) keyfile = NULL;
-  g_autofree gchar *sdk = NULL;
   g_autofree gchar *id = NULL;
+  g_autofree gchar *short_id = NULL;
   g_autofree gchar *display_name = NULL;
   g_autofree gchar *triplet = NULL;
   g_autofree gchar *runtime_name = NULL;
   g_autoptr(IdeTriplet) triplet_object = NULL;
   g_autoptr(GString) category = NULL;
-  const gchar *name;
-  const gchar *arch;
-  const gchar *branch;
-  const gchar *deploy_dir;
 
-  g_return_val_if_fail (FLATPAK_IS_INSTALLED_REF (ref), NULL);
-  g_return_val_if_fail (!cancellable || G_IS_CANCELLABLE (cancellable), NULL);
+  g_return_val_if_fail (name != NULL, NULL);
+  g_return_val_if_fail (arch != NULL, NULL);
+  g_return_val_if_fail (branch != NULL, NULL);
+  g_return_val_if_fail (deploy_dir != NULL, NULL);
 
-  arch = flatpak_ref_get_arch (FLATPAK_REF (ref));
+  if (sdk_name == NULL)
+    sdk_name = name;
 
-  name = flatpak_ref_get_name (FLATPAK_REF (ref));
-  branch = flatpak_ref_get_branch (FLATPAK_REF (ref));
-  deploy_dir = flatpak_installed_ref_get_deploy_dir (ref);
+  if (sdk_branch == NULL)
+    sdk_branch = branch;
+
   triplet_object = ide_triplet_new (arch);
   triplet = g_strdup_printf ("%s/%s/%s", name, arch, branch);
   id = g_strdup_printf ("flatpak:%s", triplet);
+  short_id = g_strdup_printf ("flatpak:%s-%s", name, branch);
 
   category = g_string_new ("Flatpak/");
 
@@ -767,48 +779,21 @@ gbp_flatpak_runtime_new (FlatpakInstalledRef  *ref,
   else if (g_str_has_prefix (name, "org.kde."))
     g_string_append (category, "KDE/");
 
-  if (ide_str_equal0 (flatpak_get_default_arch (), arch))
+  if (ide_str_equal0 (ide_get_system_arch (), arch))
     g_string_append (category, name);
   else
     g_string_append_printf (category, "%s (%s)", name, arch);
 
-  if (!(metadata = flatpak_installed_ref_load_metadata (ref, cancellable, error)))
-    return NULL;
-
-  keyfile = g_key_file_new ();
-  if (!g_key_file_load_from_bytes (keyfile, metadata, 0, error))
-    return NULL;
-
-  if (g_key_file_has_group (keyfile, "ExtensionOf") && !is_extension)
-    {
-      g_set_error (error,
-                   G_IO_ERROR,
-                   G_IO_ERROR_NOT_SUPPORTED,
-                   "Runtime is an extension");
-      return NULL;
-    }
-
-  sdk = g_key_file_get_string (keyfile, "Runtime", "sdk", NULL);
-
-  if (g_str_equal (arch, flatpak_get_default_arch ()))
+  if (g_str_equal (arch, ide_get_system_arch ()))
     display_name = g_strdup_printf (_("%s <b>%s</b>"), name, branch);
   else
     display_name = g_strdup_printf (_("%s <b>%s</b> <span fgalpha='36044'>%s</span>"), name, branch, arch);
 
   runtime_name = g_strdup_printf ("%s %s", _("Flatpak"), triplet);
 
-  /*
-   * If we have an SDK that is different from this runtime, we need to locate
-   * the SDK deploy-dir instead (for things like includes, pkg-config, etc).
-   */
-  if (!is_extension)
-    {
-      if (sdk != NULL && !g_str_equal (sdk, triplet) && NULL != (sdk_deploy_dir = locate_deploy_dir (sdk)))
-        deploy_dir = sdk_deploy_dir;
-    }
-
   return g_object_new (GBP_TYPE_FLATPAK_RUNTIME,
                        "id", id,
+                       "short-id", short_id,
                        "triplet", triplet_object,
                        "branch", branch,
                        "category", category->str,
@@ -816,6 +801,29 @@ gbp_flatpak_runtime_new (FlatpakInstalledRef  *ref,
                        "deploy-dir", deploy_dir,
                        "display-name", display_name,
                        "platform", name,
-                       "sdk", sdk,
+                       "sdk", sdk_name,
                        NULL);
+}
+
+char **
+gbp_flatpak_runtime_get_refs (GbpFlatpakRuntime *self)
+{
+  GPtrArray *ar;
+  g_autofree char *sdk = NULL;
+  g_autofree char *platform = NULL;
+  const char *arch;
+
+  g_return_val_if_fail (GBP_IS_FLATPAK_RUNTIME (self), NULL);
+
+  arch = ide_triplet_get_arch (self->triplet);
+  platform = g_strdup_printf ("runtime/%s/%s/%s", self->platform, arch, self->branch);
+  sdk = g_strdup_printf ("runtime/%s/%s/%s", self->sdk, arch, self->branch);
+
+  ar = g_ptr_array_new ();
+  g_ptr_array_add (ar, g_steal_pointer (&sdk));
+  if (g_strcmp0 (sdk, platform) != 0)
+    g_ptr_array_add (ar, g_steal_pointer (&platform));
+  g_ptr_array_add (ar, NULL);
+
+  return (char **)g_ptr_array_free (ar, FALSE);
 }

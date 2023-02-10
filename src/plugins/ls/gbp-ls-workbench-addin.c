@@ -52,7 +52,12 @@ gbp_ls_workbench_addin_can_open (IdeWorkbenchAddin *addin,
       return TRUE;
     }
 
-  /* We can open, but super low priority */
+  /* We can open, but super low priority, to avoid needing a second menu entry
+   * in the project tree context menu, even if it doesn't fully make sense to
+   * make the ls plugin handle every file… Anyway, as the open-with-external
+   * plugin has slighter higher priority it'll be used instead as a fallback
+   * method, leaving this ls plugin for explicit use with the 'ls' hint.
+   */
   *priority = G_MAXINT;
   return TRUE;
 }
@@ -187,7 +192,7 @@ workbench_addin_iface_init (IdeWorkbenchAddinInterface *iface)
   iface->unload = gbp_ls_workbench_addin_unload;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GbpLsWorkbenchAddin, gbp_ls_workbench_addin, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpLsWorkbenchAddin, gbp_ls_workbench_addin, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_WORKBENCH_ADDIN, workbench_addin_iface_init))
 
 static void

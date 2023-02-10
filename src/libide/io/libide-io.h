@@ -36,6 +36,7 @@ G_BEGIN_DECLS
 #include "ide-persistent-map.h"
 #include "ide-pkcon-transfer.h"
 #include "ide-pty-intercept.h"
+#include "ide-shell.h"
 
 #undef IDE_IO_INSIDE
 

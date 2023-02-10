@@ -9,23 +9,28 @@ libide_include_directories += include_directories('.')
 libide_lsp_public_headers = [
   'libide-lsp.h',
   'ide-lsp-client.h',
+  'ide-lsp-code-action.h',
+  'ide-lsp-code-action-provider.h',
   'ide-lsp-completion-item.h',
   'ide-lsp-completion-provider.h',
   'ide-lsp-completion-results.h',
+  'ide-lsp-diagnostic.h',
   'ide-lsp-diagnostic-provider.h',
   'ide-lsp-formatter.h',
   'ide-lsp-highlighter.h',
   'ide-lsp-hover-provider.h',
   'ide-lsp-rename-provider.h',
   'ide-lsp-search-provider.h',
+  'ide-lsp-service.h',
   'ide-lsp-symbol-node.h',
   'ide-lsp-symbol-resolver.h',
   'ide-lsp-symbol-tree.h',
   'ide-lsp-types.h',
+  'ide-lsp-util.h',
+  'ide-lsp-workspace-edit.h',
 ]
 
 libide_lsp_private_headers = [
-  'ide-lsp-util.h',
   'ide-lsp-symbol-node-private.h',
   'ide-lsp-symbol-tree-private.h',
 ]
@@ -38,9 +43,12 @@ install_headers(libide_lsp_public_headers, subdir: libide_lsp_header_subdir)
 
 libide_lsp_public_sources = [
   'ide-lsp-client.c',
+  'ide-lsp-code-action.c',
+  'ide-lsp-code-action-provider.c',
   'ide-lsp-completion-item.c',
   'ide-lsp-completion-provider.c',
   'ide-lsp-completion-results.c',
+  'ide-lsp-diagnostic.c',
   'ide-lsp-diagnostic-provider.c',
   'ide-lsp-formatter.c',
   'ide-lsp-highlighter.c',
@@ -48,13 +56,15 @@ libide_lsp_public_sources = [
   'ide-lsp-rename-provider.c',
   'ide-lsp-search-provider.c',
   'ide-lsp-search-result.c',
+  'ide-lsp-service.c',
   'ide-lsp-symbol-node.c',
   'ide-lsp-symbol-resolver.c',
   'ide-lsp-symbol-tree.c',
+  'ide-lsp-workspace-edit.c',
+  'ide-lsp-util.c',
 ]
 
 libide_lsp_private_sources = [
-  'ide-lsp-util.c',
 ]
 
 libide_lsp_enum_headers = [
@@ -86,6 +96,7 @@ libide_lsp_deps = [
   libide_code_dep,
   libide_core_dep,
   libide_io_dep,
+  libide_foundry_dep,
   libide_projects_dep,
   libide_sourceview_dep,
   libide_threading_dep,

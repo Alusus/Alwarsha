@@ -166,7 +166,7 @@ on_update_available_cb (GbpUpdateManagerAppAddin *self,
       ide_notification_set_title (self->update_notif, _("Update Available"));
       ide_notification_set_body (self->update_notif, _("An update to Alwarsha is available. Alwarsha can download and install it for you."));
       ide_notification_set_urgent (self->update_notif, TRUE);
-      ide_notification_add_button (self->update_notif, _("Update"), NULL, "app.update-builder");
+      ide_notification_add_button (self->update_notif, _("_Update"), NULL, "app.update-builder");
       ide_notification_attach (self->update_notif, IDE_OBJECT (context));
     }
 
@@ -304,7 +304,7 @@ app_addin_iface_init (IdeApplicationAddinInterface *iface)
   iface->unload = gbp_update_manager_app_addin_unload;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GbpUpdateManagerAppAddin, gbp_update_manager_app_addin, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpUpdateManagerAppAddin, gbp_update_manager_app_addin, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_APPLICATION_ADDIN, app_addin_iface_init))
 
 static void

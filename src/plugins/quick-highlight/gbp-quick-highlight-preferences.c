@@ -28,6 +28,7 @@ struct _GbpQuickHighlightPreferences
 {
   GObject parent_instance;
   guint   enable_switch;
+  guint   min_char_spin_button;
 };
 
 static void
@@ -45,13 +46,26 @@ gbp_quick_highlight_preferences_load (IdePreferencesAddin *addin,
                                 "highlight",
                                 "org.alusus.alwarsha.extension-type",
                                 "enabled",
-                                "/org/alusus/alwarsha/extension-types/quick-highlight/IdeEditorViewAddin/",
+                                "/org/alusus/alwarsha/extension-types/quick-highlight/IdeEditorPageAddin/",
                                 NULL,
                                 _("Words matching selection"),
                                 _("Highlight all occurrences of words matching the current selection"),
                                 /* Translators: the following are keywords used for searching to locate this preference */
                                 _("quick highlight words matching current selection"),
                                 10);
+
+  self->min_char_spin_button =
+    dzl_preferences_add_spin_button (preferences,
+                                     "editor",
+                                     "highlight",
+                                     "org.gnome.builder.editor",
+                                     "min-char-selected",
+                                     "/org/gnome/builder/editor/",
+                                     _("Minimum length for highlight"),
+                                     _("Highlight words matching at least this number of characters"),
+                                     /* Translators: the following are keywords used for searching to locate this preference */
+                                     _("quick highlight words matching current selection minimum length"),
+                                     10);
 }
 
 static void
@@ -65,6 +79,9 @@ gbp_quick_highlight_preferences_unload (IdePreferencesAddin *addin,
 
   dzl_preferences_remove_id (preferences, self->enable_switch);
   self->enable_switch = 0;
+
+  dzl_preferences_remove_id (preferences, self->min_char_spin_button);
+  self->min_char_spin_button = 0;
 }
 
 static void
@@ -74,7 +91,7 @@ preferences_addin_iface_init (IdePreferencesAddinInterface *iface)
   iface->unload = gbp_quick_highlight_preferences_unload;
 }
 
-G_DEFINE_TYPE_EXTENDED (GbpQuickHighlightPreferences, gbp_quick_highlight_preferences, G_TYPE_OBJECT, 0,
+G_DEFINE_TYPE_EXTENDED (GbpQuickHighlightPreferences, gbp_quick_highlight_preferences, G_TYPE_OBJECT, G_TYPE_FLAG_FINAL,
                         G_IMPLEMENT_INTERFACE (IDE_TYPE_PREFERENCES_ADDIN, preferences_addin_iface_init))
 
 static void

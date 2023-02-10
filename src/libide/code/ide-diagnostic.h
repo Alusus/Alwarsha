@@ -25,6 +25,7 @@
 #endif
 
 #include <libide-core.h>
+#include <libide-io.h>
 
 #include "ide-code-types.h"
 
@@ -36,10 +37,11 @@ typedef enum
 {
   IDE_DIAGNOSTIC_IGNORED    = 0,
   IDE_DIAGNOSTIC_NOTE       = 1,
-  IDE_DIAGNOSTIC_DEPRECATED = 2,
-  IDE_DIAGNOSTIC_WARNING    = 3,
-  IDE_DIAGNOSTIC_ERROR      = 4,
-  IDE_DIAGNOSTIC_FATAL      = 5,
+  IDE_DIAGNOSTIC_UNUSED     = 2,
+  IDE_DIAGNOSTIC_DEPRECATED = 3,
+  IDE_DIAGNOSTIC_WARNING    = 4,
+  IDE_DIAGNOSTIC_ERROR      = 5,
+  IDE_DIAGNOSTIC_FATAL      = 6,
 } IdeDiagnosticSeverity;
 
 IDE_AVAILABLE_IN_3_32
@@ -65,6 +67,11 @@ IDE_AVAILABLE_IN_3_32
 IdeLocation           *ide_diagnostic_get_location         (IdeDiagnostic         *self);
 IDE_AVAILABLE_IN_3_32
 const gchar           *ide_diagnostic_get_text             (IdeDiagnostic         *self);
+IDE_AVAILABLE_IN_42
+IdeMarkedKind          ide_diagnostic_get_marked_kind      (IdeDiagnostic         *self);
+IDE_AVAILABLE_IN_42
+void                   ide_diagnostic_set_marked_kind      (IdeDiagnostic         *self,
+                                                            IdeMarkedKind          marked_kind);
 IDE_AVAILABLE_IN_3_32
 IdeDiagnosticSeverity  ide_diagnostic_get_severity         (IdeDiagnostic         *self);
 IDE_AVAILABLE_IN_3_32

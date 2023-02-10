@@ -151,11 +151,10 @@ ide_application_can_load_plugin (IdeApplication *self,
           return FALSE;
         }
 
-      if (!g_str_has_prefix (IDE_VERSION_S, abi) ||
-          IDE_VERSION_S [strlen (abi)] != '.')
+      if (g_strcmp0 (PACKAGE_ABI_S, abi) != 0)
         {
           g_critical ("Refusing to load plugin %s, expected ABI %d.%d and got %s",
-                      module_name, IDE_MAJOR_VERSION, IDE_MINOR_VERSION, abi);
+                      module_name, IDE_MAJOR_VERSION, 0, abi);
           return FALSE;
         }
     }
@@ -325,6 +324,14 @@ _ide_application_load_plugins_for_startup (IdeApplication *self)
    * saving us some precious disk I/O.
    */
   peas_engine_prepend_search_path (engine, "resource:///plugins", "resource:///plugins");
+
+  /* If we are within the Flatpak, then load any extensions we've
+   * found merged into the extensions directory.
+   */
+  if (ide_is_flatpak ())
+    peas_engine_add_search_path (engine,
+                                 "/app/extensions/lib/gnome-builder/plugins",
+                                 "/app/extensions/lib/gnome-builder/plugins");
 
   /* Our first step is to load our "At-Startup" plugins, which may
    * contain things like command-line handlers. For example, the

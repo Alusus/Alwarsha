@@ -38,6 +38,7 @@ enum {
   PROP_0,
   PROP_AUTO_HIDE_MAP,
   PROP_BUFFER,
+  PROP_BUFFER_FILE,
   PROP_SEARCH,
   PROP_SHOW_MAP,
   PROP_VIEW,
@@ -46,7 +47,7 @@ enum {
 
 static void ide_editor_page_update_reveal_timer (IdeEditorPage *self);
 
-G_DEFINE_TYPE (IdeEditorPage, ide_editor_page, IDE_TYPE_PAGE)
+G_DEFINE_FINAL_TYPE (IdeEditorPage, ide_editor_page, IDE_TYPE_PAGE)
 
 DZL_DEFINE_COUNTER (instances, "Editor", "N Views", "Number of editor views");
 
@@ -87,6 +88,7 @@ ide_editor_page_load_fonts (IdeEditorPage *self)
   pango_fc_font_map_set_config (PANGO_FC_FONT_MAP (font_map), localFontConfig);
   gtk_widget_set_font_map (GTK_WIDGET (self->map), font_map);
   font_desc = pango_font_description_from_string ("Alusus Mono Medium");
+  pango_font_description_set_absolute_size (font_desc, (96.0/72.0) * 2 * PANGO_SCALE);
 
   g_assert (localFontConfig != NULL);
   g_assert (font_map != NULL);
@@ -544,6 +546,16 @@ ide_editor_page_update_map (IdeEditorPage *self)
 }
 
 static void
+ide_editor_page_buffer_notify_file (IdeEditorPage *self,
+                                    GParamSpec    *pspec,
+                                    gpointer       user_data)
+{
+  g_assert (IDE_IS_EDITOR_PAGE (self));
+
+
+}
+
+static void
 search_revealer_notify_reveal_child (IdeEditorPage *self,
                                      GParamSpec    *pspec,
                                      GtkRevealer   *revealer)
@@ -868,6 +880,9 @@ ide_editor_page_get_property (GObject    *object,
       g_value_set_object (value, ide_editor_page_get_buffer (self));
       break;
 
+    case PROP_BUFFER_FILE:
+      g_value_set_object (value, ide_buffer_get_file (self->buffer));
+      break;
     case PROP_VIEW:
       g_value_set_object (value, ide_editor_page_get_view (self));
       break;
@@ -936,6 +951,16 @@ ide_editor_page_class_init (IdeEditorPageClass *klass)
                          "The buffer for the view",
                          IDE_TYPE_BUFFER,
                          (G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
+
+  /* It's really just there to get notify:: support for the buffer's file property
+   * but through the page, for the session addin.
+   */
+  properties [PROP_BUFFER_FILE] =
+    g_param_spec_object ("buffer-file",
+                         "Buffer file",
+                         "The buffer file for the view's buffer",
+                         G_TYPE_FILE,
+                         (G_PARAM_STATIC_STRINGS | G_PARAM_READABLE));
 
   properties [PROP_SEARCH] =
     g_param_spec_object ("search",
@@ -1009,6 +1034,11 @@ ide_editor_page_init (IdeEditorPage *self)
   dzl_signal_group_connect_swapped (self->buffer_signals,
                                     "modified-changed",
                                     G_CALLBACK (ide_editor_page_buffer_modified_changed),
+                                    self);
+
+  dzl_signal_group_connect_swapped (self->buffer_signals,
+                                    "notify::file",
+                                    G_CALLBACK (ide_editor_page_buffer_notify_file),
                                     self);
 
   dzl_signal_group_connect_swapped (self->buffer_signals,

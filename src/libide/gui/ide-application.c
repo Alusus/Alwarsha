@@ -27,6 +27,7 @@
 #endif
 
 #include <glib/gi18n.h>
+#include <handy.h>
 #include <libpeas/peas-autocleanups.h>
 #include <libide-themes.h>
 
@@ -39,7 +40,7 @@
 #include "ide-primary-workspace.h"
 #include "ide-worker.h"
 
-G_DEFINE_TYPE (IdeApplication, ide_application, DZL_TYPE_APPLICATION)
+G_DEFINE_FINAL_TYPE (IdeApplication, ide_application, DZL_TYPE_APPLICATION)
 
 #define IS_UI_PROCESS(app) ((app)->type == NULL)
 
@@ -119,6 +120,42 @@ ide_application_register_keybindings (IdeApplication *self)
   g_settings_bind (settings, "keybindings", self->keybindings, "mode", G_SETTINGS_BIND_GET);
 }
 
+static int
+keybinding_key_snooper (GtkWidget   *grab_widget,
+                        GdkEventKey *key,
+                        gpointer     func_data)
+{
+  IdeApplication *self = func_data;
+
+  g_assert (IDE_IS_APPLICATION (self));
+
+  /* We need to hijack <Ctrl>period because ibus is messing it up. However,
+   * we only get a release event since it gets hijacked from the compositor
+   * so we never see the event. Instead, we catch the release and then change
+   * the focus to what we want (clearlying the state created in the compositor
+   * ibus bits).
+   */
+  if (key->type == GDK_KEY_RELEASE &&
+      key->keyval == GDK_KEY_period &&
+      (key->state & GDK_CONTROL_MASK) != 0)
+    {
+      if (IDE_IS_WORKSPACE (grab_widget))
+        {
+          DzlShortcutManager *shortcuts = dzl_shortcut_manager_get_default ();
+
+          g_clear_object (&key->window);
+          key->window = g_object_ref (gtk_widget_get_window (grab_widget));
+          key->type = GDK_KEY_PRESS;
+
+          dzl_shortcut_manager_handle_event (shortcuts, key, grab_widget);
+
+          return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+
 static void
 ide_application_startup (GApplication *app)
 {
@@ -158,6 +195,11 @@ ide_application_startup (GApplication *app)
       g_autofree gchar *style_path = NULL;
       GtkSourceStyleSchemeManager *styles;
 
+      /* Setup key snoopers */
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+      gtk_key_snooper_install (keybinding_key_snooper, self);
+      G_GNUC_END_IGNORE_DEPRECATIONS
+
       /* Setup access to private icons dir */
       gtk_icon_theme_prepend_search_path (gtk_icon_theme_get_default (), package_icons_dir);
 
@@ -166,6 +208,8 @@ ide_application_startup (GApplication *app)
       style_path = g_build_filename (g_get_home_dir (), ".local", "share", "gtksourceview-4", "styles", NULL);
       gtk_source_style_scheme_manager_append_search_path (styles, style_path);
       gtk_source_style_scheme_manager_append_search_path (styles, package_styles_dir);
+
+      hdy_init ();
 
       /* Load color settings (Night Light, Dark Mode, etc) */
       _ide_application_init_color (self);
@@ -199,7 +243,6 @@ ide_application_shutdown (GApplication *app)
 
   g_clear_pointer (&self->plugin_settings, g_hash_table_unref);
   g_clear_object (&self->addins);
-  g_clear_object (&self->color_proxy);
   g_clear_object (&self->settings);
   g_clear_object (&self->keybindings);
 
@@ -368,7 +411,6 @@ ide_application_dispose (GObject *object)
   g_clear_pointer (&self->type, g_free);
   g_clear_pointer (&self->dbus_address, g_free);
   g_clear_object (&self->addins);
-  g_clear_object (&self->color_proxy);
   g_clear_object (&self->settings);
   g_clear_object (&self->network_monitor);
   g_clear_object (&self->worker_manager);

@@ -2,8 +2,11 @@
 <gresources>
   <gresource prefix="/plugins/meson_templates">
     <file compressed="true">resources/src/window.ui</file>
+    <file compressed="true">resources/src/window-gtk4.ui</file>
+    <file compressed="true">resources/src/help-overlay.ui</file>
     <file compressed="true">resources/src/window.js.tmpl</file>
     <file compressed="true">resources/src/meson-py.build</file>
+    <file compressed="true">resources/src/meson-py-gtk4.build</file>
     <file compressed="true">resources/src/window.h</file>
     <file compressed="true">resources/src/hello.js.in</file>
     <file compressed="true">resources/src/hello.gresource.xml</file>
@@ -11,13 +14,20 @@
     <file compressed="true">resources/src/meson-clib.build</file>
     <file compressed="true">resources/src/meson-js.build</file>
     <file compressed="true">resources/src/meson-rs.build</file>
+    <file compressed="true">resources/src/meson-rs-gtk4.build</file>
     <file compressed="true">resources/src/hello.c</file>
     <file compressed="true">resources/src/hello.h</file>
+    <file compressed="true">resources/src/application.c</file>
+    <file compressed="true">resources/src/application-gtk4.vala</file>
+    <file compressed="true">resources/src/application.h</file>
+    <file compressed="true">resources/src/application.rs</file>
     <file compressed="true">resources/src/__init__.py</file>
     <file compressed="true">resources/src/meson-c-vala.build</file>
     <file compressed="true">resources/src/meson-empty.build</file>
     <file compressed="true">resources/src/main.js.tmpl</file>
+    <file compressed="true">resources/src/main-gtk4.js.tmpl</file>
     <file compressed="true">resources/src/main.c</file>
+    <file compressed="true">resources/src/main-gtk4.c</file>
     <file compressed="true">resources/src/main-cli.c</file>
     <file compressed="true">resources/src/main.cpp</file>
     <file compressed="true">resources/src/main-cli.cpp</file>
@@ -26,26 +36,35 @@
     <file compressed="true">resources/src/window.cpp</file>
     <file compressed="true">resources/src/window.hpp</file>
     <file compressed="true">resources/src/window.py</file>
+    <file compressed="true">resources/src/window-gtk4.py</file>
     <file compressed="true">resources/src/window.vala</file>
+    <file compressed="true">resources/src/window-gtk4.vala</file>
     <file compressed="true">resources/src/config.rs.in</file>
+    <file compressed="true">resources/src/config-gtk4.rs.in</file>
     <file compressed="true">resources/src/window.rs</file>
+    <file compressed="true">resources/src/window-gtk4.rs</file>
     <file compressed="true">resources/src/main.vala</file>
+    <file compressed="true">resources/src/main-gtk4.vala</file>
     <file compressed="true">resources/src/main-cli.vala</file>
     <file compressed="true">resources/src/hello.py.in</file>
+    <file compressed="true">resources/src/hello-cli.py.in</file>
     <file compressed="true">resources/src/main.py</file>
+    <file compressed="true">resources/src/main-gtk4.py</file>
+    <file compressed="true">resources/src/main-cli.py</file>
     <file compressed="true">resources/src/main.rs</file>
+    <file compressed="true">resources/src/main-gtk4.rs</file>
     <file compressed="true">resources/src/main-cli.rs</file>
     <file compressed="true">resources/src/application.in</file>
     <file compressed="true">resources/src/main.cs</file>
     <file compressed="true">resources/src/Cargo.lock</file>
     <file compressed="true">resources/src/Cargo.toml</file>
+    <file compressed="true">resources/src/Cargo-gtk4.toml</file>
     <file compressed="true">resources/src/Cargo-cli.toml</file>
     <file compressed="true">resources/src/meson-cs.build</file>
     <file compressed="true">resources/build-aux/cargo.sh</file>
-    <file compressed="true">resources/build-aux/meson/postinstall.py</file>
     <file compressed="true">resources/meson.build</file>
     <file compressed="true">resources/src/meson-cli.build</file>
-    <file compressed="true">resources/flatpak.json</file>
+    <file compressed="true">resources/src/meson-py-cli.build</file>
     <file compressed="true">resources/flatpak-gtksharp.json.tmpl</file>
     <file compressed="true">resources/data/meson.build</file>
     <file compressed="true">resources/data/hello.gschema.xml</file>
@@ -58,6 +77,9 @@
     <file compressed="true">resources/po/POTFILES</file>
     <file compressed="true">resources/po/LINGUAS</file>
   </gresource>
+  <gresource prefix="/plugins/meson_templates/resources">
+    <file compressed="true">flatpak.json</file>
+  </gresource>
   <gresource prefix="/org/alusus/alwarsha">
     <file compressed="true">icons/scalable/actions/pattern-legacy.svg</file>
     <file compressed="true">icons/scalable/actions/pattern-library.svg</file>
@@ -65,5 +87,6 @@
     <file compressed="true">icons/scalable/actions/pattern-browse.svg</file>
     <file compressed="true">icons/scalable/actions/pattern-cli.svg</file>
     <file compressed="true">icons/scalable/actions/pattern-gnome.svg</file>
+    <file compressed="true">icons/scalable/actions/pattern-gtk.svg</file>
   </gresource>
 </gresources>

@@ -475,6 +475,15 @@ gbp_buildui_config_view_addin_load (IdeConfigViewAddin *addin,
                                treat_null_as_empty, NULL, NULL, NULL);
   add_description_row (preferences, "general", "general", _("Configure Options"), NULL, entry);
 
+  entry = g_object_new (GTK_TYPE_ENTRY,
+                        "visible", TRUE,
+                        "hexpand", TRUE,
+                        NULL);
+  g_object_bind_property_full (config, "run-opts", entry, "text",
+                               G_BINDING_SYNC_CREATE | G_BINDING_BIDIRECTIONAL,
+                               treat_null_as_empty, NULL, NULL, NULL);
+  add_description_row (preferences, "general", "general", _("Run Options"), NULL, entry);
+
   dzl_preferences_add_custom (preferences, "general", "buttons", box, NULL, 5);
 
   /* Setup runtime selection */
@@ -517,7 +526,7 @@ config_view_addin_iface_init (IdeConfigViewAddinInterface *iface)
   iface->load = gbp_buildui_config_view_addin_load;
 }
 
-G_DEFINE_TYPE_WITH_CODE (GbpBuilduiConfigViewAddin, gbp_buildui_config_view_addin, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpBuilduiConfigViewAddin, gbp_buildui_config_view_addin, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_CONFIG_VIEW_ADDIN, config_view_addin_iface_init))
 
 static void

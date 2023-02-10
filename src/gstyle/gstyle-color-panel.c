@@ -30,14 +30,14 @@
 #include "gstyle-color.h"
 
 #include <libportal/portal.h>
-#include <libportal/portal-gtk3.h>
+#include <libportal-gtk3/portal-gtk3.h>
 
 #define HSV_TO_SCALE_FACTOR (1.0 / 256.0)
 #define CIELAB_L_TO_SCALE_FACTOR (100.0 / 256.0)
 
 #define PREFS_BOX_MARGIN (10)
 
-G_DEFINE_TYPE (GstyleColorPanel, gstyle_color_panel, GTK_TYPE_BOX)
+G_DEFINE_FINAL_TYPE (GstyleColorPanel, gstyle_color_panel, GTK_TYPE_BOX)
 
 static const gchar *comp_names [N_GSTYLE_COLOR_COMPONENT] = {
   "hsv_h",

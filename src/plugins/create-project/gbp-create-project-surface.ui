@@ -97,7 +97,7 @@
                         <property name="wrap">true</property>
                         <property name="visible">true</property>
                         <property name="max-width-chars">60</property>
-                        <property name="label" translatable="yes">The Application ID is a reverse domain-name identifier used to uniquely identify your application such as “org.gnome.Builder”.</property>
+                        <property name="label" translatable="yes">The Application ID is a reverse domain-name identifier used to uniquely identify your application such as “org.gnome.Builder” and may not contain dashes.</property>
                         <style>
                           <class name="dim-label"/>
                         </style>
@@ -325,7 +325,8 @@
                     <property name="visible">true</property>
                     <child>
                       <object class="GtkButton" id="create_button">
-                        <property name="label" translatable="yes">Create Project</property>
+                        <property name="label" translatable="yes">_Create Project</property>
+                        <property name="use-underline">True</property>
                         <property name="halign">end</property>
                         <property name="visible">true</property>
                         <style>

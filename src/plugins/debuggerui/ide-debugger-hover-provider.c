@@ -78,7 +78,7 @@ ide_debugger_hover_provider_hover_async (IdeHoverProvider    *provider,
   file = ide_buffer_get_file (buffer);
   line = gtk_text_iter_get_line (iter);
 
-  if (ide_debug_manager_supports_language (dbgmgr, lang_id))
+  if (ide_debug_manager_get_active(dbgmgr) && ide_debug_manager_supports_language (dbgmgr, lang_id))
     {
       GtkWidget *controls;
 
@@ -107,7 +107,7 @@ hover_provider_iface_init (IdeHoverProviderInterface *iface)
   iface->hover_finish = ide_debugger_hover_provider_hover_finish;
 }
 
-G_DEFINE_TYPE_WITH_CODE (IdeDebuggerHoverProvider, ide_debugger_hover_provider, G_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (IdeDebuggerHoverProvider, ide_debugger_hover_provider, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_HOVER_PROVIDER, hover_provider_iface_init))
 
 static void

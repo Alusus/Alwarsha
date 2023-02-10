@@ -25,6 +25,7 @@
 
 #include "gbp-cmake-build-system.h"
 #include "gbp-cmake-build-stage-cross-file.h"
+#include "gbp-cmake-build-stage-codemodel.h"
 #include "gbp-cmake-toolchain.h"
 #include "gbp-cmake-pipeline-addin.h"
 
@@ -37,7 +38,7 @@ static const gchar *ninja_names[] = { "ninja-build", "ninja" };
 
 static void pipeline_addin_iface_init (IdePipelineAddinInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GbpCMakePipelineAddin, gbp_cmake_pipeline_addin, IDE_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpCMakePipelineAddin, gbp_cmake_pipeline_addin, IDE_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_PIPELINE_ADDIN, pipeline_addin_iface_init))
 
 static void
@@ -69,6 +70,7 @@ gbp_cmake_pipeline_addin_load (IdePipelineAddin *addin,
                                IdePipeline      *pipeline)
 {
   GbpCMakePipelineAddin *self = (GbpCMakePipelineAddin *)addin;
+  g_autoptr(GbpCmakeBuildStageCodemodel) codemodel_stage = NULL;
   g_autoptr(IdeSubprocessLauncher) configure_launcher = NULL;
   g_autoptr(IdeSubprocessLauncher) build_launcher = NULL;
   g_autoptr(IdeSubprocessLauncher) install_launcher = NULL;
@@ -163,6 +165,12 @@ gbp_cmake_pipeline_addin_load (IdePipelineAddin *addin,
       ide_pipeline_addin_track (addin, id);
     }
 
+  /* Setup ide integration stage for cmake */
+  codemodel_stage = gbp_cmake_build_stage_codemodel_new ();
+  ide_pipeline_stage_set_name (IDE_PIPELINE_STAGE (codemodel_stage), "Prepare Codemodel");
+  id = ide_pipeline_attach (pipeline, IDE_PIPELINE_PHASE_PREPARE, 1, IDE_PIPELINE_STAGE (codemodel_stage));
+  ide_pipeline_addin_track (addin, id);
+
   /* Setup our configure stage. */
 
   prefix_option = g_strdup_printf ("-DCMAKE_INSTALL_PREFIX=%s", prefix);
@@ -173,7 +181,8 @@ gbp_cmake_pipeline_addin_load (IdePipelineAddin *addin,
   ide_subprocess_launcher_push_argv (configure_launcher, ".");
   ide_subprocess_launcher_push_argv (configure_launcher, srcdir);
   ide_subprocess_launcher_push_argv (configure_launcher, "-DCMAKE_EXPORT_COMPILE_COMMANDS=1");
-  ide_subprocess_launcher_push_argv (configure_launcher, "-DCMAKE_BUILD_TYPE=RelWithDebInfo");
+  if (config_opts == NULL || strstr (config_opts, "-DCMAKE_BUILD_TYPE=") == NULL)
+    ide_subprocess_launcher_push_argv (configure_launcher, "-DCMAKE_BUILD_TYPE=RelWithDebInfo");
   ide_subprocess_launcher_push_argv (configure_launcher, prefix_option);
   if (crossbuild_file != NULL)
     {

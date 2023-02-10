@@ -34,12 +34,13 @@ struct _GbpMesonBuildSystem
   IdeCompileCommands *compile_commands;
   GFileMonitor       *monitor;
   gchar              *project_version;
+  gchar             **languages;
 };
 
 static void async_initable_iface_init (GAsyncInitableIface     *iface);
 static void build_system_iface_init   (IdeBuildSystemInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GbpMesonBuildSystem, gbp_meson_build_system, IDE_TYPE_OBJECT,
+G_DEFINE_FINAL_TYPE_WITH_CODE (GbpMesonBuildSystem, gbp_meson_build_system, IDE_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_ASYNC_INITABLE, async_initable_iface_init)
                          G_IMPLEMENT_INTERFACE (IDE_TYPE_BUILD_SYSTEM, build_system_iface_init))
 
@@ -390,6 +391,7 @@ gbp_meson_build_system_finalize (GObject *object)
   g_clear_object (&self->compile_commands);
   g_clear_object (&self->monitor);
   g_clear_pointer (&self->project_version, g_free);
+  g_clear_pointer (&self->languages, g_strfreev);
 
   G_OBJECT_CLASS (gbp_meson_build_system_parent_class)->finalize (object);
 }
@@ -717,10 +719,25 @@ gbp_meson_build_system_get_project_version (IdeBuildSystem *build_system)
 {
   GbpMesonBuildSystem *self = (GbpMesonBuildSystem *)build_system;
 
-  g_return_val_if_fail (IDE_IS_MAIN_THREAD (), NULL);
-  g_return_val_if_fail (GBP_IS_MESON_BUILD_SYSTEM (self), NULL);
+  g_assert (IDE_IS_MAIN_THREAD ());
+  g_assert (GBP_IS_MESON_BUILD_SYSTEM (self));
 
   return g_strdup (self->project_version);
+}
+
+static gboolean
+gbp_meson_build_system_supports_language (IdeBuildSystem *system,
+                                          const char     *language)
+{
+  GbpMesonBuildSystem *self = (GbpMesonBuildSystem *)system;
+
+  g_assert (GBP_IS_MESON_BUILD_SYSTEM (self));
+  g_assert (language != NULL);
+
+  if (self->languages != NULL)
+    return g_strv_contains ((const char * const *)self->languages, language);
+
+  return FALSE;
 }
 
 static void
@@ -736,6 +753,72 @@ build_system_iface_init (IdeBuildSystemInterface *iface)
   iface->get_builddir = gbp_meson_build_system_get_builddir;
   iface->get_project_version = gbp_meson_build_system_get_project_version;
   iface->supports_toolchain = gbp_meson_build_system_supports_toolchain;
+  iface->supports_language = gbp_meson_build_system_supports_language;
+}
+
+
+static char **
+split_language (gchar *raw_language_string)
+{
+  g_autofree gchar *copy = NULL;
+  GString *str = g_string_new (raw_language_string);
+  g_string_replace (str, "'", "", -1);
+  g_string_replace (str, " ", "", -1);
+  g_string_replace (str, "\n", "", -1);
+  copy = g_string_free (str, FALSE);
+
+  return g_strsplit (copy, ",", -1);
+}
+
+/**
+ * This could be
+ * 1) without language
+ * 2) 'projectname', 'c' with only one language
+ * 3) 'projectname', 'c', 'c++' with variadic as languages
+ * 4) 'projectname', ['c', 'c++'] with an list as languages
+ */
+char **
+_gbp_meson_build_system_parse_languages (const gchar *raw_language_string)
+{
+  g_autofree gchar *language_string = NULL;
+  gchar *cur = (gchar *) raw_language_string;
+  gchar *cur2;
+  cur = g_strstr_len (cur, -1, ",");
+  if (cur == NULL) goto failure;
+  cur++;
+  cur2 = cur;
+  while (*cur2 != ':' || *cur2 == '\0')
+    {
+      if (*cur2 == '[')
+        {
+          cur2 = g_strstr_len (cur2, -1, "]");
+          if (cur2 == NULL) goto failure;
+          cur2++;
+          break;
+        }
+      cur2++;
+    }
+  if (*cur2 == ':') while(*cur2 != ',') cur2--;
+  if (cur2-cur <= 0) goto failure;
+  language_string = g_strndup (cur, cur2-cur);
+
+  if (strstr(language_string, "[") || strstr(language_string, "]"))
+    {
+      gchar *begin = NULL;
+      gchar *end = NULL;
+      g_autofree gchar *copy = NULL;
+
+      if ((begin = strstr(language_string, "[")) == NULL) goto failure;
+      if ((end = strstr(language_string, "]")) == NULL) goto failure;
+      copy = g_strndup (begin + 1, end-begin - 1);
+
+      return split_language (copy);
+    }
+
+  return split_language (language_string);
+
+failure:
+  return NULL;
 }
 
 static void
@@ -743,6 +826,8 @@ extract_metadata (GbpMesonBuildSystem *self,
                   const gchar         *contents)
 {
   const gchar *ptr;
+  g_autoptr(GRegex) regex = NULL;
+  g_autoptr(GMatchInfo) match_info = NULL;
 
   g_assert (IDE_IS_MAIN_THREAD ());
   g_assert (GBP_IS_MESON_BUILD_SYSTEM (self));
@@ -778,6 +863,16 @@ extract_metadata (GbpMesonBuildSystem *self,
           g_free (self->project_version);
           self->project_version = g_strndup (begin, end - begin);
         }
+    }
+
+  regex = g_regex_new ("^project\\((.*)\\)", G_REGEX_DOTALL | G_REGEX_MULTILINE | G_REGEX_UNGREEDY, 0, NULL);
+  g_regex_match (regex, contents, 0, &match_info);
+  while (g_match_info_matches (match_info))
+    {
+      const gchar *str = g_match_info_fetch (match_info, 1);
+      self->languages = _gbp_meson_build_system_parse_languages (str);
+
+      g_match_info_next (match_info, NULL);
     }
 
 failure:
@@ -879,4 +974,12 @@ async_initable_iface_init (GAsyncInitableIface *iface)
 {
   iface->init_async = gbp_meson_build_system_init_async;
   iface->init_finish = gbp_meson_build_system_init_finish;
+}
+
+const gchar * const *
+gbp_meson_build_system_get_languages (GbpMesonBuildSystem *self)
+{
+  g_return_val_if_fail (GBP_IS_MESON_BUILD_SYSTEM (self), NULL);
+
+  return (const gchar * const *)self->languages;
 }

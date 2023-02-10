@@ -43,7 +43,7 @@ struct _IdeNotificationListBoxRow
   guint            compact : 1;
 };
 
-G_DEFINE_TYPE (IdeNotificationListBoxRow, ide_notification_list_box_row, GTK_TYPE_LIST_BOX_ROW)
+G_DEFINE_FINAL_TYPE (IdeNotificationListBoxRow, ide_notification_list_box_row, GTK_TYPE_LIST_BOX_ROW)
 
 enum {
   PROP_0,
@@ -88,6 +88,7 @@ setup_buttons_locked (IdeNotificationListBoxRow *self)
             child = g_object_new (GTK_TYPE_LABEL,
                                   "label", label,
                                   "visible", TRUE,
+                                  "use-underline", TRUE,
                                   NULL);
           else if (icon != NULL)
             child = g_object_new (GTK_TYPE_IMAGE,

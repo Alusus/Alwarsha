@@ -1,4 +1,3 @@
-# Appdata file.
 appdata_file = i18n.merge_file(
   input: 'org.alusus.Alwarsha.appdata.xml.in',
   output: 'org.alusus.Alwarsha.appdata.xml',
