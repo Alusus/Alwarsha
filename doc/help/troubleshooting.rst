@@ -13,7 +13,7 @@ You can increase the log verbosity of Builder by adding up to four ``-v`` when l
 .. code-block:: sh
 
    # If running from flatpak
-   flatpak run org.gnome.Builder -vvvv
+   flatpak run org.alusus.Alwarsha -vvvv
 
    # If using distribution packages
    gnome-builder -vvvv

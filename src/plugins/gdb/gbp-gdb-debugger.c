@@ -2605,7 +2605,7 @@ gbp_gdb_debugger_init (GbpGdbDebugger *self)
     self, gbp_gdb_debugger_output_callback
   };
 
-  self->settings = g_settings_new ("org.gnome.builder.build");
+  self->settings = g_settings_new ("org.alusus.alwarsha.build");
   self->parser = gdbwire_mi_parser_create (callbacks);
   self->read_cancellable = g_cancellable_new ();
   self->read_buffer = g_malloc (READ_BUFFER_LEN);

@@ -67,7 +67,7 @@ class PhpService(Ide.Object):
                 self.notif.withdraw()
 
             self.notif = Ide.Notification(
-                id='org.gnome.builder.intelephense.indexing',
+                id='org.alusus.alwarsha.intelephense.indexing',
                 title="Intelephense",
                 body=_('Indexing php code…'),
                 has_progress=True,

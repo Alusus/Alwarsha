@@ -42,6 +42,6 @@ The GNU-style C indenter is provided as part of the ``c-pack`` plugin and can be
 
 .. code-block:: sh
 
-   $ flatpak run --command=bash org.gnome.Builder
-   [org.gnome.Builder]$ gsettings set "org.gnome.builder.extension-type:/org/gnome/builder/extension-types/c-pack/IdeIndenter/" enabled false
+   $ flatpak run --command=bash org.alusus.Alwarsha
+   [org.alusus.Alwarsha]$ gsettings set "org.alusus.alwarsha.extension-type:/org/alusus/alwarsha/extension-types/c-pack/IdeIndenter/" enabled false
 

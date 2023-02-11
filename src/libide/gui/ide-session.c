@@ -701,7 +701,7 @@ ide_session_restore_async (IdeSession          *self,
   r->grid = grid;
   ide_task_set_task_data (task, r, restore_free);
 
-  settings = g_settings_new ("org.gnome.builder");
+  settings = g_settings_new ("org.alusus.alwarsha");
   if (!g_settings_get_boolean (settings, "restore-previous-files"))
     {
       ide_task_return_boolean (task, TRUE);

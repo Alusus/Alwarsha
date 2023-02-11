@@ -667,7 +667,7 @@ gbp_grep_panel_init (GbpGrepPanel *self)
 
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.grep"),
+                                              I_("org.alusus.alwarsha.grep"),
                                               I_("Escape"),
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("grep.close-panel"));

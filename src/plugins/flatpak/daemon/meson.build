@@ -8,14 +8,14 @@ gnome_builder_flatpak_deps = [
 ]
 
 ipc_flatpak_service_src = gnome.gdbus_codegen('ipc-flatpak-service',
-           sources: 'org.gnome.Builder.Flatpak.Service.xml',
-  interface_prefix: 'org.gnome.Builder.',
+           sources: 'org.alusus.Alwarsha.Flatpak.Service.xml',
+  interface_prefix: 'org.alusus.Alwarsha.',
          namespace: 'Ipc',
 )
 
 ipc_flatpak_transfer_src = gnome.gdbus_codegen('ipc-flatpak-transfer',
-           sources: 'org.gnome.Builder.Flatpak.Transfer.xml',
-  interface_prefix: 'org.gnome.Builder.',
+           sources: 'org.alusus.Alwarsha.Flatpak.Transfer.xml',
+  interface_prefix: 'org.alusus.Alwarsha.',
          namespace: 'Ipc',
 )
 

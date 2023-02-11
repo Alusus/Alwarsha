@@ -1,8 +1,8 @@
 
 .. _Installation:
 .. _Flatpak: https://flatpak.org
-.. _Stable: https://flathub.org/repo/appstream/org.gnome.Builder.flatpakref
-.. _Nightly: https://nightly.gnome.org/repo/appstream/org.gnome.Builder.flatpakref
+.. _Stable: https://flathub.org/repo/appstream/org.alusus.Alwarsha.flatpakref
+.. _Nightly: https://nightly.gnome.org/repo/appstream/org.alusus.Alwarsha.flatpakref
 .. _Software: https://wiki.gnome.org/Apps/Software
 .. _GNOME: https://gnome.org/
 .. _JHBuild: https://wiki.gnome.org/Newcomers/BuildGnome
@@ -37,15 +37,15 @@ You can also use the command line to install Builder:
 
 .. code-block:: sh
 
-   $ flatpak install --from https://flathub.org/repo/appstream/org.gnome.Builder.flatpakref
-   $ flatpak run org.gnome.Builder
+   $ flatpak install --from https://flathub.org/repo/appstream/org.alusus.Alwarsha.flatpakref
+   $ flatpak run org.alusus.Alwarsha
 
 **Nightly**
 
 .. code-block:: sh
 
-   $ flatpak install --user --from https://nightly.gnome.org/repo/appstream/org.gnome.Builder.flatpakref
-   $ flatpak run org.gnome.Builder
+   $ flatpak install --user --from https://nightly.gnome.org/repo/appstream/org.alusus.Alwarsha.flatpakref
+   $ flatpak run org.alusus.Alwarsha
 
 .. note:: Nightly builds are built with tracing enabled. The tracing is fairly lightweight, but it includes a great deal of more debugging information.
 
@@ -116,7 +116,7 @@ For example, if running from ``flatpak``:
 
 .. code-block:: sh
 
-    $ flatpak run org.gnome.Builder -vvvv
+    $ flatpak run org.alusus.Alwarsha -vvvv
 
 If you're running from a system installed package of Builder, the binary name is ``gnome-builder``.
 

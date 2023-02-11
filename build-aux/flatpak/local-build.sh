@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-rm -f org.gnome.Builder.flatpak
+rm -f org.alusus.Alwarsha.flatpak
 rm -rf _build ; mkdir _build
 rm -rf _repo ; mkdir _repo
 
@@ -14,5 +14,5 @@ flatpak-builder \
     _build org.alusus.Alwarsha.json
 
 flatpak build-bundle \
-    _repo org.gnome.Builder.flatpak org.gnome.Builder $BRANCH
+    _repo org.alusus.Alwarsha.flatpak org.alusus.Alwarsha $BRANCH
 

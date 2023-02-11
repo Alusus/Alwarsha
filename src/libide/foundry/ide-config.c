@@ -683,7 +683,7 @@ ide_config_class_init (IdeConfigClass *klass)
   properties [PROP_APP_ID] =
     g_param_spec_string ("app-id",
                          "App ID",
-                         "The application ID (such as org.gnome.Builder)",
+                         "The application ID (such as org.alusus.Alwarsha)",
                          NULL,
                          (G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS));
 

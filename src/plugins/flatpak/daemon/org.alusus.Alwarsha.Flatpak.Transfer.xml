@@ -20,7 +20,7 @@
  
     SPDX-License-Identifier: GPL-3.0-or-later
   -->
-  <interface name="org.gnome.Builder.Flatpak.Transfer">
+  <interface name="org.alusus.Alwarsha.Flatpak.Transfer">
     <property name="Fraction" type="d" access="readwrite"/>
     <property name="Message" type="s" access="readwrite"/>
     <signal name="Cancel"/>

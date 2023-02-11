@@ -190,7 +190,7 @@ G_DEFINE_FINAL_TYPE_WITH_CODE (GbClangFormatBufferAddin, gb_clang_format_buffer_
 static void
 gb_clang_format_buffer_addin_class_init (GbClangFormatBufferAddinClass *klass)
 {
-  settings = g_settings_new ("org.gnome.builder");
+  settings = g_settings_new ("org.alusus.alwarsha");
 }
 
 static void

@@ -419,27 +419,27 @@ gbp_devhelp_page_init (GbpDevhelpPage *self)
 
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.devhelp-view.reveal-search"),
+                                              I_("org.alusus.alwarsha.devhelp-view.reveal-search"),
                                               "<Primary>f",
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               I_("devhelp-view.reveal-search"));
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.devhelp-view.history-next"),
+                                              I_("org.alusus.alwarsha.devhelp-view.history-next"),
                                               "<Alt>Right",
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               I_("devhelp-view.history-next"));
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.devhelp-view.history-previous"),
+                                              I_("org.alusus.alwarsha.devhelp-view.history-previous"),
                                               "<Alt>Left",
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               I_("devhelp-view.history-previous"));
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.devhelp-view.history-next"),
+                                              I_("org.alusus.alwarsha.devhelp-view.history-next"),
                                               "<Alt>KP_Right",
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               I_("devhelp-view.history-next"));
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.devhelp-view.history-previous"),
+                                              I_("org.alusus.alwarsha.devhelp-view.history-previous"),
                                               "<Alt>KP_Left",
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               I_("devhelp-view.history-previous"));

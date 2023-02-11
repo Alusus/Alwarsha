@@ -215,7 +215,7 @@ gbp_quick_highlight_editor_page_addin_load (IdeEditorPageAddin *addin,
 
   self->view = view;
 
-  self->settings = g_settings_new ("org.gnome.builder.editor");
+  self->settings = g_settings_new ("org.alusus.alwarsha.editor");
 
   self->buffer_signals = dzl_signal_group_new (IDE_TYPE_BUFFER);
 

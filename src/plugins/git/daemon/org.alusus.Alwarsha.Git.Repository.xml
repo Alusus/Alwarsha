@@ -103,7 +103,7 @@
       CreateChangeMonitor:
       @path: the path within the repository
 
-      Create a new org.gnome.Builder.Git.ChangeMonitor to quickly diff file contents for line changes.
+      Create a new org.alusus.Alwarsha.Git.ChangeMonitor to quickly diff file contents for line changes.
     -->
     <method name="CreateChangeMonitor">
       <arg name="path" direction="in" type="s"/>
@@ -143,7 +143,7 @@
       @remote: the name or URL of the remote
       @ref_names: a list of ref specs to push, such as "refs/heads/master" or "refs/heads/master:refs/heads/master"
       @flags: the GbpGitPushFlags such as atomic
-      @progress_path: an object path to an org.gnome.Builder.Git.Progress
+      @progress_path: an object path to an org.alusus.Alwarsha.Git.Progress
 
       Pushes the repository to a remote URL (can be full URL or shortname like origin).
     -->

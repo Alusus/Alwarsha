@@ -179,17 +179,17 @@ gbp_devhelp_search_init (GbpDevhelpSearch *self)
 
   controller = dzl_shortcut_controller_find (GTK_WIDGET (self));
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.devhelp-search.close"),
+                                              I_("org.alusus.alwarsha.devhelp-search.close"),
                                               "Escape",
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               I_("devhelp-search.close"));
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.devhelp-search.find-next"),
+                                              I_("org.alusus.alwarsha.devhelp-search.find-next"),
                                               "<Primary>g",
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               I_("devhelp-search.find-next"));
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.devhelp-search.find-previous"),
+                                              I_("org.alusus.alwarsha.devhelp-search.find-previous"),
                                               "<Primary><shift>g",
                                               DZL_SHORTCUT_PHASE_CAPTURE,
                                               I_("devhelp-search.find-previous"));

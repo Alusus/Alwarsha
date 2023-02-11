@@ -100,7 +100,7 @@ div.admonition.warning .first {
 a.icon-home, a.icon-home:hover {
   display: inline-block;
   padding: 2px 2px 2px 20px;
-  background: transparent url(img/org.gnome.Builder.png) center left no-repeat;
+  background: transparent url(img/org.alusus.Alwarsha.png) center left no-repeat;
 }
 .fa-home::before, .icon-home::before {
   content: "";

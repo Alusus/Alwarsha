@@ -141,7 +141,7 @@ _ide_application_update_style_scheme (IdeApplication *self)
    * scheme to match.
    */
 
-  editor_settings = g_settings_new ("org.gnome.builder.editor");
+  editor_settings = g_settings_new ("org.alusus.alwarsha.editor");
   old_name = g_settings_get_string (editor_settings, "style-scheme-name");
   new_name = find_similar_style_scheme (old_name, hdy_style_manager_get_dark (manager));
 

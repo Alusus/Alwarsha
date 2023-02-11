@@ -111,7 +111,7 @@ If you find you come across something particularly tricky, or are being clever, 
  - Update NEWS for release notes
  - Update meson.build for the new version number
  - Update doc/conf.py to reflect the updated version number
- - Update any necessary tags in org.gnome.Builder.json for Flatpak
+ - Update any necessary tags in org.alusus.Alwarsha.json for Flatpak
  - Make sure documentation builds, tests pass
  - Make sure flatpak bundle builds
  - Commit release changes, add a signed tag (git tag -s -u $keyid)

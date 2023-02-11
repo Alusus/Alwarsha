@@ -50,7 +50,7 @@ gbp_grep_editor_page_addin_show_project_panel_action (GSimpleAction *action,
 }
 
 static const DzlShortcutEntry grep_shortcut_entries[] = {
-  { "org.gnome.builder.panel",
+  { "org.alusus.alwarsha.panel",
     0, NULL,
     N_("Editor shortcuts"),
     N_("Panels"),
@@ -87,7 +87,7 @@ gbp_grep_editor_addin_load (IdeEditorAddin   *addin,
 
   controller = dzl_shortcut_controller_find (GTK_WIDGET (editor_surface));
   dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.gnome.builder.panel"),
+                                              I_("org.alusus.alwarsha.panel"),
                                               I_("<Primary><Shift>f"),
                                               DZL_SHORTCUT_PHASE_GLOBAL,
                                               I_("grep.show-project-panel"));

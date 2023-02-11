@@ -8,9 +8,9 @@ test_uncanonical_file (void)
     const gchar *other;
     const gchar *result;
   } tests[] = {
-    { "/home/alberto/.var/app/org.gnome.Builder/cache/gnome-builder/projects/gtask-example/builds/org.gnome.Gtask-Example.json-0601fcfb2fbf01231dd228e0b218301c589ae573-local-flatpak-org.gnome.Platform-x86_64-master",
+    { "/home/alberto/.var/app/org.alusus.Alwarsha/cache/gnome-builder/projects/gtask-example/builds/org.gnome.Gtask-Example.json-0601fcfb2fbf01231dd228e0b218301c589ae573-local-flatpak-org.gnome.Platform-x86_64-master",
       "/home/alberto/Projects/gtask-example/src/main.c",
-      "/home/alberto/.var/app/org.gnome.Builder/cache/gnome-builder/projects/gtask-example/builds/org.gnome.Gtask-Example.json-0601fcfb2fbf01231dd228e0b218301c589ae573-local-flatpak-org.gnome.Platform-x86_64-master/../../../../../../../../../Projects/gtask-example/src/main.c" },
+      "/home/alberto/.var/app/org.alusus.Alwarsha/cache/gnome-builder/projects/gtask-example/builds/org.gnome.Gtask-Example.json-0601fcfb2fbf01231dd228e0b218301c589ae573-local-flatpak-org.gnome.Platform-x86_64-master/../../../../../../../../../Projects/gtask-example/src/main.c" },
     { "/home/xtian/foo",
       "/home/xtian/foo/bar",
       "/home/xtian/foo/bar" },

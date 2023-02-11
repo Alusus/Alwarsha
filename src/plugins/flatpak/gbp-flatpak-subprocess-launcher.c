@@ -41,15 +41,6 @@ insert_argv (IdeSubprocessLauncher *launcher,
   return ide_subprocess_launcher_get_argv (launcher);
 }
 
-static const char * const *
-insert_argv (IdeSubprocessLauncher *launcher,
-             int                    argpos,
-             const char            *xdg_runtime_dir)
-{
-  ide_subprocess_launcher_insert_argv (launcher, argpos, xdg_runtime_dir);
-  return ide_subprocess_launcher_get_argv (launcher);
-}
-
 static IdeSubprocess *
 gbp_flatpak_subprocess_launcher_spawn (IdeSubprocessLauncher  *launcher,
                                        GCancellable           *cancellable,

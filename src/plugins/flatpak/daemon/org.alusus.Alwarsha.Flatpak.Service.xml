@@ -20,7 +20,7 @@
  
     SPDX-License-Identifier: GPL-3.0-or-later
   -->
-  <interface name="org.gnome.Builder.Flatpak.Service">
+  <interface name="org.alusus.Alwarsha.Flatpak.Service">
     <!--
       The directory to use for FLATPAK_CONFIG_DIR.
     -->
@@ -75,7 +75,7 @@
     <!--
       Install:
       @full_ref_names: the full name of the targets to install such as "runtime/org.gnome.Sdk/x86_64/master"
-      @transfer: the path of an org.gnome.Builder.Flatpak.Transfer object on the caller side
+      @transfer: the path of an org.alusus.Alwarsha.Flatpak.Transfer object on the caller side
 
       Begins the installation of a ref from a configured remote. The operation will not
       complete until the installation has completed.

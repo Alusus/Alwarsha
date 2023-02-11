@@ -4,7 +4,7 @@ browse_url = "https://gitlab.gnome.org/GNOME/gnome-builder/"
 repository_url = "https://gitlab.gnome.org/GNOME/gnome-builder.git"
 website_url = "https://wiki.gnome.org/Apps/Builder"
 authors = "Christian Hergert"
-logo_url = "org.gnome.Builder.svg"
+logo_url = "org.alusus.Alwarsha.svg"
 license = "GPL-3.0-or-later"
 description = "An IDE for GNOME"
 dependencies = [ "GObject-2.0", "Gtk-3.0", "Dazzle-1.0", "GLib-2.0", "Json-GLib-1.0", "GtkSource-4", "Peas-1.0" ]
@@ -52,6 +52,6 @@ show_class_hierarchy = true
 
 [extra]
 content_images = [
-  "../../data/icons/hicolor/scalable/apps/org.gnome.Builder.svg"
+  "../../data/icons/hicolor/scalable/apps/org.alusus.Alwarsha.svg"
 ]
 urlmap_file = "urlmap.js"

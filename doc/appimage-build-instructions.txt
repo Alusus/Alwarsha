@@ -9,6 +9,7 @@ Requirements: Ubuntu 21.10
     $ apt install libjsonrpc-glib-1.0-dev
     $ apt install libpeas-dev
     $ apt install libportal-dev
+    $ apt install libportal-gtk3-dev
     $ apt install libtemplate-glib-1.0-dev
     $ apt install libvte-2.91-dev
     $ apt install libunwind-dev
@@ -20,12 +21,14 @@ Requirements: Ubuntu 21.10
     $ apt install tidy
     $ apt install universal-ctags
     $ apt install llvm
-    $ apt install libclang-13-dev
+    $ apt install libclang-14-dev
     $ apt install libdevhelp-dev
     $ apt install libflatpak-dev
     $ apt install libgit2-glib-1.0-dev
     $ apt install libgladeui-dev
     $ apt install libgspell-1-dev
+    $ apt install libhandy-1-dev
+    $ apt install libcmark-dev
     $ apt install git
     $ apt install patchelf
     $ apt install meson
