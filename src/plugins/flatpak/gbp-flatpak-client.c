@@ -115,7 +115,17 @@ gbp_flatpak_client_reset (GbpFlatpakClient *self)
   ide_subprocess_launcher_take_fd (launcher, pipe_fds[0].write, 4);
   pipe_fds[0].write = -1;
 
-  ide_subprocess_launcher_push_argv (launcher, PACKAGE_LIBEXECDIR"/gnome-builder-flatpak");
+  /*
+    Set the path to a path relative to the current exe.
+    This will allow the locales to be found when the app is running inside an app image.
+  */
+  char pathBuf[PATH_MAX];
+  const gchar *appDir = g_getenv("APPDIR_PATH");
+  if (appDir == NULL) appDir = "/";
+  strcpy(pathBuf, appDir);
+  strcat(pathBuf, "usr/libexec/gnome-builder-flatpak");
+
+  ide_subprocess_launcher_push_argv (launcher, pathBuf);
   ide_subprocess_launcher_push_argv (launcher, "--read-fd=3");
   ide_subprocess_launcher_push_argv (launcher, "--write-fd=4");
 
