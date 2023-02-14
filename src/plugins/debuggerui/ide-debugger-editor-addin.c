@@ -403,7 +403,7 @@ ide_debugger_editor_addin_load (IdeEditorAddin   *addin,
                                "debugger",
                                _("Run with Debugger"),
                                "builder-debugger-symbolic",
-                               "F5",
+                               "<primary>F5",
                                debugger_run_handler,
                                g_object_ref (self),
                                g_object_unref);

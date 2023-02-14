@@ -1356,7 +1356,7 @@ ide_run_manager_init (IdeRunManager *self)
                                "run",
                                _("Run"),
                                "builder-run-start-symbolic",
-                               "<primary>F5",
+                               "F5",
                                NULL,
                                NULL,
                                NULL);
