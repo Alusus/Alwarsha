@@ -416,7 +416,7 @@ ide_preferences_builtin_register_build (DzlPreferences *preferences)
   g_signal_connect (widget, "output", G_CALLBACK (workers_output), NULL);
 
   dzl_preferences_add_switch (preferences, "build", "basic", "org.alusus.alwarsha.build", "clear-build-log-pane", NULL, NULL, _("Clear build logs"), _("Clear build log pane on rebuild"), NULL, 10);
-  dzl_preferences_add_switch (preferences, "build", "basic", "org.alusus.alwarsha", "clear-cache-at-startup", NULL, NULL, _("Clear build cache at startup"), _("Expired caches will be purged when Builder is started"), NULL, 10);
+  dzl_preferences_add_switch (preferences, "build", "basic", "org.alusus.alwarsha", "clear-cache-at-startup", NULL, NULL, _("Clear build cache at startup"), _("Expired caches will be purged when Alwarsha is started"), NULL, 10);
 
   dzl_preferences_add_list_group (preferences, "build", "network", _("Network"), GTK_SELECTION_NONE, 100);
   dzl_preferences_add_switch (preferences, "build", "network", "org.alusus.alwarsha.build", "allow-network-when-metered", NULL, NULL, _("Allow downloads over metered connections"), _("Allow the use of metered network connections when automatically downloading dependencies"), NULL, 10);

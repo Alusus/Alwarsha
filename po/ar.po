@@ -1833,6 +1833,10 @@ msgstr "إضافات"
 msgid "Appearance"
 msgstr "المظهر"
 
+#: src/libide/gui/ide-preferences-builtin.c:101
+msgid "Style"
+msgstr "النمط"
+
 #: src/libide/gui/ide-preferences-builtin.c:100
 msgid "Themes"
 msgstr "السمات"
@@ -1860,6 +1864,14 @@ msgstr "تفعيل الوضع الداكن تلقائيًا ليلاً"
 #: src/libide/gui/ide-preferences-builtin.c:102
 msgid "follow night light"
 msgstr "اتبع الضوء الليلي"
+
+#: src/libide/gui/ide-preferences-builtin.c:103
+msgid "Light"
+msgstr "فاتح"
+
+#: src/libide/gui/ide-preferences-builtin.c:104
+msgid "Dark"
+msgstr "داكن"
 
 #: src/libide/gui/ide-preferences-builtin.c:103
 msgid "Grid Pattern"
@@ -1925,6 +1937,14 @@ msgstr "إظهار قائمة الملفات المفتوحة"
 msgid "Display the list of all open files in the project sidebar"
 msgstr "أظهر قائمةً بكل الملفات المفتوحة في الشريط الجانبي للمشروع"
 
+#: src/libide/gui/ide-preferences-builtin.c:158
+msgid "Reformat code on save"
+msgstr "أعد التنسيق عند التخزين"
+
+#: src/libide/gui/ide-preferences-builtin.c:158
+msgid "Reformat current file on save"
+msgstr "أعد تنسيق الملف الحالي عند تخزينه"
+
 #: src/libide/gui/ide-preferences-builtin.c:155
 msgid "Cursor"
 msgstr "المؤشر"
@@ -1956,6 +1976,22 @@ msgstr "الحد الأدنى من الأسطر لتركها فوق وأسفل �
 #: src/libide/gui/ide-preferences-builtin.c:159
 msgid "Allow the editor to scroll past the end of the buffer"
 msgstr "السماح للمحرر بالتمرير بعد نهاية الصوان"
+
+#: src/libide/gui/ide-preferences-builtin.c:165
+msgid "Text Wrapping"
+msgstr "التفاف النص"
+
+#: src/libide/gui/ide-preferences-builtin.c:166
+msgid "Never"
+msgstr "مطلقًا"
+
+#: src/libide/gui/ide-preferences-builtin.c:167
+msgid "In Between Words"
+msgstr "بين الكلمات"
+
+#: src/libide/gui/ide-preferences-builtin.c:168
+msgid "Always"
+msgstr "دائمًا"
 
 #: src/libide/gui/ide-preferences-builtin.c:161
 msgid "Line Information"
@@ -2248,6 +2284,15 @@ msgstr "عاملو البناء"
 #: src/libide/gui/ide-preferences-builtin.c:401
 msgid "Number of parallel build workers"
 msgstr "عدد عمال البناء المتوازيين"
+
+#: data/gsettings/org.gnome.builder.build.gschema.xml:11
+#: src/libide/gui/ide-preferences-builtin.c:418
+msgid "Clear build logs"
+msgstr "تفريغ نافذة إشعارات البناء"
+
+#: src/libide/gui/ide-preferences-builtin.c:418
+msgid "Clear build log pane on rebuild"
+msgstr "تفريغ نافذة إشعارات البناء عند إعادة البناء"
 
 #: src/libide/gui/ide-preferences-builtin.c:409
 msgid "Clear build cache at startup"
@@ -2693,6 +2738,11 @@ msgctxt "shortcut window"
 msgid "Beautify selected code"
 msgstr "تجميل الشفرة المحددة"
 
+#: src/libide/gui/ide-shortcuts-window.ui:440
+msgctxt "shortcut window"
+msgid "(LSP only) Format selected code or whole document"
+msgstr "تجميل الشفرة المحددة أو الملف كاملاً (فقط LSP)"
+
 #: src/libide/gui/ide-shortcuts-window.ui:448
 msgctxt "shortcut window"
 msgid "Navigation"
@@ -2900,7 +2950,7 @@ msgstr "الكل لحالة الأحرف ال_صغيرة"
 
 #: src/libide/sourceview/gtk/menus.ui:90
 #| msgid "_Invert Case"
-msgid "_Invert Case"
+msgid "In_vert Case"
 msgstr "ا_عكس حالة الأحرف"
 
 msgid "Invert Case"
@@ -3963,10 +4013,10 @@ msgstr "حدث حقوق الملكية"
 
 #: src/plugins/copyright/copyright_plugin.py:115
 msgid ""
-"When saving a file Builder will automatically update copyright information "
+"When saving a file Alwarsha will automatically update copyright information "
 "for you"
 msgstr ""
-"عند حفظ ملف سيقوم الباني تلقائيًا بتحديث حقوق الملكية "
+"عند حفظ ملف ستقوم الورشة تلقائيًا بتحديث حقوق الملكية "
 "لك"
 
 #. translators: these are keywords used to search for preferences
@@ -4555,8 +4605,8 @@ msgid "New Editor Workspace…"
 msgstr "مساحة عمل جديدة للمحرر…"
 
 #: src/plugins/editor/gtk/menus.ui:102
-msgid "New File"
-msgstr "ملف جديد"
+msgid "New _File"
+msgstr "ملف _جديد"
 
 #: src/plugins/editor/gtk/menus.ui:122
 msgid "Move Page Left"
@@ -5724,6 +5774,15 @@ msgstr "تظليل كل الظهورات للكلمات التي توافق ال
 #: src/plugins/quick-highlight/gbp-quick-highlight-preferences.c:53
 msgid "quick highlight words matching current selection"
 msgstr "تظليل سريع للكلمات التي توافق التحديد الحالي"
+
+#: src/plugins/quick-highlight/gbp-quick-highlight-preferences.c:64
+msgid "Minimum length for highlight"
+msgstr "أدنى طول للتظليل"
+
+#: src/plugins/quick-highlight/gbp-quick-highlight-preferences.c:65
+msgid "Highlight words matching at least this number of characters"
+msgstr ""
+"تظليل الكلمات التي لا يقل طولها عن هذا الرقم"
 
 #. translators: %s is replaced with the path of the file to be deleted and \n for a new line
 #: src/plugins/recent/gbp-recent-section.c:349
