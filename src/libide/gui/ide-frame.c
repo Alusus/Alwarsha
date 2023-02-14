@@ -971,6 +971,8 @@ ide_frame_new (void)
   return g_object_new (IDE_TYPE_FRAME, NULL);
 }
 
+GtkWidget *prevPage = 0;
+
 /**
  * ide_frame_set_visible_child:
  * @self: a #IdeFrame
@@ -989,7 +991,26 @@ ide_frame_set_visible_child (IdeFrame *self,
   g_return_if_fail (IDE_IS_PAGE (page));
   g_return_if_fail (gtk_widget_get_parent (GTK_WIDGET (page)) == (GtkWidget *)priv->stack);
 
+  GtkWidget *currentPage = gtk_stack_get_visible_child (priv->stack);
+  if (currentPage != page) prevPage = currentPage;
   gtk_stack_set_visible_child (priv->stack, GTK_WIDGET (page));
+}
+
+void
+ide_frame_switch_to_prev_child (IdeFrame *self)
+{
+  IdeFramePrivate *priv = ide_frame_get_instance_private (self);
+
+  g_return_if_fail (IDE_IS_FRAME (self));
+
+  GtkWidget *newPage = prevPage;
+  GtkWidget *currentPage = gtk_stack_get_visible_child (priv->stack);
+  if (newPage == 0 || newPage == currentPage) {
+    dzl_gtk_widget_action (GTK_WIDGET (self), "frame", "show-list", NULL);    
+  } else {
+    prevPage = currentPage;
+    gtk_stack_set_visible_child (priv->stack, newPage);
+  }
 }
 
 /**

@@ -62,6 +62,9 @@ IDE_AVAILABLE_IN_3_32
 void       ide_frame_set_visible_child     (IdeFrame             *self,
                                             IdePage              *page);
 IDE_AVAILABLE_IN_3_32
+void
+ide_frame_switch_to_prev_child (IdeFrame *self);
+IDE_AVAILABLE_IN_3_32
 gboolean   ide_frame_get_has_page          (IdeFrame             *self);
 IDE_AVAILABLE_IN_3_32
 void       ide_frame_agree_to_close_async  (IdeFrame             *self,

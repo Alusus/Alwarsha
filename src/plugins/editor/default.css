@@ -23,6 +23,7 @@
   bind "<ctrl><shift>d" { "add-cursor" (match) };
   bind "<alt>period" { "goto-definition" () };
   bind "<ctrl>k" { "action" ("frame", "show-list", "") };
+  bind "<ctrl>Tab" { "action" ("frame", "switch-to-prev-page", "") };
   bind "<ctrl>d" { "delete-from-cursor" (paragraphs, 1) };
   bind "<ctrl>j" { "join-lines" () };
   bind "<ctrl><shift>j" { "sort" (0, 0) };

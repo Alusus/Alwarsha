@@ -67,6 +67,18 @@ ide_frame_actions_close_page (GSimpleAction *action,
 }
 
 static void
+ide_frame_actions_switch_to_prev_page (GSimpleAction *action,
+                                       GVariant      *variant,
+                                       gpointer       user_data)
+{
+  IdeFrame *self = user_data;
+
+  g_assert (IDE_IS_FRAME (self));
+
+  ide_frame_switch_to_prev_child (self);
+}
+
+static void
 ide_frame_actions_move (IdeFrame *self,
                         gint      direction)
 {
@@ -355,15 +367,16 @@ ide_frame_actions_show_list (GSimpleAction *action,
 }
 
 static const GActionEntry actions[] = {
-  { "open-in-new-frame", ide_frame_actions_open_in_new_frame, "s" },
-  { "close-stack",       ide_frame_actions_close_stack },
-  { "close-page",        ide_frame_actions_close_page },
-  { "next-page",         ide_frame_actions_next_page },
-  { "previous-page",     ide_frame_actions_previous_page },
-  { "move-right",        ide_frame_actions_move_right },
-  { "move-left",         ide_frame_actions_move_left },
-  { "split-page",        ide_frame_actions_split_page, "s" },
-  { "show-list",         ide_frame_actions_show_list },
+  { "open-in-new-frame",   ide_frame_actions_open_in_new_frame, "s" },
+  { "close-stack",         ide_frame_actions_close_stack },
+  { "close-page",          ide_frame_actions_close_page },
+  { "next-page",           ide_frame_actions_next_page },
+  { "previous-page",       ide_frame_actions_previous_page },
+  { "move-right",          ide_frame_actions_move_right },
+  { "move-left",           ide_frame_actions_move_left },
+  { "split-page",          ide_frame_actions_split_page, "s" },
+  { "show-list",           ide_frame_actions_show_list },
+  { "switch-to-prev-page", ide_frame_actions_switch_to_prev_page }
 };
 
 void
