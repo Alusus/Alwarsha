@@ -83,11 +83,11 @@ _gbp_glade_page_init_shortcuts (GtkWidget *widget)
                                               DZL_SHORTCUT_PHASE_BUBBLE,
                                               I_("glade-view.undo"));
 
-  dzl_shortcut_controller_add_command_action (controller,
-                                              I_("org.alusus.alwarsha.glade-view.redo"),
-                                              "<Control><Shift>z",
-                                              DZL_SHORTCUT_PHASE_BUBBLE,
-                                              I_("glade-view.redo"));
+  // dzl_shortcut_controller_add_command_action (controller,
+  //                                             I_("org.alusus.alwarsha.glade-view.redo"),
+  //                                             "<Control><Shift>z",
+  //                                             DZL_SHORTCUT_PHASE_BUBBLE,
+  //                                             I_("glade-view.redo"));
 
   dzl_shortcut_controller_add_command_action (controller,
                                               I_("org.alusus.alwarsha.glade-view.copy"),
