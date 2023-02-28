@@ -5,6 +5,9 @@ script: |
   cd /root/build
   ninja
   DESTDIR=/root/AppDir ninja install
+  cd /root/Jameel
+  alusus src/main.alusus --build
+  cp jameel /root/AppDir/usr/bin/
 AppDir:
   path: /root/AppDir
   app_info:
@@ -81,6 +84,8 @@ AppDir:
       - python3-gi
       - python3-lxml
       - ugrep
+      - libclang1-14
+      - uncrustify
       # Assets
       - adwaita-icon-theme
       - dmz-cursor-theme

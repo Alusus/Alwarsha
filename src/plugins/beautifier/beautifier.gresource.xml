@@ -6,6 +6,7 @@
     <file preprocess="xml-stripblanks">gtk/menus.ui</file>
 
     <file>config/global.ini</file>
+    <file>config/alusus/config.ini</file>
     <file>config/automake/config.ini</file>
     <file>config/c/config.ini</file>
     <file>config/c/gnu-indent.cfg</file>

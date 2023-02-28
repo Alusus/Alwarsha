@@ -40,18 +40,24 @@ Requirements: Ubuntu 21.10
     $ ninja
     $ sudo ninja install
 
-2- Build Alwarsha:
+    $ snap install --edge --classic alusus
+
+2- Clone Jameel
+
+    $ git clone https://github.com/Alusus/Jameel.git
+
+3- Build Alwarsha:
 
     $ cd /alwarsha
     $ meson --prefix=/usr ~/build
     $ cd ~/build
     $ ninja
 
-3- Install Alwarsha into AppDir:
+4- Install Alwarsha into AppDir:
 
     $ DESTDIR=~/AppDir ninja install
 
-4- Build AppImage:
+5- Build AppImage:
 
     $ cd ~/
     $ appimage-builder --skip-test --recipe /path/to/AppImageBuilder.yml
