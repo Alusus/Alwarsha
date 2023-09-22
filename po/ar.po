@@ -7711,3 +7711,11 @@ msgstr "مشروع الأسس - إنجليزية"
 #: src/plugins/alusus/alusus_plugin.py:129
 msgid "Create an English based Alusus project"
 msgstr "أنشئ مشروعًا بالنسخة الإنجليزية من لغة الأسس"
+
+#: src/plugins/alusus/alusus_plugin.py:507
+msgid "Alusus Net"
+msgstr "الأسس نت"
+
+#: src/plugins/alusus/alusus_plugin.py:508
+msgid "API Key"
+msgstr "رمز ولوج الواجهة البرمجية"

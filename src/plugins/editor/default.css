@@ -2,6 +2,7 @@
 
 @binding-set default-ide-source-view
 {
+  bind "<ctrl><alt>a" { "action" ("editor-page", "insert-snippet", "") };
   bind "<ctrl>n" { "action" ("editor", "new-file", "") };
   bind "<ctrl>o" { "action" ("workbench", "open", "") };
   bind "<ctrl>s" { "action" ("editor-page", "save", "") };

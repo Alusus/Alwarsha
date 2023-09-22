@@ -31,6 +31,7 @@ from gi.repository import (
     Gtk,
     GtkSource,
     Template,
+    Dazzle
 )
 
 _ = Ide.gettext
@@ -465,3 +466,51 @@ class AlususCompletionProposal(GObject.Object, Ide.CompletionProposal):
     def __init__(self, completion):
         super().__init__()
         self.completion = completion
+
+class AlususEditorPageAddin(Ide.Object, Ide.EditorPageAddin):
+    page = None
+    settings = None
+
+    def do_load(self, page: Ide.EditorPage):
+        self.page = page
+        self.settings = Gio.Settings.new("org.alusus.alwarsha.alususnet")
+        group = page.get_action_group('editor-page')
+        action = Gio.SimpleAction.new('insert-snippet', None)
+        action.connect('activate', self.insert_snippet)
+        group.add_action(action)
+
+    def do_unload(self, buffer: Ide.Buffer):
+        self.page = None
+
+    def insert_snippet(self, dummy1, dummy2):
+        # TODO: Can we enable support for other languages as well?
+        if self.page.get_language_id() != "alusus": return
+        buffer = self.page.get_buffer()
+        if buffer.get_has_selection():
+            begin, end = buffer.get_selection_bounds()
+            text = buffer.get_text(begin, end, False)
+            buffer.delete_selection(True, True)
+            # TODO: Replace text with AI generated code.
+            apikey = self.settings.get_string("apikey")
+            if apikey == "":
+                buffer.insert_at_cursor("API KEY NOT SET")
+            else:
+                buffer.insert_at_cursor("_".join(list(text)))
+
+class AlususPreferencesAddin(Ide.Object, Ide.PreferencesAddin):
+    preferences = None
+    settings = None
+    apikey = None
+
+    def do_load(self, preferences: Dazzle.Preferences):
+        self.settings = Gio.Settings.new("org.alusus.alwarsha.alususnet")
+        self.preferences = preferences
+        self.preferences.add_page("alususnet", _("Alusus Net"), 200)
+        self.preferences.add_group("alususnet", "api", _("API Key"), 0)
+        self.apikey = Gtk.Entry()
+        self.apikey.set_text(self.settings.get_string("apikey"))
+        self.apikey.connect("changed", self.on_apikey_changed)
+        self.preferences.add_custom("alususnet", "api", self.apikey, None, 0)
+
+    def on_apikey_changed(self, entry):
+        self.settings.set_string("apikey", self.apikey.get_text())

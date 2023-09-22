@@ -27,6 +27,7 @@ schema_files += [configure_file(
 )]
 
 schemas = [
+  'org.alusus.alwarsha.alususnet.gschema.xml',
   'org.alusus.alwarsha.build.gschema.xml',
   'org.alusus.alwarsha.editor.gschema.xml',
   'org.alusus.alwarsha.editor.language.gschema.xml',

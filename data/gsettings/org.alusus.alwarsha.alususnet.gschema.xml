@@ -1,0 +1,8 @@
+<schemalist>
+  <schema id="org.alusus.alwarsha.alususnet" path="/org/alusus/alwarsha/alususnet/" gettext-domain="alwarsha">
+    <key name="apikey" type="s">
+      <default>''</default>
+      <summary>API Key</summary>
+    </key>
+  </schema>
+</schemalist>

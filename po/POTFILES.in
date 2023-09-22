@@ -1,6 +1,7 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
 data/appdata/org.alusus.Alwarsha.appdata.xml.in
+data/gsettings/org.alusus.alwarsha.alususnet.gschema.xml
 data/gsettings/org.alusus.alwarsha.build.gschema.xml
 data/gsettings/org.alusus.alwarsha.code-insight.gschema.xml.in
 data/gsettings/org.alusus.alwarsha.editor.gschema.xml
